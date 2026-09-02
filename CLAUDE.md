@@ -42,6 +42,11 @@ statistics and implementation details are tunable.
   cloud (Transformers+PEFT on Modal) for grids. Never mix MLX and PEFT
   numbers in one comparison.
 
+## GitHub
+
+This project uses only the **Rj2790** GitHub account (`gh auth switch -u Rj2790`
+before any gh or git remote operation). Remote: https://github.com/Rj2790/doze-llm.
+
 ## Silent-failure watchlist
 
 These would make arms non-comparable without crashing. Test for each:

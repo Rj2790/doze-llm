@@ -6,6 +6,9 @@
 
 ## 1. Question
 
+**Public freeze record:** https://gist.github.com/Rj2790/5bfb6765d5491802c3e139d65afe3dc8 (freeze hash, date, and
+this document as of the freeze commit).
+
 Does alternating a small language model between a *day* phase (attempting
 problems with fixed weights) and a *night* phase (offline replay, synthetic
 "dreaming", and a parameter-efficient weight update) produce
