@@ -272,11 +272,16 @@ ledger check would flag the resulting step deficit against Online. About
 **A1 reproducibility check (4-bit, 2026-09-02).** Two Sleep runs, seed 0,
 4 episodes, K=2, dreams at temperature 0.8: episodes, checkpoints, night
 statistics and the training loss (0.15914291076478548) are bit-identical.
-Observation to watch: across the smokes so far 4 of the 6 parsable dreams
-were rejected for landing on a held-out prefix (20% of prefixes are held
-out, so ~1 in 5 was expected). Tiny n; if the rate stays this high in the
-first cloud run, the dream prompt is steering the model toward changing
-early digits and the rejection rate will cost dream yield (not validity).
+Observation: across the smokes so far 4 of the 6 parsable dreams were
+rejected for landing on a held-out prefix (20% of prefixes are held out).
+**Guard verified 2026-09-02 (`tests/test_dream_guard.py`):** on 2,000
+uniformly random 12-digit strings the guard rejects 0.203 (expected 0.20 ±
+0.03), and the split the dreamer checks against is the same object the
+harness built for the seed (one `make_split` call per run). The 4/6 result
+is therefore attributable to the model's choice of which digits to change,
+not to the guard. Dream yield (kept / generated, with the rejection
+breakdown) is logged per night in the run JSON and is a yield metric, not a
+validity concern.
 
 ## 6. Repo state
 
