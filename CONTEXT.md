@@ -313,11 +313,28 @@ Run file complete in the volume (`partial: false`, backend `hf:Qwen/Qwen3-4B`).
 | 3 greedy determinism | pass | two calls byte-identical; three checkpoints identical |
 | 4 training mechanics | pass | losses 0.391, 0.003, 0.0001, 0.192, 0.0007, 0.0008 (finite, one bump); training_tokens 588 = 6×(97+1); lora_norm 0 → 1.305 → 1.240 (ratio 0.94999983) → 0 after reset |
 | 5 starmap / volume / cache | pass | 3/3 results (seeds 0–2); volume holds runs/ + ledgers/ + preflight; no model download in later apps (HF cache reused; 0 "Fetching" lines vs 5 in the first app); model load 24.9 s from cache |
-| 6 wall-clock | pass | A100: 5.9 s/episode, 255 s per full-size checkpoint (60 probe + 4 held-out + 300 GSM8K). L4 (tiny checkpoints): 4.4 s/episode, 12–15 s per 6+3+3 checkpoint. L4 full-size checkpoint: see below |
+| 6 wall-clock | pass | identical 4-episode workload: A100 5.9 s/episode, checkpoints 262/254/253 s; L4 6.3 s/episode, checkpoints 276/270/270 s (60 probe + 4 held-out + 300 GSM8K each) |
 
-Full-run projection at A100 numbers: 600 episodes × 6 s = 1.0 h day time +
-13 checkpoints × ~5 min (201 held-out instead of 4 adds ~13 batches) ≈ 1.5 h
-eval + nights; a Sleep run ≈ 3 h. 24 h timeout is ample.
+**GPU choice: L4 (decided 2026-09-02).** Same workload, Modal list prices
+(A100-80GB $0.000694/s, L4 $0.000222/s):
+
+| GPU | 4-episode path check (4 episodes + 3 full checkpoints) | cost | projected 600-episode Baseline (13 full checkpoints with 201 held-out) | cost |
+|---|---|---|---|---|
+| A100-80GB | 793 s | $0.55 | ≈ 2.4 h | ≈ $6.0 |
+| L4 | 842 s (+6%) | $0.19 | ≈ 2.6 h | ≈ $2.1 |
+
+Generation at batch 1 (day episodes, dreams) and LoRA steps at batch 1 are
+latency-bound, so the A100 buys almost no time; the L4 costs ~2.9× less.
+Trainable arms add nights (50 steps ≈ 1–2 min) and Awake adds critique
+rounds; a full 5-arm × 5-seed grid on L4 is on the order of $60–80 and
+~70 GPU-hours (parallel across seeds). 24 h per-function timeout is ample.
+
+**Cross-GPU numerics.** Same weights, prompts, greedy decoding: GSM8K
+control accuracy at episode 0 was 172/300 on A100 and 176/300 on L4; probe
+and held-out were identical. "Seeded on CUDA" does not mean bit-identical
+across GPU types. **Rule: every arm of a seed runs on the same GPU type**
+(the grid entrypoint takes one `--gpu` for all arms), and the GPU name is
+written to each run JSON's timing block.
 
 **Backend agreement (frozen Baseline, 40 held-out items, greedy).** MLX bf16
 0.25 / 0.075 exact chains (kept 3); HF bf16 0.275 / 0.05 (kept 4). 30/40
