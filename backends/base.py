@@ -35,6 +35,7 @@ class TrainStats:
     training_tokens: int      # completion tokens under the loss, summed over steps
     seconds: float = 0.0
     loss: float | None = None
+    losses: list[float] | None = None   # per-step, when the backend records them
 
 
 class TrainableBackend(Backend, Protocol):

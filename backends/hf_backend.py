@@ -134,7 +134,7 @@ class HFBackend:
             losses.append(float(loss.item()))
         self.model.eval()
         return TrainStats(steps=len(order), training_tokens=tokens, seconds=time.time() - t0,
-                          loss=sum(losses) / len(losses))
+                          loss=sum(losses) / len(losses), losses=losses)
 
     def decay_adapter(self, factor: float) -> None:
         import torch
@@ -159,6 +159,14 @@ class HFBackend:
 
     def save_adapter(self, path: str) -> None:
         self.model.save_pretrained(path)
+
+    def describe(self) -> dict:
+        trainable = [(n, p) for n, p in self.model.named_parameters() if p.requires_grad]
+        return {"backend": self.name, "seed": self.seed, "lora": self.has_lora,
+                "model_dtype": str(self.model.dtype),
+                "adapter_dtypes": sorted({str(p.dtype) for _, p in trainable}),
+                "trainable_params": int(sum(p.numel() for _, p in trainable)),
+                "n_layers": int(getattr(self.model.config, "num_hidden_layers", 0))}
 
     def lora_norm(self) -> float:
         import torch

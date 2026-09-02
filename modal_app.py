@@ -86,6 +86,72 @@ def run_arm_remote(arm: str, seed: int = 0, n_episodes: int = 600, k: int = 50, 
                 weight_decay, online_filter)
 
 
+@app.function(gpu=GPU, timeout=2 * 3600, volumes={RESULTS: results_vol, HF_CACHE: cache_vol},
+              secrets=[modal.Secret.from_name("huggingface")])
+def preflight_remote(seed: int = 0, n_items: int = 40, n_dream_seeds: int = 10) -> dict:
+    """Items 1-4 of the validation list, the 40-item Baseline agreement set,
+    and dream yield/length statistics (A4). One LoRA-enabled model load."""
+    import os
+    import sys
+    import time
+    sys.path.insert(0, "/root/doze"); os.chdir("/root/doze")
+    from backends.hf_backend import HFBackend
+    from eval import preflight as pf
+    from tasks import number_reduction as nr
+
+    t0 = time.time()
+    backend = HFBackend(MODEL_ID, system=nr.SYSTEM_PROMPT, lora=True, seed=seed)
+    load_s = time.time() - t0
+    out = {"model_load_seconds": round(load_s, 1)}
+    out["validation"] = pf.validate_backend(backend)          # ends with reset_adapter -> lora_B = 0
+    t1 = time.time()
+    items = pf.agreement_items(seed=seed, n=n_items)
+    rows = pf.run_agreement(backend, items)
+    out["agreement_rows"] = rows
+    out["agreement_summary"] = pf.summarize_agreement(rows)
+    out["agreement_seconds"] = round(time.time() - t1, 1)
+    split = nr.make_split(seed=seed)
+    # dream from kept training-set trajectories generated the same way (night conditions)
+    tr_rows = pf.run_agreement(backend, split.train[:n_items])
+    out["train_rows_summary"] = pf.summarize_agreement(tr_rows)
+    out["dreams"] = pf.dream_stats(backend, tr_rows, split, n_seed=n_dream_seeds)
+    Path(RESULTS).mkdir(exist_ok=True)
+    (Path(RESULTS) / f"preflight_seed{seed}.json").write_text(json.dumps(out, indent=1, default=str))
+    results_vol.commit()
+    return out
+
+
+@app.function(volumes={RESULTS: results_vol})
+def ls_results() -> list[str]:
+    import os
+    out = []
+    for root, _, files in os.walk(RESULTS):
+        for f in files:
+            p = os.path.join(root, f)
+            out.append(f"{p} {os.path.getsize(p)}")
+    return sorted(out)
+
+
+@app.local_entrypoint()
+def preflight(seed: int = 0, n_items: int = 40, n_dream_seeds: int = 10):
+    r = preflight_remote.remote(seed, n_items, n_dream_seeds)
+    Path("results").mkdir(exist_ok=True)
+    Path(f"results/preflight_hf_seed{seed}.json").write_text(json.dumps(r, indent=1, default=str))
+    v = r["validation"]
+    print(json.dumps({k: v[k] for k in v if k.endswith("_pass") or k in ("1_describe", "2_completion_tokens", "2_count_tokens_text", "4_losses", "4_training_tokens", "4_expected_tokens", "4_norm_before_after_decay_reset", "4_decay_ratio")}, indent=1, default=str))
+    print(json.dumps({"model_load_seconds": r["model_load_seconds"], "agreement": r["agreement_summary"],
+                      "agreement_seconds": r["agreement_seconds"], "train_rows": r["train_rows_summary"],
+                      "dreams": r["dreams"]}, indent=1, default=str))
+
+
+@app.local_entrypoint()
+def pathcheck(n_episodes: int = 2):
+    """Item 5: starmap three tiny Baseline runs, then list what the volume holds."""
+    rs = list(run_arm_remote.starmap([("baseline", s, n_episodes, 2, 6, 3, 3) for s in (0, 1, 2)]))
+    print(json.dumps([{k: r[k] for k in ("arm", "seed", "criterion_episode", "ledger", "out")} for r in rs], indent=1, default=str))
+    print("\n".join(ls_results.remote()))
+
+
 @app.local_entrypoint()
 def main(arm: str = "baseline", seed: int = 0, n_episodes: int = 600, k: int = 50, n_probe: int = 60,
          n_heldout_eval: int = 201, control_items: int = 300, awake_budget: int = 0, lr: float = 1e-4,

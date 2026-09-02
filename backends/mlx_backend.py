@@ -123,7 +123,7 @@ class MLXBackend:
         self.model.eval()
         mx.clear_cache()
         return TrainStats(steps=len(order), training_tokens=tokens, seconds=time.time() - t0,
-                          loss=sum(losses) / len(losses))
+                          loss=sum(losses) / len(losses), losses=losses)
 
     def decay_adapter(self, factor: float) -> None:
         """W_lora *= (1 - factor): shrink lora_b so the delta a@b scales once."""
@@ -151,6 +151,17 @@ class MLXBackend:
         import mlx.core as mx
         from mlx.utils import tree_flatten
         mx.save_safetensors(path, dict(tree_flatten(self.model.trainable_parameters())))
+
+    def describe(self) -> dict:
+        import mlx.core as mx
+        from mlx.utils import tree_flatten
+        trainable = dict(tree_flatten(self.model.trainable_parameters())) if self.has_lora else {}
+        base = dict(tree_flatten(self.model.parameters()))
+        return {"backend": self.name, "seed": self.seed, "lora": self.has_lora,
+                "model_dtype": str(next(iter(v.dtype for k, v in base.items() if "lora" not in k))),
+                "adapter_dtypes": sorted({str(v.dtype) for v in trainable.values()}),
+                "trainable_params": int(sum(v.size for v in trainable.values())),
+                "n_layers": len(self.model.layers)}
 
     def lora_norm(self) -> float:
         """Diagnostic: L2 norm of all lora_b (0 at init; grows with training)."""
