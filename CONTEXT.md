@@ -256,6 +256,21 @@ runs 5–6 use the stratified sampler. Files: `results/calibration*.json`.
 Verdict: in the learnable regime; no pretrained shortcut; format decision
 made (work, unnumbered).
 
+**Calibration items predate A6 (2026-09-02; PREREG Appendix A addendum,
+DEVIATIONS.md doc correction).** Runs 1–6 used the first 40 held-out items
+of the pre-A6 split. The frozen split's first 40 held-out items (no overlap)
+give 0.25 / 0.075 exact chains with the same model, prompt and decoding
+(`results/agreement_mlx_bf16_seed0.json`). Re-running the pre-A6 items on
+the frozen code reproduces 0.475 / 0.175 exactly
+(`results/agreement_mlx_bf16_preA6_items.json`), so the Baseline path is
+unchanged and the gap is item-sample variance (two 40-item draws, pooled
+0.36, difference ≈ 2 SE). Repeated-digit statistics of the two sets are
+indistinguishable (runs 2.2 vs 2.3, longest run 3.1 vs 2.9, adjacent-equal
+3.55 vs 3.48). Per-gold-answer accuracy on the new set is flat (0.25 / 0.29
+/ 0.20), so it is not answer bias. Untrained accuracy is therefore
+~0.3–0.4 rather than ~0.475; still above the 0.15 floor. The Baseline
+episode-0 checkpoint on all 201 held-out items is the authoritative number.
+
 **Harness smoke against the real model (4-bit, 2026-09-02, not a recorded
 number).** `run_arm.py --arm sleep --n-episodes 4 --k 2 --n-probe 6
 --n-heldout-eval 2`: day attempts, night after episode 2 and 4 (before the
