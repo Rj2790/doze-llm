@@ -1,0 +1,378 @@
+# doze-llm — project context
+
+Handoff document. Everything decided so far, why it was decided, and what is
+next. Written 2026-09-02. Keep this file in the repo root and update it when
+decisions change; it is the memory that survives between sessions.
+
+---
+
+## 1. The question
+
+Does giving an LLM a *sleep cycle* — alternating a **day** phase (attempting
+problems with fixed weights) with a **night** phase (offline replay, verified
+self-generated "dreams", and a small LoRA weight update) — produce
+
+(a) faster discovery of hidden task structure ("insight"), and
+(b) less forgetting of unrelated capability,
+
+than spending the **same compute** on either (i) extended inference-time
+reasoning or (ii) continuous online weight updates?
+
+The biological analogy motivates the design but is not the claim. Human sleep
+does roughly four things: replays episodes and consolidates them, prunes
+synapses back down, clears waste, and does offline recombination that
+produces measurable insight (Wagner et al. 2004: people were ~3x more likely
+to discover a hidden shortcut in the Number Reduction Task after sleep).
+Fragments of each exist for LLMs — experience replay in RL, memory systems
+that consolidate conversation into notes, wake-sleep (Hinton 1995),
+distillation/pruning at deployment — but nobody has assembled them into a
+scheduled phase and *measured* whether the phase structure itself matters.
+
+**The load-bearing comparison is Sleep vs Online at matched gradient budget.**
+Beating a frozen baseline only shows fine-tuning works. Beating continuous
+updates shows the phase structure does something.
+
+## 2. Literature check (done 2026-09-02)
+
+- **Letta, "Sleep-time compute" (arXiv 2504.13171, Apr 2025).** Offline
+  pre-processing of *context* with frozen weights to cut test-time cost. Not
+  what we are building; it is the "diary" track. Cite, don't replicate.
+- **"Let Them Sleep: Adaptive LLM Agents via a Sleep Cycle" (Medium,
+  ~Dec 2025).** Proposes day/night with LoRA overlay on a frozen base. An
+  architecture proposal, apparently no experiments. Idea is in the air;
+  nobody has measured it.
+- **Replay + LoRA for forgetting is well-trodden**: ERI-LoRA (2025), SSR
+  self-synthesized rehearsal (2024), FOREVER (2026), Hybrid-CASR (2026),
+  etc. "Replay prevents forgetting" is not a finding anyone will care about.
+- **Therefore the novelty lives in two things**: phased vs continuous
+  updates at matched compute (H2), and the insight effect on hidden-structure
+  tasks (H1). Keep the design pointed at exactly those.
+
+## 3. Design (frozen in PREREG.md — read that file for the authoritative version)
+
+### Hypotheses
+- H1 insight: Sleep reaches the shortcut criterion in fewer episodes than
+  Baseline, Awake, Online.
+- H2 phase structure: Sleep beats Online at matched gradient budget.
+- H3 dreaming: Sleep beats Sleep-NoDream at matched gradient budget.
+- H4 retention: Sleep forgets less than Online on the control benchmark.
+All reported regardless of outcome. A null on H2 is publishable.
+
+### Arms (same instance sequence per seed, same checkpoints every K=50 episodes)
+| Arm | Weights | Compute | Role |
+|---|---|---|---|
+| Baseline | frozen | 1 attempt, work format | floor |
+| Awake | frozen | matched **token** budget on extra CoT / self-critique | inference-time control |
+| Online | LoRA | 1 gradient step after every episode on its own trajectory | continuous-update control |
+| Sleep | LoRA | 0 by day; every K episodes: filter → dream → replay-interleave → S steps → weight-decay pass | treatment |
+| Sleep-NoDream | LoRA | as Sleep, no synthetic generation | ablation |
+
+Compute matching: Awake tokens = Sleep tokens (day + dreams) ±5%; Online
+gradient steps and training tokens = Sleep's ±5%. `eval/compute_ledger.py`
+logs both and the analysis refuses to compare arms outside tolerance.
+
+Night procedure: keep correct and near-miss (≥9/11 steps) trajectories;
+dream = prompt current model for 2 variations per kept trajectory, keep only
+those that verify against the ground-truth solver; interleave 1:1 with a
+uniform sample from the replay buffer of all prior nights; train LoRA for S
+steps; one weight-decay pass on LoRA params (pruning analogue); append to
+buffer.
+
+### Primary task: Number Reduction, L=12
+Digits over {1,4,9}. Rule: same→same, different→third digit. Applied
+left-to-right giving r1..r11; answer is r11. Instances constructed so the
+last three responses mirror the preceding three: **r11 = r6**, r10 = r7,
+r9 = r8. The shortcut needs only the first 7 digits.
+
+Why 12 not Wagner's 8: structured instances number 3^(L−3). At L=8 that is
+243 with 27 three-digit prefixes each mapping to one answer — a lookup table
+a 4B model memorises in one night. At L=12: 19,683 instances, 2,187 prefixes.
+
+**Splits are by prefix.** 20% of prefixes (437) held out; no held-out prefix
+appears in training. Probe items come only from held-out prefixes, so
+passing the probe requires the rule r11 = r6, not a memorised map.
+Train 801, held-out eval 201, probe 60 (disjoint from eval); each sampled
+stratified by answer so exactly uniform (A6, C7; 800/200 are not multiples
+of 3).
+
+**Probe**: digits 8–12 masked. Literal rule reaches only r6; answering r11
+above chance (1/3) requires the shortcut. Checkpoints at episode 0 and every
+K (A5). Scripted tests confirm a literal
+solver sits at chance and a shortcut solver scores 1.0.
+
+### Secondary task: string grammar with a hidden invariant (not yet written).
+### Control benchmark: fixed 300-item GSM8K test sample, exact match, never trained on.
+
+### Metrics
+- Shortcut criterion (primary): probe accuracy ≥ 0.70 on two consecutive
+  checkpoints (60 items each). Report episode of first hit, censored.
+- Secondary insight signal: median tokens per correct held-out answer
+  (collapse = stopped simulating the chain).
+- Held-out accuracy; control-benchmark delta; tokens, grad steps, GPU-s.
+
+### Analysis
+5 seeds per arm. Log-rank test on episode-to-criterion (censoring handled).
+Paired comparison for forgetting. p<0.05 in predicted direction on the
+primary task; secondary task is replication, not pooled. 600 episodes (12
+nights) per run or until all arms meet criterion. Deviations go in
+`DEVIATIONS.md`.
+
+## 4. Decisions log (with reasons)
+
+**Model: Qwen3-4B, bf16, LoRA r=16 on all attention+MLP projections,
+thinking OFF.** Strongest small family, Apache 2.0, dense, boring PEFT path.
+Thinking off so all reasoning is in visible, countable tokens. Avoid Qwen 3.5
+(hybrid Mamba/attention complicates LoRA). Gemma 4 E4B is the alternate but
+its licence is more restrictive, which matters for open-sourcing.
+
+**Start at 4B, don't start big.** Small first because: ceiling effects (a
+70B may spot the rule in-context by episode 3, leaving Sleep nothing to add);
+statistics (5 seeds at 4B vs 1 at 70B); forgetting dynamics (bigger models
+forget less per update, so the forgetting metric loses discrimination).
+Plan: full protocol at 4B → sweep 1.7B/4B/8B with same seeds → if trend is
+clean, one Qwen3-32B headline run (fits one 80GB GPU with LoRA bf16). Whether
+the Sleep advantage shrinks or grows with scale is the most interesting
+possible result. Stated limitation: LoRA on 4B ≠ full FT on a frontier model.
+
+**Infra: MacBook M3 Pro 18GB for development; Modal for the seeded grid.**
+4B bf16 (~8GB) fits for inference and LoRA training at batch 2–4. But the
+full grid (5 arms × 5 seeds + ablation, Awake generating several× the
+tokens) is over a week of laptop time vs an afternoon on Modal for tens of
+dollars. bf16 throughput observed locally: ~8 s per ~100-token work-mode
+completion. **All reported numbers come from the cloud backend
+(Transformers+PEFT).** MLX and PEFT have different LoRA numerics; never mix
+backends in a plot. Local 4-bit is fine for iteration only.
+
+**Backend abstraction.** `backends/base.py` Protocol (`generate`,
+`count_tokens`; training methods added when arms land). `backends/scripted.py`
+model-free solvers (literal / shortcut, with noise) for harness tests.
+`backends/mlx_backend.py` for the Mac.
+
+**Prompt format: `work` mode** (one line per comparison `prev,digit->result`,
+then `STEPS:` and `ANSWER:`), with a system prompt forbidding preamble and a
+6-digit worked example (too short to carry the mirror structure, so it cannot
+leak). History: compact format at max_tokens=96 → 100% unparsable (model
+wrote Markdown preamble and got cut off); compact format at 400 tokens →
+30% = chance, 33/40 chains wrong at step 1–2, model emitting eleven
+plausible digits without computing; `work` mode → 47.5%, 7/40 chains exact,
+errors spread over steps 3–11. **Prompt wording is tunable; task construction,
+splits and probe target are frozen.**
+
+**4-bit vs bf16:** no difference in compact mode (both at floor). Precision
+was not the problem; the missing scratchpad was. Develop in bf16 (primary
+precision anyway).
+
+**Remaining failure mode is positional, not rule errors**: the model skips a
+repeated digit or misreads one in runs of identical digits. This is noise
+unrelated to the hypothesis and it corrupts r6 when it happens early. The
+numbered-digit variant (`1:1 2:4 3:9 ...`) was tested 2026-09-02 (run 6):
+full_acc 0.525 but steps_exact 0.00 and first errors moved to steps 1–3
+(21/40) — the model copies position labels into its work lines and starts
+misapplying the rule itself. Outside the 0.60–0.80 acceptance band and
+worse chain quality than plain work mode. **Rejected. Final format: work
+mode, unnumbered, 400-token budget.** The `--number-digits` flag stays in
+the code as a documented negative.
+
+**Probe statistics fixed (2026-09-02).** Probe items are now sampled
+stratified by target (n/3 per digit; `eval/shortcut_detector.py:
+stratified_probe_items`) and `above_chance` is a one-sided exact binomial
+test vs 1/3 at p<0.01. Re-run of bf16 work mode with n_probe=120: 0.325,
+p=0.61 — the earlier 0.50 was the artifact predicted here. The untrained
+model has no shortcut. The PREREG criterion (0.70, two consecutive) is
+unchanged. The old fixed-margin test had also been hiding a lucky random
+guesser (53/120) in the model-free test suite.
+
+**Doc fix done:** PREREG §6.1 now reads "digits 8–12 masked (see §4.1)".
+
+**Online arm, decided (A2, 2026-09-02).** One gradient step after every
+episode on a *kept* trajectory: the current one if kept, else a random one
+from today's kept pool, else the most recently kept ever, else skip and
+log. Steps therefore equal K per K episodes once anything has been kept.
+The literal reading (train on every trajectory as written) survives as the
+optional arm `online_unfiltered`, matched to Sleep like Online.
+
+**Keep rule (C3).** Correct final answer AND ≥ 9/11 steps correct, shared
+by Sleep's night filter, Online and (stricter: fully correct) the dreamer.
+Wrong-answer near-misses are out.
+
+**Dreams are never replayed (C2).** The replay buffer holds kept real
+trajectories only; dreams are trained on in the night they were generated.
+
+**Seeding (A1).** `backend.set_seed(seed)` is called by the harness; MLX
+seeds `mx.random` (LoRA init and sampling), HF seeds torch/CUDA/random.
+Scripted same-seed reproducibility is tested; the MLX 4-episode check
+(§5) is bit-identical.
+
+**Analysis gate (A3).** `eval/analyze.py` loads ledgers with
+`Ledger.load`, runs `check_matched`, writes the verdict into every run JSON
+of that seed (`"matched"`) and raises before producing any table or figure
+if arms are unmatched or from different backends.
+
+**Compute matching, as implemented.** Sleep trains S = K = 50 steps per
+night (batch 1), so gradient steps match Online (1/episode) by
+construction. Training tokens match only if day trajectories and dreams
+have similar lengths; same format, same L, so they should, but this is
+checked post hoc by `check_matched`, not forced. Awake accrues its token
+budget cumulatively across day episodes (overshoot in one episode is
+repaid in the next) so its total lands within one completion of Sleep's.
+Evaluation tokens (checkpoint probe / held-out / control) are recorded
+separately and are not part of the matched quantity; Awake uses its
+critique loop at eval too, with a probe-specific critique prompt at probe
+time (C4), otherwise it would be identical to Baseline on every metric.
+
+**Dreams are verified, nothing more.** A dream enters training only if
+every work line, every STEPS entry and the ANSWER agree with the solver,
+and its prefix is not held out. We deliberately do NOT filter dreams for
+the mirror structure: that would inject the experimenter's knowledge of
+the hidden rule into the treatment.
+
+**Weight-decay pass** (night step 6) shrinks lora_b by 5% (`weight_decay`
+in `SleepConfig`, tunable). Kept near-misses (correct answer, ≤ 2 wrong
+steps) are trained on as the model wrote them.
+
+**Open-sourcing plan.** Don't design the package before there is a result.
+If the weights track shows signal → a library (`sleep` scheduler wrapping any
+open-weight fine-tuning setup; replay buffer, dream generator, forgetting
+monitor as swappable parts). The text-memory track (Letta-style, works with
+closed models too) → a connector/MCP server, worth shipping regardless. Two
+artifacts, two audiences. Write up either way; preregistering publicly is
+what makes a positive result credible.
+
+## 5. Calibration record (untrained Qwen3-4B, L=12, n=40)
+
+| run | precision | mode | n_probe | full_acc | steps_exact | unparsable | median tok | probe (p) |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 4-bit | compact, 96 tok | 40 | 0.00 | 0.00 | 1.00 | — | 0.00 (cut off) |
+| 2 | 4-bit | compact, 400 tok | 40 | 0.30 | 0.00 | 0.00 | 31 | 0.375 |
+| 3 | bf16 | compact, 400 tok | 40 | 0.30 | 0.00 | 0.05 | 31 | 0.50 (artifact) |
+| 4 | bf16 | **work**, 400 tok | 40 | **0.475** | **0.175** | 0.00 | 97 | 0.50 (artifact) |
+| 5 | bf16 | work, 400 tok | 120 strat. | 0.475 | 0.175 | 0.00 | 97 | **0.325 (p=0.61)** |
+| 6 | bf16 | work + numbered | 120 strat. | 0.525 | 0.000 | 0.00 | 97 | 0.333 (p=0.53) |
+
+Run 4/5 first-error histogram: {3:4, 4:3, 5:6, 6:3, 7:6, 8:1, 9:6, 10:2, 11:1}.
+Run 6: {1:7, 2:5, 3:9, 4:5, 5:5, 6:3, 7:3, 9:2}.
+Runs 1–4 used the first 40 held-out items for the probe (targets 17/15/8);
+runs 5–6 use the stratified sampler. Files: `results/calibration*.json`.
+Verdict: in the learnable regime; no pretrained shortcut; format decision
+made (work, unnumbered).
+
+**Harness smoke against the real model (4-bit, 2026-09-02, not a recorded
+number).** `run_arm.py --arm sleep --n-episodes 4 --k 2 --n-probe 6
+--n-heldout-eval 2`: day attempts, night after episode 2 and 4 (before the
+checkpoint), LoRA training on MLX (2 steps, loss 2.05, 196 training
+tokens), dream generation (4 dreams: 2 rejected as wrong, 2 rejected for
+landing on a held-out prefix — the leak guard fires in practice), weight
+decay, checkpoints and JSON output all worked. Night 2 kept nothing (both
+day trajectories wrong) and trained 0 steps: an **empty night** is
+possible at K=2 but at K=50 with ~47% day accuracy is not expected; the
+ledger check would flag the resulting step deficit against Online. About
+30 s per 4-bit checkpoint of 6 probe + 2 held-out items; a full local
+600-episode run is not practical (as §4 says: cloud for grids).
+
+**A1 reproducibility check (4-bit, 2026-09-02).** Two Sleep runs, seed 0,
+4 episodes, K=2, dreams at temperature 0.8: episodes, checkpoints, night
+statistics and the training loss (0.15914291076478548) are bit-identical.
+Observation to watch: across the smokes so far 4 of the 6 parsable dreams
+were rejected for landing on a held-out prefix (20% of prefixes are held
+out, so ~1 in 5 was expected). Tiny n; if the rate stays this high in the
+first cloud run, the dream prompt is steering the model toward changing
+early digits and the rejection rate will cost dream yield (not validity).
+
+## 6. Repo state
+
+```
+doze-llm/
+  PREREG.md                 preregistration (authoritative design) + calibration appendix
+  README.md
+  CONTEXT.md                this file
+  CLAUDE.md                 working conventions for future sessions
+  requirements.txt          pytest; mlx-lm on darwin
+  calibrate.py              untrained-model difficulty check (--mode, --number-digits, stratified probe)
+  run_arm.py                run one arm / one seed -> results/runs/*.json
+  backends/  base.py            Backend + TrainableBackend protocols, GenResult, TrainStats
+             scripted.py        ScriptedBackend (literal/shortcut) + FakeTrainableBackend
+             mlx_backend.py     MLX generation + LoRA r=16 training (Mac, dev only)
+             hf_backend.py      Transformers+PEFT (Modal, recorded numbers) — not yet run
+             training_utils.py  LoRA targets, loss-mask conventions, example cycling
+  tasks/     number_reduction.py  generator, prefix-disjoint splits, prompts (full/work/short, numbered), parsing, scoring
+  eval/      shortcut_detector.py stratified probe + binomial test, token collapse, CriterionTracker
+             compute_ledger.py    per-arm Ledger, check_matched (+-5%, never mixes backends)
+             analyze.py           A3 gate: check_seed persists verdicts, summarize/report only when matched
+             control_bench.py     300 fixed GSM8K test items (ids frozen in control_bench_ids.json)
+  arms/      harness.py  episode loop, nights after episode K, checkpoints, RunResult
+             baseline.py awake.py online.py sleep.py
+  sleep/     filters.py replay_buffer.py dreamer.py consolidate.py
+  data/      gsm8k_test.jsonl (1319 rows, original OpenAI release)
+  tests/     81 model-free tests
+  results/   calibration*.json; runs/ (arm runs); ledgers/ (per-arm ledgers, read by analyze.py)
+  .gitignore                .venv/, results/, data/*.jsonl, __pycache__/
+  modal_app.py              Modal entrypoint for the grid — not yet run
+```
+Not yet written: `tasks/string_grammar.py`; log-rank test and figures
+beyond `eval/analyze.py`'s probe-curve plot. `REVIEW.md` = the
+fresh-session review (2026-09-02); `DEVIATIONS.md` created at freeze.
+
+## 7. Frozen vs tunable
+
+**Frozen (PREREG §4.1, §5, §6, §7):** L=12; mirror construction; prefix-
+disjoint split with 20% held-out prefixes; probe = mask digits 8–12, target
+r6; the five arms and their compute-matching rule; the 0.70 / two-checkpoint
+criterion; 5 seeds; K=50; 600 episodes; analysis plan.
+**Tunable:** prompt wording, system prompt, worked example, token budgets,
+whether digits are numbered, probe sample size and statistics, MLX vs PEFT
+implementation details, Modal configuration.
+Any change to a frozen item goes in `DEVIATIONS.md` with a reason.
+
+## 8. Immediate next steps, in order
+
+1. ~~Finish the three in-flight items~~ done 2026-09-02: stray copy deleted;
+   stratified probe + binomial test with tests; `--number-digits` variant
+   run and rejected (§4, §5 runs 5–6).
+2. ~~Pick the final prompt format~~ work mode, unnumbered. PREREG §6.1
+   fixed; calibration appendix added to PREREG. Frozen 2026-09-02 as
+   PREREG v1.0 (hash in PREREG header); `DEVIATIONS.md` created empty.
+3. ~~`eval/compute_ledger.py`~~ done, with tests (incl. backend-mixing guard).
+4. ~~`eval/control_bench.py`~~ done; 300 ids frozen; not yet run on a model.
+5. ~~Arms: Baseline and Awake~~ written and tested model-free; 4-bit smoke
+   against the real model in progress (see §5 / results/runs).
+6. `backends/hf_backend.py` and `modal_app.py` written but **never
+   executed** (no torch/modal locally). First cloud action: run the
+   Baseline arm for 4 episodes on Modal to validate the path.
+7. ~~`sleep/` components + Online, Sleep, Sleep-NoDream arms~~ written and
+   tested against a fake trainable backend; MLX LoRA path smoke-tested
+   locally (4-bit).
+8. ~~Fresh-session review~~ done 2026-09-02 (`REVIEW.md`); all A/B/C items
+   applied (PREREG §8a). Frozen: see PREREG header for the commit hash.
+9. **Next: Modal path check** — `modal run modal_app.py::main --arm baseline
+   --seed 0 --n-episodes 4 --k 2 --n-probe 6 --n-heldout-eval 4`, with the
+   first-execution validation list from REVIEW.md: (1) model.dtype bf16,
+   adapter params fp32, ~33M trainable; (2) chat template emits the empty
+   think block, generation stops at <|im_end|>, completion_tokens ≈
+   count_tokens(text) ±1; (3) two greedy calls identical; (4) train on one
+   repeated example: finite decreasing loss, training_tokens = completion
+   length + 1, lora_norm grows, decay_adapter(0.05) shrinks it by exactly
+   5%, reset_adapter returns it to zero; (5) starmap returns three results,
+   volume commit persists /results/runs, HF cache reused; (6) wall-clock
+   per episode and per checkpoint.
+10. **Pre-launch (A4):** from the Baseline run, estimate the mean kept-
+    trajectory length vs dream length so Online-vs-Sleep training tokens
+    are expected within ±5%; if not, adjust `steps_per_night` and record
+    it in DEVIATIONS.md before the grid.
+11. 5-seed grid on Modal; `eval/analyze.py`; `tasks/string_grammar.py` as
+    replication; write-up.
+
+## 9. Working conventions
+
+- Run everything from the repo root with the venv active. Python 3.14.
+- Tests are model-free and must stay green; run `python -m pytest -q` before
+  and after every change.
+- Never put shell comments containing apostrophes on copy-paste lines (zsh
+  will open a quote and hang on `quote>`).
+- Prefer editing files in place over creating copies; the stale-copy problem
+  has already cost one wasted calibration cycle.
+- Report results as the header line + JSON + one or two raw completions.
+- Don't announce routine actions; do flag anything that touches a frozen
+  item, any inconsistency between code and PREREG, and any result that
+  contradicts an expectation stated in this file.
+- Cheap over clever: 4-bit for smoke tests, bf16 for numbers, cloud for grids.
+

@@ -1,0 +1,5 @@
+pytest
+# Apple silicon development backend:
+mlx-lm ; sys_platform == "darwin"
+# cloud grid (Transformers+PEFT runs inside the Modal image; the client is needed locally):
+modal
