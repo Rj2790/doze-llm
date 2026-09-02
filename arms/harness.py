@@ -57,6 +57,7 @@ class Episode:
     steps_correct: int
     tokens: int
     rounds: int = 1
+    seconds: float = 0.0            # wall-clock for this episode (attempt + after_episode)
 
 
 @dataclass
@@ -69,10 +70,13 @@ class Checkpoint:
     control_accuracy: float | None
     ledger: dict
     eval_tokens: int
-    seconds: float
+    seconds: float                  # wall-clock of this checkpoint evaluation
+    day_seconds_mean: float | None = None   # mean episode wall-clock since the previous checkpoint
+    night_seconds: float | None = None
 
     def flat(self) -> dict:
         d = {"episode": self.episode, "probe_accuracy": self.probe.accuracy,
+             "day_seconds_mean": self.day_seconds_mean, "night_seconds": self.night_seconds,
              "probe_p_value": self.probe.p_value, "probe_above_chance": self.probe.above_chance,
              "heldout_accuracy": self.heldout_accuracy, "heldout_n": self.heldout_n,
              "median_tokens_correct": self.median_tokens_correct,
@@ -254,20 +258,26 @@ def run_arm(arm: Arm, backend: Backend, cfg: RunConfig,
                                 correct=s["correct"], steps_correct=s["steps_correct"],
                                 tokens=r.completion_tokens, rounds=rounds))
         arm.after_episode(episodes[-1], backend, ledger, cfg)
+        episodes[-1].seconds = time.time() - t0
         if is_checkpoint(i, cfg.k):
             day = episodes[i - cfg.k: i]
             assert len(day) == cfg.k and day[0].episode == i - cfg.k + 1 and day[-1].episode == i
+            tn = time.time()
             night_info = arm.night(day, backend, ledger, cfg, split) or {}
+            night_s = time.time() - tn
             if night_info:
                 nights.append({"episode": i, **night_info})
             ck = _checkpoint(arm, backend, cfg, i, probe_items, heldout_items, control, ledger)
+            ck.day_seconds_mean = statistics.mean(e.seconds for e in day)
+            ck.night_seconds = night_s
             eval_tokens += ck.eval_tokens
             checkpoints.append(ck)
             tracker.update(i, ck.probe)
             if log:
                 log(f"[{arm.name} seed={cfg.seed}] ep={i} probe={ck.probe.accuracy:.3f} "
                     f"heldout={ck.heldout_accuracy:.3f} control={ck.control_accuracy} "
-                    f"tokens={ledger.tokens_generated} steps={ledger.gradient_steps} {ck.seconds:.0f}s")
+                    f"tokens={ledger.tokens_generated} steps={ledger.gradient_steps} "
+                    f"| episode {ck.day_seconds_mean:.1f}s night {night_s:.0f}s checkpoint {ck.seconds:.0f}s")
             persist(partial=(i < cfg.n_episodes))
     res = result(partial=False)
     if save_path is not None:

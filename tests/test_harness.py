@@ -113,6 +113,14 @@ def test_eval_tokens_are_tracked_separately_from_matched_budget():
     assert res.ledger.tokens_generated == day_tokens
 
 
+def test_wall_clock_is_recorded_per_episode_and_checkpoint():
+    res = hz.run_arm(BaselineArm(), ScriptedBackend("literal"), _cfg())
+    assert all(e.seconds >= 0 for e in res.episodes)
+    assert res.checkpoints[0].day_seconds_mean is None and res.checkpoints[0].night_seconds is None
+    assert all(c.day_seconds_mean is not None and c.night_seconds is not None for c in res.checkpoints[1:])
+    assert "day_seconds_mean" in res.checkpoints[1].flat() and "night_seconds" in res.checkpoints[1].flat()
+
+
 def test_run_result_json_roundtrip(tmp_path):
     res = hz.run_arm(BaselineArm(), ScriptedBackend("literal"), _cfg(n_episodes=50))
     p = tmp_path / "run.json"

@@ -5,6 +5,7 @@ come from Transformers+PEFT in the cloud). NOT YET EXECUTED.
   modal run modal_app.py::main --arm baseline --seed 0 --n-episodes 4 --k 2 --n-probe 6 --n-heldout-eval 4   # path check
   modal run modal_app.py::main --arm sleep --seed 0                                                       # full run
   modal run modal_app.py::grid --seeds 0,1,2,3,4                                                          # all arms, all seeds
+  modal run modal_app.py::main --gpu A100-80GB --arm baseline ...                                          # GPU override (default L4)
 
 Two local entrypoints exist, so always name one (`::main` or `::grid`; B2).
 Results are saved after every checkpoint and the volume committed (B1).
@@ -18,13 +19,18 @@ plus a ledger JSON per arm; `check_matched` runs at the end of each seed.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import modal
 
 APP = "doze-llm"
 MODEL_ID = "Qwen/Qwen3-4B"
-GPU = "A100-80GB"
+# Default GPU. Qwen3-4B bf16 (~8 GB) + LoRA r=16 at batch 1 and batched
+# generation fit on an L4 (24 GB). Override per run with --gpu (entrypoint
+# parameter, applied via Function.with_options) or DOZE_GPU=... in the
+# environment. A100-80GB was the original unexamined default.
+GPU = os.environ.get("DOZE_GPU", "L4")
 RESULTS = "/results"
 HF_CACHE = "/hf-cache"
 
@@ -42,10 +48,17 @@ cache_vol = modal.Volume.from_name("doze-hf-cache", create_if_missing=True)
 
 def _run(arm: str, seed: int, n_episodes: int, k: int, n_probe: int, n_heldout_eval: int,
          control_items: int, awake_budget: int, lr: float, weight_decay: float, online_filter: bool) -> dict:
+    import subprocess
     import sys
+    import time
     sys.path.insert(0, "/root/doze")
-    import os
     os.chdir("/root/doze")
+    t_start = time.time()
+    try:
+        gpu_name = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+                                  capture_output=True, text=True, timeout=10).stdout.strip()
+    except Exception:
+        gpu_name = "unknown"
     from arms import harness as hz
     from arms.awake import AwakeArm
     from arms.baseline import BaselineArm
@@ -55,6 +68,7 @@ def _run(arm: str, seed: int, n_episodes: int, k: int, n_probe: int, n_heldout_e
     from tasks import number_reduction as nr
 
     trainable = arm in ("online", "online_unfiltered", "sleep", "sleep_nodream")
+    print(f"gpu={gpu_name} arm={arm} seed={seed} episodes={n_episodes} k={k}", flush=True)
     if arm == "awake" and awake_budget <= 0:
         raise SystemExit("awake needs --awake-budget > 0 (derive it from the Sleep ledger)")   # B4: before model load
     backend = HFBackend(MODEL_ID, system=nr.SYSTEM_PROMPT, lora=trainable, lr=lr, seed=seed)
@@ -72,9 +86,15 @@ def _run(arm: str, seed: int, n_episodes: int, k: int, n_probe: int, n_heldout_e
     res = hz.run_arm(a, backend, cfg, log=print, save_path=out, on_checkpoint=results_vol.commit)
     res.ledger.save(Path(RESULTS) / "ledgers" / f"{arm}_seed{seed}.json")
     results_vol.commit()
+    eps = [e.seconds for e in res.episodes]
+    timing = {"gpu": gpu_name, "total_seconds": round(time.time() - t_start, 1),
+              "episode_seconds_mean": round(sum(eps) / len(eps), 2) if eps else None,
+              "checkpoint_seconds": [round(c.seconds, 1) for c in res.checkpoints],
+              "night_seconds": [c.night_seconds for c in res.checkpoints if c.night_seconds is not None]}
+    print("timing " + json.dumps(timing), flush=True)
     return {"arm": arm, "seed": seed, "criterion_episode": res.criterion_episode,
             "ledger": res.ledger.totals(), "checkpoints": [c.flat() for c in res.checkpoints],
-            "nights": res.nights, "out": str(out)}
+            "nights": res.nights, "out": str(out), "timing": timing}
 
 
 @app.function(gpu=GPU, timeout=24 * 3600, volumes={RESULTS: results_vol, HF_CACHE: cache_vol},
@@ -132,9 +152,15 @@ def ls_results() -> list[str]:
     return sorted(out)
 
 
+def _gpu(fn, gpu: str):
+    """Apply a per-invocation GPU override (defaults to GPU)."""
+    return fn.with_options(gpu=gpu) if gpu and gpu != GPU else fn
+
+
 @app.local_entrypoint()
-def preflight(seed: int = 0, n_items: int = 40, n_dream_seeds: int = 10):
-    r = preflight_remote.remote(seed, n_items, n_dream_seeds)
+def preflight(seed: int = 0, n_items: int = 40, n_dream_seeds: int = 10, gpu: str = GPU):
+    print(f"gpu={gpu}")
+    r = _gpu(preflight_remote, gpu).remote(seed, n_items, n_dream_seeds)
     Path("results").mkdir(exist_ok=True)
     Path(f"results/preflight_hf_seed{seed}.json").write_text(json.dumps(r, indent=1, default=str))
     v = r["validation"]
@@ -145,9 +171,10 @@ def preflight(seed: int = 0, n_items: int = 40, n_dream_seeds: int = 10):
 
 
 @app.local_entrypoint()
-def pathcheck(n_episodes: int = 2):
+def pathcheck(n_episodes: int = 2, gpu: str = GPU):
     """Item 5: starmap three tiny Baseline runs, then list what the volume holds."""
-    rs = list(run_arm_remote.starmap([("baseline", s, n_episodes, 2, 6, 3, 3) for s in (0, 1, 2)]))
+    print(f"gpu={gpu}")
+    rs = list(_gpu(run_arm_remote, gpu).starmap([("baseline", s, n_episodes, 2, 6, 3, 3) for s in (0, 1, 2)]))
     print(json.dumps([{k: r[k] for k in ("arm", "seed", "criterion_episode", "ledger", "out")} for r in rs], indent=1, default=str))
     print("\n".join(ls_results.remote()))
 
@@ -155,26 +182,29 @@ def pathcheck(n_episodes: int = 2):
 @app.local_entrypoint()
 def main(arm: str = "baseline", seed: int = 0, n_episodes: int = 600, k: int = 50, n_probe: int = 60,
          n_heldout_eval: int = 201, control_items: int = 300, awake_budget: int = 0, lr: float = 1e-4,
-         weight_decay: float = 0.05, online_filter: bool = False):
-    r = run_arm_remote.remote(arm, seed, n_episodes, k, n_probe, n_heldout_eval, control_items,
-                              awake_budget, lr, weight_decay, online_filter)
+         weight_decay: float = 0.05, online_filter: bool = False, gpu: str = GPU):
+    print(f"gpu={gpu}")
+    r = _gpu(run_arm_remote, gpu).remote(arm, seed, n_episodes, k, n_probe, n_heldout_eval, control_items,
+                                         awake_budget, lr, weight_decay, online_filter)
     print(json.dumps(r, indent=1, default=str))
 
 
 @app.local_entrypoint()
-def grid(seeds: str = "0,1,2,3,4", n_episodes: int = 600, online_filter: bool = False):
+def grid(seeds: str = "0,1,2,3,4", n_episodes: int = 600, online_filter: bool = False, gpu: str = GPU):
     import sys
     sys.path.insert(0, ".")
     from arms.awake import AwakeArm
     from eval import compute_ledger as cl
 
+    print(f"gpu={gpu}")
+    fn = _gpu(run_arm_remote, gpu)
     for seed in [int(s) for s in seeds.split(",")]:
-        sleep = run_arm_remote.remote("sleep", seed, n_episodes, online_filter=online_filter)
-        others = list(run_arm_remote.starmap([("sleep_nodream", seed, n_episodes), ("online", seed, n_episodes),
-                                              ("baseline", seed, n_episodes)]))
+        sleep = fn.remote("sleep", seed, n_episodes, online_filter=online_filter)
+        others = list(fn.starmap([("sleep_nodream", seed, n_episodes), ("online", seed, n_episodes),
+                                  ("baseline", seed, n_episodes)]))
         ref = cl.Ledger(arm="sleep", **{k: v for k, v in sleep["ledger"].items()})
         budget = AwakeArm.budget_from_reference(ref, n_episodes)
-        awake = run_arm_remote.remote("awake", seed, n_episodes, awake_budget=budget)
+        awake = fn.remote("awake", seed, n_episodes, awake_budget=budget)
         ledgers = {}
         for r in [sleep, awake] + others:
             L = cl.Ledger(arm=r["arm"], backend=f"hf:{MODEL_ID}")

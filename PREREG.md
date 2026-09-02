@@ -228,3 +228,17 @@ and bf16 and was replaced by work mode; a numbered-digit variant (0.525,
 tunable and is not part of the frozen design; the task construction, the
 prefix-disjoint split and the probe (mask digits 8–12, target r6) are.
 Full record: `CONTEXT.md` §5, `results/calibration*.json`.
+
+**Addendum 2026-09-02 (documentation correction, see DEVIATIONS.md).** The
+40 calibration items above were the first 40 held-out items of the
+pre-amendment split (before A6 introduced answer-stratified sampling and
+the 801/201/60 sizes). They are not the first 40 held-out items of the
+frozen split; the two sets share no items. On the frozen split's first 40
+held-out items the same untrained model, prompt and decoding give
+accuracy 0.25 and 0.075 exact chains (MLX bf16, `results/
+agreement_mlx_bf16_seed0.json`). Repeated-digit statistics of the two sets
+are indistinguishable (mean adjacent-equal positions 3.55 vs 3.48; mean
+longest run 3.1 vs 2.9). The calibration verdict ("learnable regime") was
+based on the pre-A6 sample; the pooled estimate over both 40-item samples
+is 0.36. The Baseline arm's episode-0 checkpoint on 201 items is the
+authoritative untrained accuracy.
