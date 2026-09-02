@@ -298,6 +298,58 @@ not to the guard. Dream yield (kept / generated, with the rejection
 breakdown) is logged per night in the run JSON and is a yield metric, not a
 validity concern.
 
+### 5a. Modal path check and first-execution validation (2026-09-02)
+
+**Path check** `modal_app.py::main --arm baseline --seed 0 --n-episodes 4 --k 2
+--n-probe 6 --n-heldout-eval 4` (control 300), A100-80GB (the pre-L4
+default): three checkpoints (0, 2, 4) with identical results, as required
+for frozen weights + greedy: probe 1/6, held-out 3/4, GSM8K 0.573 (172/300).
+Run file complete in the volume (`partial: false`, backend `hf:Qwen/Qwen3-4B`).
+
+| validation item | result | observed |
+|---|---|---|
+| 1 dtype / adapters / trainable | pass | model bf16; adapter params fp32; 33,030,144 trainable; 36 layers |
+| 2 template / stop / tokens | pass | `<think></think>` emitted; stopped at 100 tokens (< 400 budget); completion_tokens 100 vs count_tokens 99 |
+| 3 greedy determinism | pass | two calls byte-identical; three checkpoints identical |
+| 4 training mechanics | pass | losses 0.391, 0.003, 0.0001, 0.192, 0.0007, 0.0008 (finite, one bump); training_tokens 588 = 6×(97+1); lora_norm 0 → 1.305 → 1.240 (ratio 0.94999983) → 0 after reset |
+| 5 starmap / volume / cache | pass | 3/3 results (seeds 0–2); volume holds runs/ + ledgers/ + preflight; no model download in later apps (HF cache reused; 0 "Fetching" lines vs 5 in the first app); model load 24.9 s from cache |
+| 6 wall-clock | pass | A100: 5.9 s/episode, 255 s per full-size checkpoint (60 probe + 4 held-out + 300 GSM8K). L4 (tiny checkpoints): 4.4 s/episode, 12–15 s per 6+3+3 checkpoint. L4 full-size checkpoint: see below |
+
+Full-run projection at A100 numbers: 600 episodes × 6 s = 1.0 h day time +
+13 checkpoints × ~5 min (201 held-out instead of 4 adds ~13 batches) ≈ 1.5 h
+eval + nights; a Sleep run ≈ 3 h. 24 h timeout is ample.
+
+**Backend agreement (frozen Baseline, 40 held-out items, greedy).** MLX bf16
+0.25 / 0.075 exact chains (kept 3); HF bf16 0.275 / 0.05 (kept 4). 30/40
+completions byte-identical, 31/40 same answer, 39/40 same exact-chain flag,
+both-correct 8, only-MLX 2, only-HF 3. All 10 divergences start at work
+line 6–11 (histogram {6:1, 7:2, 10:3, 11:4}), i.e. deep in a greedy chain
+where logits are near-tied — numeric noise across backends, no flag.
+Files: `results/agreement_mlx_bf16_seed0.json`,
+`results/preflight_hf_seed0.json`, `results/agreement_mlx_vs_hf_seed0.json`.
+
+**Dream yield on the untrained model is zero.** From 7 kept training
+trajectories (HF; keep rate 7/40 = 0.175 on training items), 14 dreams:
+0 verified, 9 wrong, 5 on held-out prefixes. Expected: a dream must be a
+fully correct 11-step chain on a new string, and the untrained model's
+exact-chain rate is 5–8%, so ≈ 1 of 14 was the expectation. The held-out
+rejection rate is again above 20% (5/14; cumulative 9/20 across all
+smokes), consistent with the model preferring to change early digits.
+Consequence: in the first nights Sleep ≈ Sleep-NoDream; dreaming can only
+contribute once the model's chain accuracy rises. **Decision needed
+before the grid** (see §8).
+
+**A4 estimate.** Kept-trajectory completion tokens (HF, training items):
+mean 97.1, median 98 (held-out kept: 94.5 / 95). Dream generations average
+119 tokens including the ~27-token Digits line → completion ≈ 92. Projected
+Sleep/Online training-token ratio: 1.000 at yield 0, 0.997 at 0.07, 0.988
+at 0.30, 0.975 at 1.0 — within ±5% at every yield, because dreams and
+trajectories share the format. No `steps_per_night` change; DEVIATIONS.md
+unchanged. Secondary observation: at keep rate 0.175 a night has ~9 kept
+trajectories for 50 steps (≈5 passes each); Online substitutes the same few
+trajectories for its non-kept episodes. Both arms overfit the same small
+pool early; this is symmetric and inherent to the design at this accuracy.
+
 ## 6. Repo state
 
 ```
@@ -366,7 +418,8 @@ Any change to a frozen item goes in `DEVIATIONS.md` with a reason.
    locally (4-bit).
 8. ~~Fresh-session review~~ done 2026-09-02 (`REVIEW.md`); all A/B/C items
    applied (PREREG §8a). Frozen: see PREREG header for the commit hash.
-9. **Next: Modal path check** — `modal run modal_app.py::main --arm baseline
+9. ~~Modal path check~~ done 2026-09-02, all six validation items pass
+   (§5a). Original list: `modal run modal_app.py::main --arm baseline
    --seed 0 --n-episodes 4 --k 2 --n-probe 6 --n-heldout-eval 4`, with the
    first-execution validation list from REVIEW.md: (1) model.dtype bf16,
    adapter params fp32, ~33M trainable; (2) chat template emits the empty
@@ -377,10 +430,16 @@ Any change to a frozen item goes in `DEVIATIONS.md` with a reason.
    5%, reset_adapter returns it to zero; (5) starmap returns three results,
    volume commit persists /results/runs, HF cache reused; (6) wall-clock
    per episode and per checkpoint.
-10. **Pre-launch (A4):** from the Baseline run, estimate the mean kept-
-    trajectory length vs dream length so Online-vs-Sleep training tokens
-    are expected within ±5%; if not, adjust `steps_per_night` and record
-    it in DEVIATIONS.md before the grid.
+10. ~~Pre-launch (A4)~~ done (§5a): ratio 1.000–0.975 across yields, no
+    adjustment. **Open decision before any trainable arm:** dream yield is
+    0 on the untrained model (§5a). Options: (a) run as designed and treat
+    yield-per-night as a reported metric (H3 may be uninformative if yield
+    stays ~0); (b) tunable prompt work on the dream instruction (e.g. ask
+    for changes only in the last five digits, which also removes the
+    held-out-prefix rejections) — prompt wording is tunable, but steering
+    which digits change is close to the hidden structure and must be
+    weighed; (c) defer. Builder recommendation: (a) for the first seed,
+    log yield per night, decide (b) with data.
 11. 5-seed grid on Modal; `eval/analyze.py`; `tasks/string_grammar.py` as
     replication; write-up.
 
