@@ -20,7 +20,7 @@ def test_guard_rejection_rate_on_uniform_random_strings_is_20pct():
         digits = "".join(rng.choice(nr.DIGITS) for _ in range(12))
         inst = nr.Instance.from_digits(digits)
         text = f"{nr.digits_line(digits)}\n{nr.gold_response(inst, 'work')}"
-        ex, reason = dreamer.verify(text, split, mode="work")
+        ex, reason = dreamer.verify(text, split, mode="work", source_prefix=inst.prefix)   # isolate the held-out guard
         if reason == "heldout_prefix":
             rejected += 1
         elif reason != "ok":

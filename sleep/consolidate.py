@@ -40,7 +40,7 @@ def run_night(day: Sequence[Episode], backend: TrainableBackend, ledger: cl.Ledg
     kept = [filters.to_example(e, cfg.mode, cfg.numbered) for e in kept_eps]
     buffer.check(kept)   # day episodes are training instances by construction; verify anyway
 
-    dreams, dstats = [], {"generated": 0, "tokens": 0, "kept": 0, "rejected": {}}
+    dreams, dstats = [], {"generated": 0, "tokens": 0, "kept": 0, "rejected": {}, "structured": 0, "structured_frac": None}
     if dream_enabled and kept:
         dreams, dstats = dreamer.dream(backend, kept, scfg.n_variations, split, cfg.mode, cfg.numbered,
                                        max_tokens=scfg.dream_max_tokens, temperature=scfg.dream_temperature)
@@ -65,6 +65,10 @@ def run_night(day: Sequence[Episode], backend: TrainableBackend, ledger: cl.Ledg
     return {"night": night_index, "day_episodes": len(day), "kept": len(kept), "new": len(new),
             "dreams_generated": dstats["generated"], "dreams_kept": dstats["kept"],
             "dreams_rejected": dstats["rejected"], "dream_tokens": dstats["tokens"],
+            "dreams_rejected_wrong": dstats["rejected"].get("wrong", 0),
+            "dreams_rejected_heldout": dstats["rejected"].get("heldout_prefix", 0),
+            "dreams_rejected_prefix_changed": dstats["rejected"].get("prefix_changed", 0),
+            "dreams_structured": dstats["structured"], "dreams_structured_frac": dstats["structured_frac"],
             "replay": len(replay), "train_set": len(train_set), "steps": st.steps,
             "training_tokens": st.training_tokens, "loss": st.loss, "buffer_size": len(buffer),
             "weight_decay": scfg.weight_decay, "seconds": round(time.time() - t0, 1),

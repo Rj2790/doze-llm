@@ -195,6 +195,18 @@ optional arm `online_unfiltered`, matched to Sleep like Online.
 by Sleep's night filter, Online and (stricter: fully correct) the dreamer.
 Wrong-answer near-misses are out.
 
+**Dream instruction (tunable wording, 2026-09-02).** Dreams keep the
+first seven digits of the source and change 1–3 of the last five; dreams
+whose prefix differs from the source are rejected (`prefix_changed`). Held-
+out rejections are impossible by construction (source = training
+instance). Digit-7 boundary: digits 1–7 fix r6 (the shortcut target), so
+these dreams vary r11 while r6 stays put; most accepted dreams are
+unstructured strings solved literally. Logged per night: generated,
+rejected-wrong, rejected-heldout, rejected-prefix-changed, accepted, and
+the fraction of accepted dreams that are mirror-structured. Dream
+verification = shared C3 keep rule (`filters.keep_scores`), aligned
+2026-09-02 (it had been an exact-chain check; DEVIATIONS.md doc note).
+
 **Dreams are never replayed (C2).** The replay buffer holds kept real
 trajectories only; dreams are trained on in the night they were generated.
 

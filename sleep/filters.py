@@ -27,9 +27,13 @@ class Example:
         return self.digits[: nr.prefix_len(len(self.digits))]
 
 
+def keep_scores(correct: bool, steps_correct: int, length: int) -> bool:
+    """The C3 keep rule on raw scores; shared by Sleep, Online and the dreamer."""
+    return bool(correct) and steps_correct >= (length - 1) - NEAR_MISS_MAX_WRONG
+
+
 def keep(ep: Episode) -> bool:
-    steps_total = len(ep.digits) - 1
-    return ep.correct and ep.steps_correct >= steps_total - NEAR_MISS_MAX_WRONG
+    return keep_scores(ep.correct, ep.steps_correct, len(ep.digits))
 
 
 def filter_day(episodes: Sequence[Episode]) -> list[Episode]:

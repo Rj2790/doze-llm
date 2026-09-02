@@ -88,12 +88,11 @@ class FakeTrainableBackend(ScriptedBackend):
         seed[i] = self.rng.choice([d for d in nr.DIGITS if d != seed[i]])
         inst = nr.Instance.from_digits("".join(seed))
         body = nr.gold_response(inst, "work")
-        if self.rng.random() < self.dream_error_rate:
-            lines = body.splitlines()
-            j = self.rng.randrange(0, L - 1)
-            pair, res = lines[j].split("->")
-            lines[j] = f"{pair}->{[d for d in nr.DIGITS if d != res][0]}"
-            body = "\n".join(lines)
+        if self.rng.random() < self.dream_error_rate:      # a wrong dream: 3 wrong STEPS entries (fails C3)
+            steps = list(inst.responses)
+            for j in self.rng.sample(range(L - 1), 3):
+                steps[j] = [d for d in nr.DIGITS if d != steps[j]][0]
+            body = f"{nr._work_lines(inst.digits)}\nSTEPS: {' '.join(steps)}\nANSWER: {inst.answer}"
         return f"{nr.digits_line(inst.digits)}\n{body}"
 
     def generate(self, prompts: Sequence[str], max_tokens: int = 128,

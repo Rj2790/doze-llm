@@ -1,12 +1,18 @@
 """Night step 3 (PREREG §5): dreaming = verified self-generation.
 
 For each kept trajectory the current model is asked for `n_variations` new
-puzzles (a changed digit string plus its full solution). A dream enters
-training only if it verifies against the ground-truth solver: every work
-line, every STEPS entry and the ANSWER must be exactly right. Dreams whose
-prefix is held out are rejected (eval leak guard). Nothing else is filtered:
-in particular we do NOT check for the mirror structure, because that would
-inject the experimenter's knowledge of the hidden rule into the treatment.
+puzzles: change one to three of the LAST FIVE digits of the source string,
+keep the first seven, and solve the new string. A dream enters training
+only if it passes the shared C3 keep rule against the ground-truth solver
+(final answer correct AND >= 9/11 STEPS entries correct) and keeps the
+source prefix (so it can never carry a held-out prefix: the source is a
+training instance). We do NOT filter dreams for the mirror structure; the
+fraction of accepted dreams that happen to be structured is reported.
+
+Digit-7 boundary note: digits 1-7 determine r6, the shortcut target.
+Varying only digits 8-12 leaves r6 fixed and changes r11 unless the mirror
+happens to hold, so most accepted dreams are unstructured strings solved
+literally. This is tunable prompt wording (CONTEXT.md §4).
 """
 
 from __future__ import annotations
@@ -15,17 +21,19 @@ from collections import Counter
 from collections.abc import Sequence
 
 from backends.base import Backend
+from sleep import filters
 from sleep.filters import Example
 from tasks import number_reduction as nr
 
 DREAM_TEMPERATURE = 0.8   # tunable; dreams need diversity
 
 DREAM_INSTRUCTION = (
-    "Above is a solved puzzle. Invent a NEW puzzle of {length} digits, each 1, 4 or 9, by "
-    "changing several digits of the one above, then solve it with the same rule. Output exactly: "
-    "a line 'Digits: ' with the {length} new digits separated by spaces, then the {steps} "
-    "comparison lines as 'previous,digit->result', then 'STEPS:' with all {steps} results, then "
-    "'ANSWER:' with the final result. Output only these lines."
+    "Above is a solved puzzle. Invent a NEW puzzle from it: keep the first seven digits exactly as "
+    "they are and change between one and three of the last five digits (positions 8 to 12), each "
+    "still 1, 4 or 9. Then solve the new string with the same rule. Output exactly: a line "
+    "'Digits: ' with the {length} new digits separated by spaces, then the {steps} comparison "
+    "lines as 'previous,digit->result', then 'STEPS:' with all {steps} results, then 'ANSWER:' "
+    "with the final result. Output only these lines."
 )
 
 
@@ -36,27 +44,9 @@ def dream_prompt(seed: Example, mode: str, numbered: bool) -> str:
             f"{DREAM_INSTRUCTION.format(length=length, steps=length - 1)}")
 
 
-def _verify_work_lines(inst: nr.Instance, body: str) -> bool:
-    lines = [l.strip() for l in body.splitlines() if "->" in l]
-    if len(lines) != inst.length - 1:
-        return False
-    prev = inst.digits[0]
-    for i, line in enumerate(lines):
-        try:
-            pair, res = line.split("->")
-            a, b = [t.strip() for t in pair.split(",")]
-        except ValueError:
-            return False
-        a, b, res = a.split(":")[-1], b.split(":")[-1], res.strip()
-        if a != prev or b != inst.digits[i + 1] or res != inst.responses[i]:
-            return False
-        prev = res
-    return True
-
-
-def verify(text: str, split: nr.Split, mode: str) -> tuple[Example | None, str]:
+def verify(text: str, split: nr.Split, mode: str, source_prefix: str) -> tuple[Example | None, str]:
     """Return (example, 'ok') or (None, reason). Reasons: unparsable,
-    heldout_prefix, wrong."""
+    prefix_changed, heldout_prefix, wrong. 'wrong' = fails the C3 keep rule."""
     try:
         toks = nr.parse_digits_line(text)
     except ValueError:
@@ -70,12 +60,11 @@ def verify(text: str, split: nr.Split, mode: str) -> tuple[Example | None, str]:
     s = nr.score(inst, body)
     if s["answer"] is None or not s["steps_parsed"] or (mode == "work" and body.count("->") == 0):
         return None, "unparsable"
-    if inst.prefix in split.heldout_prefixes:
+    if inst.prefix != source_prefix:
+        return None, "prefix_changed"
+    if inst.prefix in split.heldout_prefixes:      # unreachable when the source is a training instance
         return None, "heldout_prefix"
-    ok = s["correct"] and s["steps_correct"] == inst.length - 1 and nr.parse_steps(body) == list(inst.responses)
-    if mode == "work":
-        ok = ok and _verify_work_lines(inst, body)
-    if not ok:
+    if not filters.keep_scores(s["correct"], s["steps_correct"], inst.length):
         return None, "wrong"
     return Example(digits=digits, prompt="", completion=body, source="dream"), "ok"
 
@@ -83,21 +72,26 @@ def verify(text: str, split: nr.Split, mode: str) -> tuple[Example | None, str]:
 def dream(backend: Backend, kept: Sequence[Example], n_variations: int, split: nr.Split,
           mode: str, numbered: bool, max_tokens: int,
           temperature: float = DREAM_TEMPERATURE) -> tuple[list[Example], dict]:
-    prompts = [dream_prompt(e, mode, numbered) for e in kept for _ in range(n_variations)]
+    seeds = [e for e in kept for _ in range(n_variations)]
+    prompts = [dream_prompt(e, mode, numbered) for e in seeds]
     out: list[Example] = []
     rejected: Counter = Counter()
     tokens = 0
+    structured = 0
     if prompts:
         gens = backend.generate(prompts, max_tokens=max_tokens, temperature=temperature)
-        for g in gens:
+        for seed, g in zip(seeds, gens):
             tokens += g.completion_tokens
-            ex, reason = verify(g.text, split, mode)
+            ex, reason = verify(g.text, split, mode, source_prefix=seed.prefix)
             if ex is None:
                 rejected[reason] += 1
             else:
                 ex.prompt = nr.format_prompt(nr.Instance.from_digits(ex.digits), mode, numbered=numbered)
+                structured += nr.Instance.from_digits(ex.digits).structured
                 out.append(ex)
-    return out, {"generated": len(prompts), "tokens": tokens, "kept": len(out), "rejected": dict(rejected)}
+    return out, {"generated": len(prompts), "tokens": tokens, "kept": len(out), "rejected": dict(rejected),
+                 "structured": structured,
+                 "structured_frac": (structured / len(out)) if out else None}
 
 
 def interleave(a: Sequence, b: Sequence) -> list:

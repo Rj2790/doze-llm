@@ -190,30 +190,39 @@ def main(arm: str = "baseline", seed: int = 0, n_episodes: int = 600, k: int = 5
 
 
 @app.local_entrypoint()
-def grid(seeds: str = "0,1,2,3,4", n_episodes: int = 600, online_filter: bool = False, gpu: str = GPU):
+def grid(seeds: str = "0,1,2,3,4", n_episodes: int = 600, online_filter: bool = False, gpu: str = GPU,
+         arms: str = "sleep,sleep_nodream,online,baseline,awake"):
+    """All arms of a seed run on ONE GPU type (cross-GPU numerics differ).
+    Sleep and the other non-Awake arms run concurrently; Awake waits for
+    Sleep's ledger to set its token budget."""
     import sys
     sys.path.insert(0, ".")
     from arms.awake import AwakeArm
     from eval import compute_ledger as cl
 
-    print(f"gpu={gpu}")
+    arm_list = [a.strip() for a in arms.split(",") if a.strip()]
+    assert "sleep" in arm_list, "sleep is the matching reference and must be in --arms"
+    print(f"gpu={gpu} arms={arm_list}")
     fn = _gpu(run_arm_remote, gpu)
     for seed in [int(s) for s in seeds.split(",")]:
-        sleep = fn.remote("sleep", seed, n_episodes, online_filter=online_filter)
-        others = list(fn.starmap([("sleep_nodream", seed, n_episodes), ("online", seed, n_episodes),
-                                  ("baseline", seed, n_episodes)]))
-        ref = cl.Ledger(arm="sleep", **{k: v for k, v in sleep["ledger"].items()})
-        budget = AwakeArm.budget_from_reference(ref, n_episodes)
-        awake = fn.remote("awake", seed, n_episodes, awake_budget=budget)
+        calls = {a: fn.spawn(a, seed, n_episodes) for a in arm_list if a != "awake"}
+        results = {a: c.get() for a, c in calls.items()}
+        if "awake" in arm_list:
+            ref = cl.Ledger(arm="sleep", **{k: v for k, v in results["sleep"]["ledger"].items()})
+            budget = AwakeArm.budget_from_reference(ref, n_episodes)
+            print(f"seed {seed}: awake budget {budget} tokens/episode from sleep total {ref.tokens_generated}")
+            results["awake"] = fn.remote("awake", seed, n_episodes, awake_budget=budget)
         ledgers = {}
-        for r in [sleep, awake] + others:
-            L = cl.Ledger(arm=r["arm"], backend=f"hf:{MODEL_ID}")
+        for a, r in results.items():
+            L = cl.Ledger(arm=a, backend=f"hf:{MODEL_ID}")
             L.add(**r["ledger"])
-            ledgers[r["arm"]] = L
+            ledgers[a] = L
         try:
             cl.check_matched(ledgers, tol=0.05)
             print(f"seed {seed}: budgets matched")
         except cl.BudgetMismatch as e:
             print(f"seed {seed}: BUDGET MISMATCH — do not compare\n{e}")
-        for r in [sleep, awake] + others:
-            print(json.dumps({k: r[k] for k in ("arm", "seed", "criterion_episode", "ledger")}, default=str))
+        for a, r in results.items():
+            print("RESULT " + json.dumps({k: r[k] for k in ("arm", "seed", "criterion_episode", "ledger", "timing")}, default=str))
+            print("NIGHTS " + json.dumps({"arm": a, "nights": r["nights"]}, default=str))
+            print("PROBE " + json.dumps({"arm": a, "curve": [(c["episode"], c["probe_accuracy"]) for c in r["checkpoints"]]}))

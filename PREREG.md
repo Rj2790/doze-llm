@@ -120,8 +120,8 @@ forgetting baseline and the untrained probe) and then every K=50 episodes
 1. Collect the day's K trajectories.
 2. Keep trajectories whose final answer is correct **and** ≥ 9/11
    intermediate responses are correct. Wrong-answer near-misses are not
-   kept. The same keep rule is used by Online; dreams must be fully correct
-   (C3).
+   kept. The same keep rule is used by Online and by dream verification
+   (C3; wording corrected 2026-09-02, see DEVIATIONS.md).
 3. Dream: prompt the current model to generate 2 variations per kept
    trajectory; keep only those that verify against the ground-truth solver.
 4. Interleave 1:1 with a uniform sample from the replay buffer of all
@@ -242,3 +242,15 @@ longest run 3.1 vs 2.9). The calibration verdict ("learnable regime") was
 based on the pre-A6 sample; the pooled estimate over both 40-item samples
 is 0.36. The Baseline arm's episode-0 checkpoint on 201 items is the
 authoritative untrained accuracy.
+
+**Addendum 2026-09-02 (tunable wording): dream instruction.** The dream
+prompt asks the model to keep the first seven digits of the source string
+and change one to three of the last five (positions 8–12), then solve the
+new string; dreams whose prefix differs from the source are rejected.
+Because the source is a training instance, dreams can no longer land on
+held-out prefixes. Digit-7 boundary: digits 1–7 determine r6, the shortcut
+target, so these dreams hold r6 fixed and vary r11; most accepted dreams
+are therefore unstructured strings solved literally, and the fraction of
+accepted dreams that are mirror-structured is logged per night. Dream
+verification uses the C3 keep rule (correct answer and ≥ 9/11 steps), not
+an exact-chain check.
