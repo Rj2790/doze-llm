@@ -313,6 +313,9 @@ doze-llm/
   .gitignore                .venv/, results/, data/*.jsonl, __pycache__/
   modal_app.py              Modal entrypoint for the grid — not yet run
 ```
+Remote: https://github.com/Rj2790/doze-llm (private; `main`; freeze commit
+6cfc319 pushed 2026-09-02).
+
 Not yet written: `tasks/string_grammar.py`; log-rank test and figures
 beyond `eval/analyze.py`'s probe-curve plot. `REVIEW.md` = the
 fresh-session review (2026-09-02); `DEVIATIONS.md` created at freeze.
