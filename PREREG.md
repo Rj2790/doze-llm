@@ -1,8 +1,8 @@
 # Preregistration: Phased offline consolidation ("sleep") in LLMs
 
-**Status:** draft v0.1 — commit publicly before the first GPU job runs.
+**Status:** v1.0 — frozen 2026-09-02 at commit `6cfc31923d180b79cb204f199c13bb29098f84c9` ("Freeze PREREG v1.0").
 **Author:** Rushil
-**Date frozen:** _____
+**Date frozen:** 2026-09-02
 
 ## 1. Question
 
@@ -75,7 +75,7 @@ there are 19,683 instances over 2,187 seven-digit prefixes.
 - Probe: digits 8..12 masked. The literal rule reaches only r6; the
   answer is recoverable above chance (1/3) only via r11 = r6.
 - Implementation and tests: `tasks/number_reduction.py`,
-  `eval/shortcut_detector.py`, `tests/`. Frozen at commit ______.
+  `eval/shortcut_detector.py`, `tests/`. Frozen at commit `6cfc31923d180b79cb204f199c13bb29098f84c9`.
 
 ### 4.2 String Grammar (secondary)
 
