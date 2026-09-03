@@ -202,9 +202,12 @@ def main(arm: str = "baseline", seed: int = 0, n_episodes: int = 600, k: int = 5
     from eval import orchestrate
     tag = run_tag or orchestrate.new_tag()
     print(f"gpu={gpu} run_tag={tag}")
-    r = _gpu(run_arm_remote, gpu).remote(arm, seed, n_episodes, k, n_probe, n_heldout_eval, control_items,
-                                         awake_budget, lr, weight_decay, online_filter, tag)
-    print(json.dumps(r, indent=1, default=str))
+    # spawn, not .remote(): a blocking call is cancelled if this client dies, even under --detach
+    call = _gpu(run_arm_remote, gpu).spawn(arm, seed, n_episodes, k, n_probe, n_heldout_eval, control_items,
+                                           awake_budget, lr, weight_decay, online_filter, tag)
+    print(f"spawned {arm} seed={seed}: call_id={call.object_id} run_tag={tag}", flush=True)
+    print(f"Result file: doze-results volume /{tag}/runs/{arm}_seed{seed}.json (saved every checkpoint); "
+          f"re-run the same command with --run-tag {tag} to resume after a preemption.", flush=True)
 
 
 @app.function(timeout=24 * 3600, volumes={RESULTS: results_vol})
