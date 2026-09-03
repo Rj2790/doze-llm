@@ -38,6 +38,24 @@ class ScriptedBackend:
     def set_seed(self, seed: int) -> None:
         self.rng = random.Random(seed)
 
+    def _state(self) -> dict:
+        return {"policy": self.policy, "noise": self.noise, "rng": self.rng.getstate()}
+
+    def _load(self, d: dict) -> None:
+        self.policy, self.noise = d["policy"], d["noise"]
+        st = d["rng"]
+        self.rng.setstate((st[0], tuple(st[1]), st[2]))
+
+    def save_state(self, sdir) -> None:
+        import json
+        from pathlib import Path
+        Path(sdir, "backend.json").write_text(json.dumps(self._state()))
+
+    def load_state(self, sdir) -> None:
+        import json
+        from pathlib import Path
+        self._load(json.loads(Path(sdir, "backend.json").read_text()))
+
     def generate(self, prompts: Sequence[str], max_tokens: int = 128,
                  temperature: float = 0.0) -> list[GenResult]:
         out = []
@@ -106,6 +124,18 @@ class FakeTrainableBackend(ScriptedBackend):
             else:
                 out.extend(super().generate([p], max_tokens=max_tokens, temperature=temperature))
         return out
+
+    def _state(self) -> dict:
+        d = super()._state()
+        d.update({"learn_after_steps": self.learn_after_steps, "dream_error_rate": self.dream_error_rate,
+                  "trained": self.trained, "gradient_steps": self.gradient_steps, "decays": self.decays})
+        return d
+
+    def _load(self, d: dict) -> None:
+        super()._load(d)
+        self.learn_after_steps, self.dream_error_rate = d["learn_after_steps"], d["dream_error_rate"]
+        self.trained = [tuple(x) for x in d["trained"]]
+        self.gradient_steps, self.decays = d["gradient_steps"], d["decays"]
 
     def train(self, examples: Sequence[tuple[str, str]], steps: int, seed: int) -> TrainStats:
         if not examples or steps <= 0:

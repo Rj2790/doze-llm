@@ -160,6 +160,36 @@ class HFBackend:
     def save_adapter(self, path: str) -> None:
         self.model.save_pretrained(path)
 
+    def save_state(self, sdir) -> None:
+        """Adapter params + optimizer + RNG states, for resume after preemption."""
+        import random
+        import torch
+        from pathlib import Path
+        st = {"trainable": {n: p.detach().cpu() for n, p in self.model.named_parameters() if p.requires_grad},
+              "optimizer": self.optimizer.state_dict() if self.optimizer is not None else None,
+              "torch_rng": torch.get_rng_state(), "py_random": random.getstate(), "seed": self.seed}
+        if torch.cuda.is_available():
+            st["cuda_rng"] = torch.cuda.get_rng_state_all()
+        tmp = Path(sdir, "backend.pt.tmp")
+        torch.save(st, tmp)
+        tmp.replace(Path(sdir, "backend.pt"))
+
+    def load_state(self, sdir) -> None:
+        import random
+        import torch
+        from pathlib import Path
+        st = torch.load(Path(sdir, "backend.pt"), map_location="cpu", weights_only=False)
+        with torch.no_grad():
+            params = dict(self.model.named_parameters())
+            for n, v in st["trainable"].items():
+                params[n].copy_(v.to(params[n].device))
+        if st["optimizer"] is not None and self.optimizer is not None:
+            self.optimizer.load_state_dict(st["optimizer"])
+        torch.set_rng_state(st["torch_rng"])
+        if "cuda_rng" in st and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(st["cuda_rng"])
+        random.setstate(st["py_random"])
+
     def describe(self) -> dict:
         trainable = [(n, p) for n, p in self.model.named_parameters() if p.requires_grad]
         return {"backend": self.name, "seed": self.seed, "lora": self.has_lora,

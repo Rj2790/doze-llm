@@ -42,6 +42,14 @@ statistics and implementation details are tunable.
   cloud (Transformers+PEFT on Modal) for grids. Never mix MLX and PEFT
   numbers in one comparison.
 
+## Modal runs
+
+Always `modal run --detach`. Every launch gets a run tag; files live under
+`/results/<tag>/` in the `doze-results` volume. Preempted GPU functions
+resume from their last checkpoint; a preempted orchestrator re-attaches.
+Re-attach a launch with `--run-tag <tag>`. All arms of a seed on one GPU
+type (default L4).
+
 ## GitHub
 
 This project uses only the **Rj2790** GitHub account (`gh auth switch -u Rj2790`

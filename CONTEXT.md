@@ -435,12 +435,22 @@ original runs' final files from the volume in the window before the
 duplicates overwrite them (`results/final/`), then stop the app and launch
 Awake separately with the budget from Sleep's ledger. Accepted waste ≈ $3.
 
-**Preemption-safety work required before any further seed** (not yet
-built): unique run directory per launch; an idempotent orchestrator that,
-on restart, waits on an existing in-progress run file instead of
-re-spawning; resumable GPU runs (save adapter + optimizer + replay buffer +
-arm state at every checkpoint; resume from the last one). Preemption is a
-standing risk for 3–8 h functions and a 25-run grid will hit it.
+**Preemption safety, built 2026-09-03 (tests in `tests/test_resume.py`):**
+(1) every launch has a run tag (`YYYYMMDDTHHMMZ`); all files live under
+`/results/<tag>/{runs,ledgers}/` and `grid_seed<seed>.json` — restarts can
+never clobber another launch; (2) `grid_remote` is idempotent: spawned
+FunctionCall ids are written to `<tag>/grid_calls_seed<seed>.json`, and on
+restart it re-attaches to them, loads complete run files, waits on fresh
+partial files and only re-spawns stale ones (`eval/orchestrate.plan`); (3)
+GPU runs are resumable: at every checkpoint the harness saves backend
+state (adapter params, optimizer, torch/CUDA/python RNG) and arm state
+(Awake budget accounting, Online most-recent-kept, Sleep replay buffer +
+night count) to `<run>.json.state/`, and `run_arm(resume=True)` continues
+from the last checkpoint, redoing the partial block. Model-free test: a run
+crashed mid-block and resumed reproduces the uninterrupted run exactly for
+all four arm types. On real hardware resume is exact only up to CUDA
+non-determinism. `modal run --detach ... --run-tag <tag>` re-attaches a
+launch.
 
 Also observed in attempt 2: run-to-run non-determinism at fixed seed on
 CUDA after the first update (Sleep ep-50 probe 0.417 vs 0.350 in attempt 1;
@@ -518,7 +528,8 @@ doze-llm/
              hf_backend.py      Transformers+PEFT (Modal, recorded numbers) — not yet run
              training_utils.py  LoRA targets, loss-mask conventions, example cycling
   tasks/     number_reduction.py  generator, prefix-disjoint splits, prompts (full/work/short, numbered), parsing, scoring
-  eval/      shortcut_detector.py stratified probe + binomial test, token collapse, CriterionTracker
+  eval/      orchestrate.py        run tags, preemption-safe orchestration decisions
+             shortcut_detector.py stratified probe + binomial test, token collapse, CriterionTracker
              compute_ledger.py    per-arm Ledger, check_matched (+-5%, never mixes backends)
              analyze.py           A3 gate: check_seed persists verdicts, summarize/report only when matched
              control_bench.py     300 fixed GSM8K test items (ids frozen in control_bench_ids.json)
@@ -526,7 +537,7 @@ doze-llm/
              baseline.py awake.py online.py sleep.py
   sleep/     filters.py replay_buffer.py dreamer.py consolidate.py
   data/      gsm8k_test.jsonl (1319 rows, original OpenAI release)
-  tests/     81 model-free tests
+  tests/     102 model-free tests
   results/   calibration*.json; runs/ (arm runs); ledgers/ (per-arm ledgers, read by analyze.py)
   .gitignore                .venv/, results/, data/*.jsonl, __pycache__/
   modal_app.py              Modal entrypoint for the grid — not yet run

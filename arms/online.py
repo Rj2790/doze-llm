@@ -36,6 +36,22 @@ class OnlineArm:
         self.substitutions: Counter = Counter()
         self.log: list[dict] = []
 
+    def save_state(self, sdir) -> None:
+        import json
+        from dataclasses import asdict
+        from pathlib import Path
+        Path(sdir, "online.json").write_text(json.dumps({
+            "most_recent": asdict(self.most_recent) if self.most_recent else None,
+            "skipped": self.skipped, "substitutions": dict(self.substitutions), "log": self.log}))
+
+    def load_state(self, sdir, episodes, cfg, split) -> None:
+        import json
+        from pathlib import Path
+        d = json.loads(Path(sdir, "online.json").read_text())
+        self.most_recent = Example(**d["most_recent"]) if d["most_recent"] else None
+        self.skipped, self.substitutions, self.log = d["skipped"], Counter(d["substitutions"]), d["log"]
+        self.today = []            # resume happens at a day boundary
+
     def attempt(self, prompt: str, backend: TrainableBackend, max_tokens: int,
                 phase: str = "day") -> tuple[GenResult, int]:
         return backend.generate([prompt], max_tokens=max_tokens)[0], 1

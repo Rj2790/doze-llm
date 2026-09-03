@@ -80,6 +80,17 @@ class AwakeArm:
             self.spent += total
         return GenResult(text=r.text, prompt_tokens=r.prompt_tokens, completion_tokens=total), rounds
 
+    def save_state(self, sdir) -> None:
+        import json
+        from pathlib import Path
+        Path(sdir, "awake.json").write_text(json.dumps({"spent": self.spent, "allowed": self.allowed}))
+
+    def load_state(self, sdir, episodes, cfg, split) -> None:
+        import json
+        from pathlib import Path
+        d = json.loads(Path(sdir, "awake.json").read_text())
+        self.spent, self.allowed = d["spent"], d["allowed"]
+
     def attempt_many(self, prompts: Sequence[str], backend: Backend, max_tokens: int,
                      phase: str = "eval") -> list[tuple[GenResult, int]]:
         return [self.attempt(p, backend, max_tokens, phase=phase) for p in prompts]

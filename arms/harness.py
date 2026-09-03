@@ -76,6 +76,7 @@ class Checkpoint:
 
     def flat(self) -> dict:
         d = {"episode": self.episode, "probe_accuracy": self.probe.accuracy,
+             "probe_n": self.probe.n, "probe_correct": self.probe.correct,
              "day_seconds_mean": self.day_seconds_mean, "night_seconds": self.night_seconds,
              "probe_p_value": self.probe.p_value, "probe_above_chance": self.probe.above_chance,
              "heldout_accuracy": self.heldout_accuracy, "heldout_n": self.heldout_n,
@@ -98,11 +99,12 @@ class RunResult:
     nights: list[dict] = field(default_factory=list)
     matched: dict | None = None     # A3: check_matched verdict, written by eval/analyze.py
     partial: bool = False           # B1: True while the run is still in progress
+    resumed_from: int | None = None # checkpoint episode this run resumed from (preemption safety)
 
     def save(self, path: str | Path) -> None:
         d = {"arm": self.arm, "backend": self.ledger.backend, "config": asdict(self.config),
              "criterion_episode": self.criterion_episode, "eval_tokens": self.eval_tokens, "matched": self.matched,
-             "partial": self.partial,
+             "partial": self.partial, "resumed_from": self.resumed_from,
              "ledger": asdict(self.ledger), "checkpoints": [c.flat() for c in self.checkpoints],
              "nights": self.nights, "episodes": [asdict(e) for e in self.episodes]}
         Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -111,6 +113,32 @@ class RunResult:
 
 def load_run(path: str | Path) -> dict:
     return json.loads(Path(path).read_text())
+
+
+def state_dir(save_path: str | Path) -> Path:
+    return Path(str(save_path) + ".state")
+
+
+def _checkpoint_from_flat(c: dict) -> Checkpoint:
+    probe = sd.ProbeResult(n=c["probe_n"], correct=c["probe_correct"], accuracy=c["probe_accuracy"],
+                           above_chance=c["probe_above_chance"], p_value=c["probe_p_value"])
+    ledger = {"episode": c["episode"], **{k[len("ledger_"):]: v for k, v in c.items() if k.startswith("ledger_")}}
+    return Checkpoint(episode=c["episode"], probe=probe, heldout_accuracy=c["heldout_accuracy"],
+                      heldout_n=c["heldout_n"], median_tokens_correct=c["median_tokens_correct"],
+                      control_accuracy=c["control_accuracy"], ledger=ledger, eval_tokens=c["eval_tokens"],
+                      seconds=c["seconds"], day_seconds_mean=c.get("day_seconds_mean"),
+                      night_seconds=c.get("night_seconds"))
+
+
+def _restore(d: dict) -> tuple[list[Episode], list[Checkpoint], cl.Ledger, list[dict], int]:
+    """Rebuild in-memory state from a partial run file, truncated to its last
+    checkpoint (backend/arm state on disk corresponds to that checkpoint)."""
+    ck_ep = d["checkpoints"][-1]["episode"]
+    episodes = [Episode(**e) for e in d["episodes"] if e["episode"] <= ck_ep]
+    checkpoints = [_checkpoint_from_flat(c) for c in d["checkpoints"]]
+    ledger = cl.Ledger(**d["ledger"])
+    nights = [n for n in d["nights"] if n["episode"] <= ck_ep]
+    return episodes, checkpoints, ledger, nights, ck_ep
 
 
 class Arm(Protocol):
@@ -208,10 +236,13 @@ def _checkpoint(arm: Arm, backend: Backend, cfg: RunConfig, episode: int,
 
 def run_arm(arm: Arm, backend: Backend, cfg: RunConfig,
             control: Sequence[cb.Item] | None = None, log=None,
-            save_path: str | Path | None = None, on_checkpoint=None) -> RunResult:
+            save_path: str | Path | None = None, on_checkpoint=None, resume: bool = False) -> RunResult:
     """Run one arm for one seed. If save_path is given the (partial) result is
-    written after every checkpoint (B1) and `on_checkpoint()` is called
-    afterwards (e.g. to commit a volume)."""
+    written after every checkpoint (B1) together with backend + arm state in
+    <save_path>.state/, and `on_checkpoint()` is called afterwards (e.g. to
+    commit a volume). With resume=True and an existing partial file, the run
+    continues from its last checkpoint (preemption safety); a complete file
+    is returned as is."""
     if hasattr(backend, "set_seed"):
         backend.set_seed(cfg.seed)                    # A1: sampling / init generators follow the run seed
     split = nr.make_split(seed=cfg.seed, length=cfg.length)
@@ -226,29 +257,66 @@ def run_arm(arm: Arm, backend: Backend, cfg: RunConfig,
     checkpoints: list[Checkpoint] = []
     nights: list[dict] = []
     eval_tokens = 0
+    resumed_from: int | None = None
+    start = 1
+
+    if resume and save_path is not None and Path(save_path).exists():
+        d = load_run(save_path)
+        if not d["partial"]:
+            episodes, checkpoints, ledger, nights, _ = _restore(d)
+            for c in checkpoints:
+                tracker.update(c.episode, c.probe)
+            if log:
+                log(f"[{arm.name} seed={cfg.seed}] complete run found at {save_path}; nothing to do")
+            return RunResult(arm=arm.name, config=cfg, episodes=episodes, checkpoints=checkpoints, ledger=ledger,
+                             criterion_episode=tracker.first_met_at, eval_tokens=d["eval_tokens"], nights=nights,
+                             matched=d.get("matched"), partial=False, resumed_from=d.get("resumed_from"))
+        episodes, checkpoints, ledger, nights, ck_ep = _restore(d)
+        eval_tokens = d["eval_tokens"]
+        for c in checkpoints:
+            tracker.update(c.episode, c.probe)
+        sdir = state_dir(save_path)
+        if hasattr(backend, "load_state"):
+            backend.load_state(sdir)
+        if hasattr(arm, "load_state"):
+            arm.load_state(sdir, episodes, cfg, split)
+        resumed_from = ck_ep
+        start = ck_ep + 1
+        if log:
+            log(f"[{arm.name} seed={cfg.seed}] resumed from checkpoint {ck_ep} ({len(episodes)} episodes kept)")
 
     def result(partial: bool) -> RunResult:
         return RunResult(arm=arm.name, config=cfg, episodes=episodes, checkpoints=checkpoints, ledger=ledger,
                          criterion_episode=tracker.first_met_at, eval_tokens=eval_tokens, nights=nights,
-                         partial=partial)
+                         partial=partial, resumed_from=resumed_from)
 
     def persist(partial: bool) -> None:
         if save_path is not None:
+            if partial:
+                sdir = state_dir(save_path)
+                sdir.mkdir(parents=True, exist_ok=True)
+                if hasattr(backend, "save_state"):
+                    backend.save_state(sdir)
+                if hasattr(arm, "save_state"):
+                    arm.save_state(sdir)
             result(partial).save(save_path)
             if on_checkpoint:
                 on_checkpoint()
 
-    # A5: episode-0 checkpoint before any day episode (forgetting baseline, untrained probe)
-    ck0 = _checkpoint(arm, backend, cfg, 0, probe_items, heldout_items, control, ledger)
-    eval_tokens += ck0.eval_tokens
-    checkpoints.append(ck0)
-    tracker.update(0, ck0.probe)
-    if log:
-        log(f"[{arm.name} seed={cfg.seed}] ep=0 probe={ck0.probe.accuracy:.3f} heldout={ck0.heldout_accuracy:.3f} "
-            f"control={ck0.control_accuracy} {ck0.seconds:.0f}s")
-    persist(partial=True)
+    if start == 1:
+        # A5: episode-0 checkpoint before any day episode (forgetting baseline, untrained probe)
+        ck0 = _checkpoint(arm, backend, cfg, 0, probe_items, heldout_items, control, ledger)
+        eval_tokens += ck0.eval_tokens
+        checkpoints.append(ck0)
+        tracker.update(0, ck0.probe)
+        if log:
+            log(f"[{arm.name} seed={cfg.seed}] ep=0 probe={ck0.probe.accuracy:.3f} heldout={ck0.heldout_accuracy:.3f} "
+                f"control={ck0.control_accuracy} {ck0.seconds:.0f}s")
+        persist(partial=True)
 
     for i, inst in enumerate(seq, start=1):
+        if i < start:
+            continue
         t0 = time.time()
         r, rounds = arm.attempt(nr.format_prompt(inst, cfg.mode, numbered=cfg.numbered), backend, cfg.max_tokens,
                                 phase="day")

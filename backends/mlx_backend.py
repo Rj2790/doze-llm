@@ -152,6 +152,35 @@ class MLXBackend:
         from mlx.utils import tree_flatten
         mx.save_safetensors(path, dict(tree_flatten(self.model.trainable_parameters())))
 
+    def save_state(self, sdir) -> None:
+        import json
+        import mlx.core as mx
+        from mlx.utils import tree_flatten
+        from pathlib import Path
+        mx.save_safetensors(str(Path(sdir, "adapter.safetensors")), dict(tree_flatten(self.model.trainable_parameters())))
+        if self.optimizer is not None:
+            flat = {k: v for k, v in tree_flatten(self.optimizer.state) if isinstance(v, mx.array)}
+            mx.save_safetensors(str(Path(sdir, "optimizer.safetensors")), flat)
+        mx.save_safetensors(str(Path(sdir, "rng.safetensors")), {"state": mx.random.state[0]})
+        Path(sdir, "backend.json").write_text(json.dumps({"seed": self.seed, "has_lora": self.has_lora}))
+
+    def load_state(self, sdir) -> None:
+        import mlx.core as mx
+        from mlx.utils import tree_flatten, tree_unflatten
+        from pathlib import Path
+        params = mx.load(str(Path(sdir, "adapter.safetensors")))
+        self.model.update(tree_unflatten(list(params.items())))
+        opt = Path(sdir, "optimizer.safetensors")
+        if opt.exists() and self.optimizer is not None:
+            saved = mx.load(str(opt))
+            cur = dict(tree_flatten(self.optimizer.state))
+            for k in cur:
+                if k in saved:
+                    cur[k] = saved[k]
+            self.optimizer.state = tree_unflatten(list(cur.items()))
+        mx.random.state[0] = mx.load(str(Path(sdir, "rng.safetensors")))["state"]
+        mx.eval(self.model.parameters())
+
     def describe(self) -> dict:
         import mlx.core as mx
         from mlx.utils import tree_flatten

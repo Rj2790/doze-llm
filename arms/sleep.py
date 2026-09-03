@@ -23,6 +23,20 @@ class SleepArm:
         self.buffer: ReplayBuffer | None = None
         self.nights = 0
 
+    def save_state(self, sdir) -> None:
+        import json
+        from pathlib import Path
+        if self.buffer is not None:
+            self.buffer.save(Path(sdir, "buffer.json"))
+        Path(sdir, "sleep.json").write_text(json.dumps({"nights": self.nights, "has_buffer": self.buffer is not None}))
+
+    def load_state(self, sdir, episodes, cfg, split) -> None:
+        import json
+        from pathlib import Path
+        d = json.loads(Path(sdir, "sleep.json").read_text())
+        self.nights = d["nights"]
+        self.buffer = ReplayBuffer.load(Path(sdir, "buffer.json"), split.train_prefixes) if d["has_buffer"] else None
+
     def attempt(self, prompt: str, backend: TrainableBackend, max_tokens: int,
                 phase: str = "day") -> tuple[GenResult, int]:
         return backend.generate([prompt], max_tokens=max_tokens)[0], 1
