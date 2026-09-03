@@ -71,3 +71,23 @@ def test_summarize_only_after_all_seeds_pass(tmp_path):
     _write_seed(tmp_path, 2, bad)
     with pytest.raises(analyze.AnalysisRefused):
         analyze.summarize(tmp_path, seeds=[0, 1, 2])
+
+
+def test_frozen_arm_eval_determinism_is_reported(tmp_path):
+    """Frozen arms (baseline, awake) are re-evaluated at every checkpoint on
+    purpose; the analysis reports whether all their checkpoints are identical
+    (an eval-pipeline validation) instead of assuming it."""
+    _write_seed(tmp_path, 0, _good())
+    # make baseline's checkpoints identical and awake's not
+    for arm, vals in (("baseline", (0.3, 0.3)), ("awake", (0.3, 0.35))):
+        p = tmp_path / "runs" / f"{arm}_seed0.json"
+        d = json.loads(p.read_text())
+        for c, v in zip(d["checkpoints"], vals):
+            c["probe_accuracy"] = v; c["heldout_accuracy"] = 0.5; c["control_accuracy"] = 0.6
+        p.write_text(json.dumps(d))
+    rep = analyze.summarize(tmp_path, seeds=[0])
+    assert rep["arms"]["baseline"]["frozen_eval_identical"] == [True]
+    assert rep["arms"]["awake"]["frozen_eval_identical"] == [False]
+    assert "frozen_eval_identical" not in rep["arms"]["sleep"]
+    md = analyze.report_markdown(rep)
+    assert "frozen-arm eval identical" in md and "awake: NO" in md

@@ -195,6 +195,17 @@ optional arm `online_unfiltered`, matched to Sleep like Online.
 by Sleep's night filter, Online and (stricter: fully correct) the dreamer.
 Wrong-answer near-misses are out.
 
+**Frozen arms are re-evaluated at every checkpoint (decided 2026-09-03).**
+Baseline and Awake have frozen weights and greedy decoding, so their 13
+checkpoints should be identical (Awake ep 0 == ep 50 exactly). Skipping the
+repeats would save ~5 h / ~$4.4 per Awake run and ~$20 across the grid,
+but was rejected on output quality: measured flatness is evidence, copied
+flatness is an assumption, eval determinism has only been checked twice and
+can break across GPU types (GSM8K 172 vs 176/300 on A100 vs L4), and the
+frozen arms are the controls for H1. `eval/analyze.py` now reports
+`frozen_eval_identical` per frozen arm and seed as an eval-pipeline
+validation.
+
 **Dream instruction (tunable wording, 2026-09-02).** Dreams keep the
 first seven digits of the source and change 1–3 of the last five; dreams
 whose prefix differs from the source are rejected (`prefix_changed`). Held-

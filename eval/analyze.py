@@ -22,6 +22,14 @@ class AnalysisRefused(RuntimeError):
     pass
 
 
+FROZEN_ARMS = ("baseline", "awake")   # weights never change; greedy eval should be identical at every checkpoint
+
+
+def frozen_eval_identical(checkpoints: list[dict]) -> bool:
+    key = lambda c: (c["probe_accuracy"], c["heldout_accuracy"], c["control_accuracy"])
+    return all(key(c) == key(checkpoints[0]) for c in checkpoints)
+
+
 def _runs(root: Path, seed: int) -> dict[str, Path]:
     return {p.stem.rsplit("_seed", 1)[0]: p for p in sorted((root / "runs").glob(f"*_seed{seed}.json"))}
 
@@ -83,6 +91,8 @@ def summarize(root: str | Path, seeds: list[int], tol: float = 0.05) -> dict:
             a["final_heldout"].append(cks[-1]["heldout_accuracy"] if cks else None)
             a["final_probe"].append(cks[-1]["probe_accuracy"] if cks else None)
             a["probe_curves"].append([(c["episode"], c["probe_accuracy"]) for c in cks])
+            if arm in FROZEN_ARMS:
+                a.setdefault("frozen_eval_identical", []).append(frozen_eval_identical(cks) if cks else None)
     for a in arms.values():
         met = [e for e in a["criterion_episodes"] if e is not None]
         a["median_criterion_episode"] = statistics.median(met) if met else None
@@ -101,6 +111,10 @@ def report_markdown(summary: dict) -> str:
         m = lambda v: f"{statistics.mean(v):.3f}" if v else "—"
         lines.append(f"| {arm} | {a['median_criterion_episode']} | {a['n_censored']}/{len(a['seeds'])} | "
                      f"{m(fh)} | {m(fp)} | {m(fg)} |")
+    frozen = [(arm, a["frozen_eval_identical"]) for arm, a in sorted(summary["arms"].items()) if "frozen_eval_identical" in a]
+    if frozen:
+        lines += ["", "Eval-pipeline validation (frozen-arm eval identical at every checkpoint, per seed): "
+                  + "; ".join(f"{arm}: {'yes' if all(v) else 'NO'} {v}" for arm, v in frozen)]
     return "\n".join(lines) + "\n"
 
 
