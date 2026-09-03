@@ -447,6 +447,60 @@ CUDA after the first update (Sleep ep-50 probe 0.417 vs 0.350 in attempt 1;
 Online ep-50 held-out 0.527 vs 0.363). Consider
 `torch.use_deterministic_algorithms(True)` (tunable) for the grid.
 
+### 5d. Seed 0 results — Sleep and Online (original containers, salvaged 2026-09-03); Awake pending
+
+Files: `results/final/{sleep,online}_seed0.json`, `results/final/ledgers/`.
+Backend hf:Qwen/Qwen3-4B on NVIDIA L4, PREREG v1.0 protocol, K=50, 600 episodes.
+
+**Compute matching:** `check_matched({sleep, online})` = MATCHED. Sleep 600
+steps / 57,270 training tokens / 141,499 generated tokens (day + dreams);
+Online 593 steps / 58,088 / 58,806. Online skipped 7 steps before its first
+kept trajectory (1.2% deficit, inside tolerance). Awake budget from Sleep's
+total: 236 tokens/episode.
+
+**Wall-clock / cost (L4, $0.000222/s):** Sleep 3.40 h ($2.72): episodes
+1.31 h, nights 15 min, checkpoints 1.84 h. Online 3.22 h ($2.57). Plus
+~$3 of duplicate/preempted waste (§5c) and ~$1.7 from attempt 1 (§5b).
+
+**Primary metric (probe accuracy, 60 items, chance 0.33):** neither arm
+met the 0.70 criterion at any checkpoint; both curves sit at chance for all
+13 checkpoints (Sleep 0.25–0.42, Online 0.27–0.37). Median tokens per
+correct held-out answer stayed at 98 throughout for both (no token
+collapse). No shortcut discovery in 600 episodes for either arm.
+
+| ep | Sleep probe / held-out / GSM8K | Online probe / held-out / GSM8K |
+|---|---|---|
+| 0 | 0.37 / 0.37 / 0.59 | 0.37 / 0.37 / 0.59 |
+| 100 | 0.32 / 0.58 / 0.48 | 0.37 / 0.52 / 0.71 |
+| 200 | 0.33 / 0.76 / 0.61 | 0.35 / 0.55 / 0.62 |
+| 300 | 0.28 / 0.76 / 0.62 | 0.33 / 0.94 / 0.64 |
+| 400 | 0.37 / 0.86 / 0.62 | 0.27 / 0.88 / 0.67 |
+| 500 | 0.25 / 0.92 / 0.56 | 0.32 / 0.84 / 0.71 |
+| 600 | 0.32 / 0.93 / 0.65 | 0.32 / 0.67 / 0.72 |
+
+**Task accuracy:** both learn the literal rule to ~0.93 held-out by the
+end (Online's final checkpoint dipped to 0.67 from 0.97 at ep 550; single
+checkpoint, 201 items). Day accuracy by 100-episode block: Sleep 0.50,
+0.56, 0.74, 0.84, 0.74, 0.93; Online 0.53, 0.56, 0.81, 0.86, 0.82, 0.91.
+
+**Forgetting (GSM8K, 300 items):** no net forgetting for either arm.
+Sleep dipped to 0.48 at ep 100 and recovered to 0.65 (+0.06 vs ep 0);
+Online rose almost monotonically to 0.72 (+0.14). H4's predicted direction
+(Sleep forgets less) is not what seed 0 shows.
+
+**Dreams (12 nights):** 714 generated, 152 accepted (21%), of which 58
+were verbatim copies of the source and 94 real variations; only 4 of the
+94 real variations are mirror-structured. Rejected: 279 wrong, 283
+unparsable (40%; format drift grows with training), 0 held-out, 0
+prefix-changed. Real dream yield 13%. Keep rate rose 8/50 → 47/50; night
+pool 11 → 165 examples for 50 steps; mean night loss 0.06 → ~0.013.
+
+Interpretation for seed 0 only: the phase structure did not produce
+insight on this task at this scale (H1/H2 null so far), and the dreams as
+constructed (digits 1–7 fixed) mostly teach the literal rule on
+unstructured strings. Awake result and the H3 ablation (Sleep-NoDream) are
+still needed for the full seed-0 picture.
+
 ## 6. Repo state
 
 ```
