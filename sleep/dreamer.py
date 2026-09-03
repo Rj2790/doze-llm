@@ -78,6 +78,8 @@ def dream(backend: Backend, kept: Sequence[Example], n_variations: int, split: n
     rejected: Counter = Counter()
     tokens = 0
     structured = 0
+    duplicates = 0
+    accepted: list[dict] = []
     if prompts:
         gens = backend.generate(prompts, max_tokens=max_tokens, temperature=temperature)
         for seed, g in zip(seeds, gens):
@@ -86,12 +88,17 @@ def dream(backend: Backend, kept: Sequence[Example], n_variations: int, split: n
             if ex is None:
                 rejected[reason] += 1
             else:
-                ex.prompt = nr.format_prompt(nr.Instance.from_digits(ex.digits), mode, numbered=numbered)
-                structured += nr.Instance.from_digits(ex.digits).structured
+                inst = nr.Instance.from_digits(ex.digits)
+                ex.prompt = nr.format_prompt(inst, mode, numbered=numbered)
+                dup = ex.digits == seed.digits          # a verbatim copy of the source (logged, still accepted)
+                structured += inst.structured
+                duplicates += dup
+                accepted.append({"digits": ex.digits, "source": seed.digits, "structured": bool(inst.structured),
+                                 "duplicate": bool(dup), "tokens": backend.count_tokens(ex.completion)})
                 out.append(ex)
     return out, {"generated": len(prompts), "tokens": tokens, "kept": len(out), "rejected": dict(rejected),
-                 "structured": structured,
-                 "structured_frac": (structured / len(out)) if out else None}
+                 "structured": structured, "structured_frac": (structured / len(out)) if out else None,
+                 "duplicates": duplicates, "accepted": accepted}
 
 
 def interleave(a: Sequence, b: Sequence) -> list:

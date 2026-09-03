@@ -379,6 +379,46 @@ trajectories for 50 steps (≈5 passes each); Online substitutes the same few
 trajectories for its non-kept episodes. Both arms overfit the same small
 pool early; this is symmetric and inherent to the design at this accuracy.
 
+### 5b. Seed-0 run, attempt 1 (2026-09-02/03, L4) — lost to a client disconnect
+
+`modal run modal_app.py::grid --seeds 0 --arms sleep,online,awake` ran
+Sleep and Online concurrently. The ephemeral app was torn down when the
+local client disconnected ("Stopping app - local client disconnected") at
+Sleep episode 150 / Online episode 100; ~2 GPU-hours (~$1.7) lost. LoRA
+state is not resumable, so the run restarts. Fix: orchestration moved into
+the CPU-only Modal function `grid_remote`, launched with `modal run
+--detach`; the laptop is no longer in the loop.
+
+What the partial run showed (single seed, not results):
+
+| ep | Sleep probe / held-out / GSM8K | Online probe / held-out / GSM8K |
+|---|---|---|
+| 0 | 0.367 / 0.373 / 0.587 | same (identical untrained weights) |
+| 50 | 0.350 / 0.493 / 0.540 | 0.333 / 0.363 / 0.653 (43 steps: 7 skipped before first kept) |
+| 100 | 0.317 / 0.527 / 0.477 | 0.317 / 0.428 / 0.677 (93 steps) |
+| 150 | 0.350 / 0.597 / 0.443 | — |
+
+Sleep nights: kept 8 → 11 → ?, dreams 16 → 22, accepted 3 → 6, wrong 9 → 6,
+unparsable 4 → 10, held-out and prefix-changed 0 → 0, structured fraction
+1.00 → 0.33, mean night loss 0.068 → 0.020. Timing on L4: Sleep 7.8–8.3 s
+per episode, nights 34/43/55 s, full checkpoint 440–515 s; Online 11.4–11.7
+s per episode (train step each), checkpoint 590–633 s.
+
+Observations to carry forward (all logged now, none acted on):
+- The 3/3 structured accepted dreams on night 1 were probably verbatim
+  copies of the source string. Accepted dreams are now recorded with
+  digits, source, structured and duplicate flags, and duplicates are
+  counted per night; they are still accepted (PREREG says "variations";
+  rejecting copies is a decision, not yet taken).
+- Unparsable dreams rose after the first night (4 → 10 of 22): training on
+  solution-only completions pulls the model away from the "Digits: …"
+  dream format. Logged as its own category.
+- Online's GSM8K rose (0.587 → 0.677) while Sleep's fell (0.587 → 0.443)
+  over 100 steps; Sleep's held-out rose faster (0.597 vs 0.428 at the
+  same step count ±7). One seed; noted, not interpreted.
+- Online skipped 7 steps before its first kept trajectory; the deficit is
+  fixed and ends at 593/600 (1.2%), inside tolerance.
+
 ## 6. Repo state
 
 ```

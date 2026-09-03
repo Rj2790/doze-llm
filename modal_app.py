@@ -4,11 +4,18 @@ come from Transformers+PEFT in the cloud). NOT YET EXECUTED.
   modal secret create huggingface HF_TOKEN=hf_...                       # once per workspace (B4)
   modal run modal_app.py::main --arm baseline --seed 0 --n-episodes 4 --k 2 --n-probe 6 --n-heldout-eval 4   # path check
   modal run modal_app.py::main --arm sleep --seed 0                                                       # full run
-  modal run modal_app.py::grid --seeds 0,1,2,3,4                                                          # all arms, all seeds
+  modal run --detach modal_app.py::grid --seeds 0,1,2,3,4                                                 # all arms, all seeds
   modal run modal_app.py::main --gpu A100-80GB --arm baseline ...                                          # GPU override (default L4)
 
-Two local entrypoints exist, so always name one (`::main` or `::grid`; B2).
+Always name an entrypoint (`::main`, `::grid`, `::preflight`, `::pathcheck`; B2).
 Results are saved after every checkpoint and the volume committed (B1).
+
+**Always launch the grid with `--detach`.** The grid orchestration runs in a
+CPU-only Modal function (`grid_remote`), so a laptop disconnect cannot stop
+the run (2026-09-02: an ephemeral app was torn down by a client disconnect
+at Sleep episode 150, ~2 GPU-hours lost). Progress: `modal app logs <app>`
+or the per-checkpoint run files in the `doze-results` volume; the final
+summary is written to /results/grid_seed<seed>.json.
 
 Order inside `grid`: Sleep first per seed (its ledger sets Awake's token
 budget), then Sleep-NoDream, Online and Baseline in parallel, then Awake.
@@ -189,21 +196,23 @@ def main(arm: str = "baseline", seed: int = 0, n_episodes: int = 600, k: int = 5
     print(json.dumps(r, indent=1, default=str))
 
 
-@app.local_entrypoint()
-def grid(seeds: str = "0,1,2,3,4", n_episodes: int = 600, online_filter: bool = False, gpu: str = GPU,
-         arms: str = "sleep,sleep_nodream,online,baseline,awake"):
-    """All arms of a seed run on ONE GPU type (cross-GPU numerics differ).
+@app.function(timeout=24 * 3600, volumes={RESULTS: results_vol})
+def grid_remote(seeds: str, n_episodes: int, online_filter: bool, gpu: str, arms: str) -> list[dict]:
+    """Runs on Modal (CPU only) so the orchestration survives local disconnects.
+    All arms of a seed run on ONE GPU type (cross-GPU numerics differ).
     Sleep and the other non-Awake arms run concurrently; Awake waits for
     Sleep's ledger to set its token budget."""
+    import os
     import sys
-    sys.path.insert(0, ".")
+    sys.path.insert(0, "/root/doze"); os.chdir("/root/doze")
     from arms.awake import AwakeArm
     from eval import compute_ledger as cl
 
     arm_list = [a.strip() for a in arms.split(",") if a.strip()]
     assert "sleep" in arm_list, "sleep is the matching reference and must be in --arms"
-    print(f"gpu={gpu} arms={arm_list}")
+    print(f"gpu={gpu} arms={arm_list}", flush=True)
     fn = _gpu(run_arm_remote, gpu)
+    summaries = []
     for seed in [int(s) for s in seeds.split(",")]:
         calls = {a: fn.spawn(a, seed, n_episodes) for a in arm_list if a != "awake"}
         results = {a: c.get() for a, c in calls.items()}
@@ -217,12 +226,31 @@ def grid(seeds: str = "0,1,2,3,4", n_episodes: int = 600, online_filter: bool = 
             L = cl.Ledger(arm=a, backend=f"hf:{MODEL_ID}")
             L.add(**r["ledger"])
             ledgers[a] = L
+        verdict = {"seed": seed, "ok": True, "message": "compute budgets matched", "arms": sorted(ledgers)}
         try:
             cl.check_matched(ledgers, tol=0.05)
-            print(f"seed {seed}: budgets matched")
+            print(f"seed {seed}: budgets matched", flush=True)
         except cl.BudgetMismatch as e:
-            print(f"seed {seed}: BUDGET MISMATCH — do not compare\n{e}")
+            verdict.update(ok=False, message=str(e))
+            print(f"seed {seed}: BUDGET MISMATCH — do not compare\n{e}", flush=True)
+        summary = {"seed": seed, "gpu": gpu, "verdict": verdict, "arms": {}}
         for a, r in results.items():
-            print("RESULT " + json.dumps({k: r[k] for k in ("arm", "seed", "criterion_episode", "ledger", "timing")}, default=str))
-            print("NIGHTS " + json.dumps({"arm": a, "nights": r["nights"]}, default=str))
-            print("PROBE " + json.dumps({"arm": a, "curve": [(c["episode"], c["probe_accuracy"]) for c in r["checkpoints"]]}))
+            summary["arms"][a] = {k: r[k] for k in ("criterion_episode", "ledger", "timing", "nights")}
+            summary["arms"][a]["probe_curve"] = [(c["episode"], c["probe_accuracy"]) for c in r["checkpoints"]]
+            summary["arms"][a]["checkpoints"] = r["checkpoints"]
+            print("RESULT " + json.dumps({k: r[k] for k in ("arm", "seed", "criterion_episode", "ledger", "timing")}, default=str), flush=True)
+        Path(RESULTS).mkdir(exist_ok=True)
+        (Path(RESULTS) / f"grid_seed{seed}.json").write_text(json.dumps(summary, indent=1, default=str))
+        results_vol.commit()
+        summaries.append(summary)
+    return summaries
+
+
+@app.local_entrypoint()
+def grid(seeds: str = "0,1,2,3,4", n_episodes: int = 600, online_filter: bool = False, gpu: str = GPU,
+         arms: str = "sleep,sleep_nodream,online,baseline,awake"):
+    """Launch with `modal run --detach`. Spawns grid_remote and returns its
+    call id; the run then continues on Modal regardless of this client."""
+    call = grid_remote.spawn(seeds, n_episodes, online_filter, gpu, arms)
+    print(f"grid_remote spawned: call_id={call.object_id} seeds={seeds} arms={arms} gpu={gpu}", flush=True)
+    print("Follow with: modal app logs <app id>; summary lands in the doze-results volume as grid_seed<seed>.json", flush=True)

@@ -231,3 +231,20 @@ def test_accepted_dreams_always_keep_source_prefix_and_report_structure():
     assert all(d.prefix in src_prefixes for d in kept)
     assert "structured" in st and 0 <= st["structured"] <= st["kept"]
     assert st["kept"] + sum(st["rejected"].values()) == 20
+
+
+def test_dream_stats_record_digits_and_duplicates():
+    """Accepted dreams are recorded (digits, structured, duplicate-of-source)
+    so copies of the source can be counted; acceptance is unchanged."""
+    src = SPLIT.train[11]
+    seed_ex = filters.to_example(_ep(src, True, 11), "work", False)
+    copy = f"{nr.digits_line(src.digits)}\n{nr.gold_response(src, 'work')}"
+    var = nr.Instance.from_digits(src.digits[:7] + ("14919" if src.digits[7:] != "14919" else "91491"))
+    variation = f"{nr.digits_line(var.digits)}\n{nr.gold_response(var, 'work')}"
+    be = CannedBackend([copy, variation])
+    kept, st = dreamer.dream(be, [seed_ex], n_variations=2, split=SPLIT, mode="work", numbered=False, max_tokens=400)
+    assert st["kept"] == 2 and st["duplicates"] == 1
+    assert [d["digits"] for d in st["accepted"]] == [src.digits, var.digits]
+    assert st["accepted"][0]["duplicate"] is True and st["accepted"][1]["duplicate"] is False
+    assert st["accepted"][0]["structured"] is True
+    assert all(d["source"] == src.digits for d in st["accepted"])
