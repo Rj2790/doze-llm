@@ -167,10 +167,19 @@ def test_checkpoint_eval_is_batched_for_single_shot_arms():
     assert sum(c == 1 for c in be.calls) == 50
 
 
-def test_awake_keeps_per_prompt_rounds_under_batched_eval():
-    be = CountingBackend()
-    res = hz.run_arm(AwakeArm(token_budget_per_episode=40), be, _cfg(n_episodes=50, k=50, n_probe=30, n_heldout_eval=20))
-    assert max(be.calls) == 1 and len(res.checkpoints) == 2
+def test_awake_eval_is_round_batched_and_matches_sequential():
+    """Awake's eval attempt_many batches each critique round across prompts;
+    per-prompt results and rounds equal the sequential attempt() loop, and
+    the number of generate calls is bounded by max_rounds, not by prompts."""
+    items = nr.make_split(seed=0).heldout[:20]
+    prompts = [nr.format_prompt(x, "work") for x in items] + [nr.format_probe(x) for x in items]
+    # shortcut policy: deterministic on probes too (literal guesses probes from its RNG, so call order matters)
+    seq = [AwakeArm(token_budget_per_episode=40).attempt(p, ScriptedBackend("shortcut"), 64, phase="eval") for p in prompts]
+    be = CountingBackend(); be.policy = "shortcut"
+    bat = AwakeArm(token_budget_per_episode=40).attempt_many(prompts, be, 64, phase="eval")
+    assert [(r.text, r.completion_tokens, k) for r, k in bat] == [(r.text, r.completion_tokens, k) for r, k in seq]
+    assert len(be.calls) <= AwakeArm(token_budget_per_episode=40).max_rounds and max(be.calls) == 40
+    assert all(k >= 2 for _, k in bat)                                  # critique happened at probe time too (C4)
 
 
 def test_partial_results_saved_after_every_checkpoint(tmp_path):

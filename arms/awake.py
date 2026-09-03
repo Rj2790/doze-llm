@@ -93,7 +93,28 @@ class AwakeArm:
 
     def attempt_many(self, prompts: Sequence[str], backend: Backend, max_tokens: int,
                      phase: str = "eval") -> list[tuple[GenResult, int]]:
-        return [self.attempt(p, backend, max_tokens, phase=phase) for p in prompts]
+        """Eval: round-synchronous batching. All first attempts in one batch,
+        then one batched critique round for every prompt still under its
+        budget, until none remain or max_rounds. Per-prompt semantics are
+        identical to attempt(phase="eval"). Day attempts stay sequential
+        because the budget accrues per episode."""
+        if phase == "day" or not prompts:
+            return [self.attempt(p, backend, max_tokens, phase=phase) for p in prompts]
+        prompts = list(prompts)
+        best = backend.generate(prompts, max_tokens=max_tokens)
+        totals = [r.completion_tokens for r in best]
+        rounds = [1] * len(prompts)
+        active = [i for i in range(len(prompts)) if totals[i] < self.budget and rounds[i] < self.max_rounds]
+        while active:
+            outs = backend.generate([critique_prompt(prompts[i], best[i].text) for i in active], max_tokens=max_tokens)
+            for i, o in zip(active, outs):
+                totals[i] += o.completion_tokens
+                rounds[i] += 1
+                if nr.parse_answer(o.text) is not None:
+                    best[i] = o
+            active = [i for i in active if totals[i] < self.budget and rounds[i] < self.max_rounds]
+        return [(GenResult(text=best[i].text, prompt_tokens=best[i].prompt_tokens, completion_tokens=totals[i]), rounds[i])
+                for i in range(len(prompts))]
 
     def after_episode(self, ep: Episode, backend: Backend, ledger: cl.Ledger, cfg: RunConfig) -> None:
         return None
