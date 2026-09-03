@@ -419,6 +419,34 @@ Observations to carry forward (all logged now, none acted on):
 - Online skipped 7 steps before its first kept trajectory; the deficit is
   fixed and ends at 593/600 (1.2%), inside tolerance.
 
+### 5c. Seed-0 run, attempt 2 (2026-09-03, L4, detached) — orchestrator preempted
+
+Sleep and Online ran concurrently under `grid_remote`. After ~4 h Modal
+preempted the orchestrator container ("Container terminated due to
+preemption. Your Function will be restarted with the same input"). The
+restarted orchestrator re-spawned Sleep and Online from episode 0 while the
+original GPU containers (then at episode 300) kept running; five tasks were
+active and both copies wrote to the same `runs/<arm>_seed0.json` paths.
+Stopping individual containers only reschedules their inputs, so the
+duplicates could not be cancelled separately.
+
+Decision (human, 2026-09-03): salvage — let everything run, capture the
+original runs' final files from the volume in the window before the
+duplicates overwrite them (`results/final/`), then stop the app and launch
+Awake separately with the budget from Sleep's ledger. Accepted waste ≈ $3.
+
+**Preemption-safety work required before any further seed** (not yet
+built): unique run directory per launch; an idempotent orchestrator that,
+on restart, waits on an existing in-progress run file instead of
+re-spawning; resumable GPU runs (save adapter + optimizer + replay buffer +
+arm state at every checkpoint; resume from the last one). Preemption is a
+standing risk for 3–8 h functions and a 25-run grid will hit it.
+
+Also observed in attempt 2: run-to-run non-determinism at fixed seed on
+CUDA after the first update (Sleep ep-50 probe 0.417 vs 0.350 in attempt 1;
+Online ep-50 held-out 0.527 vs 0.363). Consider
+`torch.use_deterministic_algorithms(True)` (tunable) for the grid.
+
 ## 6. Repo state
 
 ```
