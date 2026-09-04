@@ -45,8 +45,13 @@ diverged after the first LoRA update (Online ep-50 held-out 0.363 vs 0.527).
    True)`, cuDNN deterministic, CUBLAS_WORKSPACE_CONFIG=:4096:8), default on
    for all runs after the pilot. Reason: attempt 1 vs attempt 2 of the same
    seed diverged by up to 16 points on held-out after 43 steps. Slowdown
-   measured on a 4-episode Online run: see CONTEXT.md §5e (filled when
-   measured).
+   measured 2026-09-04 on L4: 4-episode Online run (generation only, no
+   kept episodes) 11.96 vs 7.64 s/episode (+57%), small checkpoint 195 vs
+   137 s (+42%); in the seed-0 grid, Sleep-NoDream (LoRA-wrapped model)
+   12.0 s/episode and 886 s/full checkpoint vs the pilot's 7.8 s / ~470 s
+   without determinism (+50% / +90%), while Baseline (no LoRA) is
+   unaffected (6.2 s, 466 s). A trainable-arm run grows from ~3.4 h to
+   ~6 h, about +$2.50 on L4. Accepted.
 
 **Secondary insight metrics added after the pilot; the primary metric
 (PREREG §6.1 probe criterion) is unchanged.** Computed at every checkpoint

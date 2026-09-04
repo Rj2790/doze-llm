@@ -528,6 +528,50 @@ and cannot carry the mirror statistic. Cross-attempt non-determinism on
 CUDA (§5c) is of the same order as between-arm differences on held-out and
 GSM8K, so seeds 1–4 are required before any comparison is read.
 
+### 5e. Post-pilot changes and retro-computation (2026-09-04)
+
+Code: duplicate-dream rejection, decoupled dreamer (digits proposal at
+T=0.8 → solve with the day prompt, greedy → C3), 1–3 changed digits
+enforced (`out_of_spec`), deterministic CUDA default, secondary metrics
+(mirror_bias with chance, short_gap, late_vs_early, volatility), GSM8K
+parse rate, per-item held-out rows, final adapter state. DEVIATIONS.md and
+PREREG Appendix B record them. 114 model-free tests.
+
+**Two-step dreamer on the real model (4-bit MLX, untrained, 4 seeds × 2):**
+8/8 proposals parsable (pilot: 40% unparsable), prefix kept 8/8, 1
+duplicate caught, model sometimes changed all five trailing digits (now
+rejected as out_of_spec), 2/8 solves passed C3.
+
+**Deterministic-mode slowdown:** see DEVIATIONS.md entry 4: ≈ +50% per
+episode and +90% per checkpoint for LoRA arms, none for frozen arms.
+
+**Pilot retro-computation.** Possible only from saved data or for frozen
+arms (no adapters / eval texts were saved for Sleep and Online).
+
+| metric | Baseline (untrained base) | Awake (base + critique) | Sleep | Online |
+|---|---|---|---|---|
+| (a) mirror_bias (chance) | 0.353 (0.356), n=201 error steps | 0.358 (0.348), n=204 | n/a | n/a |
+| (b) short_gap (struct / unstruct) | 0.000 (0.317 / 0.317) | 0.000 (0.317 / 0.317) | n/a | n/a |
+| (c) late vs early error, held-out | 0.512 vs 0.431 | 0.488 vs 0.426 | proxy below | proxy below |
+| (d) volatility (std held-out) | 0.000 | 0.000 | 0.167 | 0.188 |
+| GSM8K unparsable | 0.0% | 0.0% | n/a | n/a |
+
+(c) proxy from day trajectories (training items) by 100-episode block,
+"late | steps 1–8 correct" vs "early | steps 1–2 correct": Sleep 0.61/0.44 →
+0.25/0.25 → 0.02/0.18 → 0.07/0.07 → 0.14/0.12 → 0.01/0.02; Online 0.09/0.35 →
+0.13/0.22 → 0.03/0.15 → 0.01/0.10 → 0.05/0.07 → 0.01/0.04; Awake ≈ 0.45/0.45
+throughout. Both LoRA arms drive late-step errors near zero while early-step
+errors stay several times higher in the middle blocks — consistent with
+learning the literal rule, not a late-step shortcut, but a proxy on training
+items, not held-out.
+
+**Answers.** The untrained base shows no mirror bias (0.353 vs chance 0.356)
+and no short-mode gap, so the implicit metrics start at their null values.
+GSM8K parse rate is 100% for the base and for Awake, so Online's GSM8K gain
+(0.587 → 0.723) cannot be a parse-rate effect. Trained-arm values for (a),
+(b) and GSM8K parse rate will exist from the Sleep-NoDream/Baseline runs
+onward (adapters and rows are now saved).
+
 ## 6. Repo state
 
 ```
