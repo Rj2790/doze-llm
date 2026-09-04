@@ -28,6 +28,7 @@ from tasks import number_reduction as nr
 DREAM_TEMPERATURE = 0.8   # tunable; the digits proposal needs diversity; the solve is greedy like the day
 
 PROPOSE_MARKER = "Write a NEW string"
+MAX_CHANGED = 3           # a proposal may change 1..3 of the last five digits
 PROPOSE_INSTRUCTION = (
     "{marker}: keep the first seven digits exactly as they are and change between one and three of "
     "the last five digits (positions 8 to 12); every digit must be 1, 4 or 9. Output exactly one line, "
@@ -66,7 +67,7 @@ def _verify_scores(inst: nr.Instance, body: str, split: nr.Split, mode: str) -> 
 
 def parse_proposal(text: str, split: nr.Split, source: Example) -> tuple[nr.Instance | None, str]:
     """Validate a proposed digit string: parsable, right length/alphabet,
-    same prefix as the source, not a verbatim copy."""
+    same prefix as the source, not a verbatim copy, 1-3 digits changed."""
     try:
         toks = nr.parse_digits_line(text)
     except ValueError:
@@ -79,6 +80,9 @@ def parse_proposal(text: str, split: nr.Split, source: Example) -> tuple[nr.Inst
         return None, "prefix_changed"
     if digits == source.digits:
         return None, "duplicate"
+    n_changed = sum(a != b for a, b in zip(digits, source.digits))
+    if not 1 <= n_changed <= MAX_CHANGED:
+        return None, "out_of_spec"          # instruction says change 1-3 of the last five
     if inst.prefix in split.heldout_prefixes:
         return None, "heldout_prefix"
     return inst, "ok"

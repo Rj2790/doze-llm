@@ -97,8 +97,13 @@ def test_dreams_are_verified_against_solver_and_split():
     """Two-step dreamer: proposals first (batched), then solves (batched)."""
     src = TRAIN
     seed_ex = filters.to_example(_ep(src, True, 11), "work", False)
-    v = lambda tail: nr.Instance.from_digits(src.digits[:7] + tail)
-    t_ok, t_wrong, t_near = v("14919"), v("41191"), v("99141")
+    flip = lambda d: "1" if d != "1" else "4"
+    def v(positions):                                   # flip <= 3 of the last five digits
+        d = list(src.digits)
+        for i in positions:
+            d[i] = flip(d[i])
+        return nr.Instance.from_digits("".join(d))
+    t_ok, t_wrong, t_near = v([7]), v([8, 10]), v([9, 11])
     proposals = [nr.digits_line(t_ok.digits), nr.digits_line(t_wrong.digits), nr.digits_line(HELD.digits),
                  "Digits: 1 2 3", nr.digits_line(t_near.digits), nr.digits_line(src.digits)]
     solves = [nr.gold_response(t_ok, "work"), _solution_with_wrong_steps(t_wrong, (3, 5, 7)),
@@ -314,7 +319,8 @@ def test_verbatim_copies_are_rejected_as_duplicate():
     src = SPLIT.train[11]
     seed_ex = filters.to_example(_ep(src, True, 11), "work", False)
     copy = f"{nr.digits_line(src.digits)}"
-    var = nr.Instance.from_digits(src.digits[:7] + ("14919" if src.digits[7:] != "14919" else "91491"))
+    flip = lambda d: "1" if d != "1" else "4"
+    var = nr.Instance.from_digits(src.digits[:7] + flip(src.digits[7]) + src.digits[8:])
     # decoupled dreamer: the model proposes digits only; the solve uses the day prompt
     be = CannedBackend([copy, nr.digits_line(var.digits), nr.gold_response(var, "work")])
     kept, st = dreamer.dream(be, [seed_ex], n_variations=2, split=SPLIT, mode="work", numbered=False, max_tokens=400)
@@ -346,3 +352,17 @@ def test_digits_proposal_prompt_is_short_and_instructs_last_five():
     seed_ex = filters.to_example(_ep(TRAIN, True, 11), "work", False)
     p = dreamer.propose_prompt(seed_ex)
     assert "Digits:" in p and ("last five" in p.lower() or "positions 8" in p.lower()) and "STEPS" not in p
+
+
+def test_proposal_must_change_one_to_three_of_the_last_five():
+    src = SPLIT.train[13]
+    seed_ex = filters.to_example(_ep(src, True, 11), "work", False)
+    tail = src.digits[7:]
+    flip = lambda d: "1" if d != "1" else "4"
+    one = src.digits[:7] + flip(tail[0]) + tail[1:]
+    three = src.digits[:7] + flip(tail[0]) + tail[1] + flip(tail[2]) + tail[3] + flip(tail[4])
+    four = src.digits[:7] + "".join(flip(d) for d in tail[:4]) + tail[4]
+    assert dreamer.parse_proposal(nr.digits_line(one), SPLIT, seed_ex)[1] == "ok"
+    assert dreamer.parse_proposal(nr.digits_line(three), SPLIT, seed_ex)[1] == "ok"
+    assert dreamer.parse_proposal(nr.digits_line(four), SPLIT, seed_ex)[1] == "out_of_spec"
+    assert dreamer.parse_proposal(nr.digits_line(src.digits), SPLIT, seed_ex)[1] == "duplicate"
