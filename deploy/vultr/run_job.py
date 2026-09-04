@@ -20,6 +20,8 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# the script directory must not shadow stdlib modules (a local module named like a stdlib one broke torch import)
+sys.path = [p for p in sys.path if Path(p or ".").resolve() != Path(__file__).resolve().parent]
 sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 

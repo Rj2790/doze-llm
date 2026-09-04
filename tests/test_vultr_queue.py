@@ -1,7 +1,7 @@
 import subprocess, sys, json
 from pathlib import Path
 
-from deploy.vultr.queue import plan_queues
+from deploy.vultr.gpu_queue import plan_queues
 
 
 def test_queues_balance_and_keep_awake_after_sleep():

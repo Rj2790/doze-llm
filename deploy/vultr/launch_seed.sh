@@ -5,7 +5,7 @@ SEED=$1; TAG=${2:-seed$1}
 cd /opt/doze
 NGPU=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
 QUEUES=$(.venv/bin/python -c "
-from deploy.vultr.queue import plan_queues
+from deploy.vultr.gpu_queue import plan_queues
 for q in plan_queues(['sleep','sleep_nodream','online','baseline','awake'], $NGPU): print(' '.join(q))")
 i=0
 while IFS= read -r q; do
