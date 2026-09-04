@@ -572,6 +572,60 @@ GSM8K parse rate is 100% for the base and for Awake, so Online's GSM8K gain
 (b) and GSM8K parse rate will exist from the Sleep-NoDream/Baseline runs
 onward (adapters and rows are now saved).
 
+### 5f. Seed 0 complete — all five arms (Sleep-NoDream and Baseline added 2026-09-04)
+
+Files: `results/final/{runs,ledgers}/` (all five), `report.md`, `summary.json`;
+volume `/seed0-nodream-base/`. Caveat: Sleep, Online and Awake are the pilot
+runs (non-deterministic CUDA, one-step dreamer); Sleep-NoDream and Baseline
+ran with the post-pilot code (deterministic CUDA, secondary metrics). Same
+protocol, same GPU type; the dreamer change does not touch these two arms.
+
+**check_seed over all five arms: MATCHED.** Sleep-NoDream 600 steps /
+57,252 training tokens vs Sleep 600 / 57,270 (−0.03%).
+
+| arm | gen tokens | steps | wall-clock | cost (L4) | probe curve (13 ckpts) | held-out 0→600 | GSM8K 0→600 | volatility |
+|---|---|---|---|---|---|---|---|---|
+| Baseline | 58,084 | 0 | 2.70 h | $2.16 | 0.37 flat | 0.373 → 0.373 | 0.587 → 0.587 | 0.000 |
+| Awake | 141,628 | 0 | 8.43 h | $6.74 | 0.30 flat | 0.403 → 0.403 | 0.597 → 0.597 | 0.000 |
+| Online | 58,806 | 593 | 3.22 h | $2.57 | 0.27–0.37 | 0.373 → 0.667 (max 0.965) | 0.587 → 0.723 | 0.188 |
+| Sleep | 141,499 | 600 | 3.40 h | $2.72 | 0.25–0.42 | 0.373 → 0.930 | 0.587 → 0.647 (min 0.477) | 0.167 |
+| Sleep-NoDream | 57,302 | 600 | 5.68 h (det.) | $4.54 | 0.18–0.37 | 0.373 → 0.970 (max 0.980) | 0.587 → 0.827 | 0.174 |
+
+Primary metric: no arm met the criterion; all five censored at 600. Sleep-
+NoDream's probe sat *below* chance for nine consecutive checkpoints
+(0.18–0.25), the opposite direction of insight. Frozen-arm eval identical
+at all 13 checkpoints for both Baseline and Awake (validation passes).
+
+H3 on this seed (Sleep vs Sleep-NoDream, matched budget): dreams did not
+help — NoDream ends higher on held-out (0.970 vs 0.930) and far higher on
+GSM8K (+0.240 vs +0.060), with the same null probe. H4: the arm with the
+least forgetting is Sleep-NoDream, then Online, then Sleep; all improved.
+
+**Sleep-NoDream secondary metrics.** mirror_bias at chance throughout while
+n was adequate (ep 50–200: 0.38/0.40/0.35/0.39 vs chance 0.37/0.35/0.34/
+0.36, n=91–124 error steps); from ep 250 the error count collapses (n=8–60)
+as held-out accuracy passes 0.9 and the metric becomes uninformative.
+late_vs_early: untrained 0.51 vs 0.43; trained 0.01–0.19 late vs 0.02–0.33
+early — late-step errors fall faster than early-step errors, consistent
+with literal-rule mastery, not a late-step shortcut. short_gap: −0.10 to
+−0.12 at ep 50–150 (no structured advantage), then both short-mode
+accuracies collapse to ~0 from ep 200 because the trained model ignores the
+answer-only instruction and writes work lines that the 16-token budget cuts
+off — a measurement artefact, now logged as short-mode unparsable
+fractions (post-run fix). GSM8K unparsable 0.0% at every checkpoint: the
+control gains are real correctness.
+
+Nights: kept 8 → 48 of 50; replay 1:1; loss 0.044 → ~0.006–0.013 (heavy
+repetition of a small pool early). Cost of seed 0 in total: $18.73 useful
++ ≈ $6.3 failures.
+
+**Reading (one seed):** H1, H2, H3 null; H4 reversed; both LoRA arms reach
+> 0.9 on the literal task without any implicit-shortcut signal on the probe,
+mirror_bias or late/early metrics. The dreams (pilot version) were, if
+anything, a small negative for task and control accuracy. Seeds 1–4 are
+needed before any of this is a result; the implicit-probe numbers above are
+the first for a trained arm.
+
 ## 6. Repo state
 
 ```
@@ -631,11 +685,7 @@ amendments, path check, A4, seed-0 Sleep/Online/Awake; §5, §5a–5d).
     (`duplicate`); dream format drift (40% unparsable); whether the dream
     instruction stays at digits 8–12 given ~0 structured dreams. Also:
     `torch.use_deterministic_algorithms(True)` for the grid (§5c).
-12. Seed 0: Sleep-NoDream and Baseline (H3 and the floor). ~$5 on L4.
-    Launch with `modal run --detach modal_app.py::grid --seeds 0 --arms
-    sleep,sleep_nodream,baseline --run-tag <tag>`; Sleep will re-run under
-    the new tag unless the salvaged files are copied into `/ <tag>/runs/`
-    first (the orchestrator then loads them).
+12. ~~Seed 0: Sleep-NoDream and Baseline~~ done 2026-09-04 (§5f).
 13. Seeds 1–4, all five arms, one GPU type, preemption-safe launch.
 14. `eval/analyze.py`: log-rank test on episode-to-criterion (all censored
     so far), forgetting paired test; figures.
