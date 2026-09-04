@@ -204,3 +204,28 @@ def test_partial_results_saved_after_every_checkpoint(tmp_path):
     d = hz.load_run(out)
     assert [c["episode"] for c in d["checkpoints"]] == [0, 50, 100] and d["partial"] is False
     assert len(res.checkpoints) == 3
+
+
+# ---- post-pilot checkpoint fields (DEVIATIONS 2026-09-04) ----------------------
+
+def test_checkpoint_records_implicit_metrics_rows_and_control_parse_rate(tmp_path):
+    from eval import control_bench as cb
+    cfg = _cfg(n_episodes=50, k=50, n_probe=12, n_heldout_eval=9, n_implicit=12)
+    items = cb.load_sample(tmp_path / "x.jsonl", n=4, seed=0, ids=None) if False else None
+    res = hz.run_arm(BaselineArm(), ScriptedBackend("literal"), cfg, save_path=tmp_path / "r.json")
+    c = res.checkpoints[0]
+    f = c.flat()
+    for k in ("mirror_bias", "mirror_bias_chance", "mirror_bias_n", "short_structured_acc", "short_unstructured_acc",
+              "short_gap", "late_error_rate", "early_error_rate", "control_unparsable"):
+        assert k in f, k
+    assert f["short_structured_acc"] == 1.0 and f["short_gap"] == 0.0        # literal solver
+    assert f["control_unparsable"] is None                                   # no control items configured
+    assert len(c.heldout_rows) == 9 and set(c.heldout_rows[0]) == {"digits", "steps", "answer"}
+    d = hz.load_run(tmp_path / "r.json")
+    assert len(d["checkpoints"][0]["heldout_rows"]) == 9
+    assert (tmp_path / "r.json.state").is_dir()                               # final state saved too
+
+
+def test_implicit_metrics_can_be_disabled():
+    res = hz.run_arm(BaselineArm(), ScriptedBackend("literal"), _cfg(n_episodes=50, k=50, n_implicit=0))
+    assert res.checkpoints[0].flat()["mirror_bias"] is None and res.checkpoints[0].flat()["short_gap"] is None

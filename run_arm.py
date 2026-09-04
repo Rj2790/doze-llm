@@ -80,6 +80,7 @@ def main():
     ap.add_argument("--n-probe", type=int, default=60)
     ap.add_argument("--n-heldout-eval", type=int, default=nr.N_HELDOUT)
     ap.add_argument("--control-items", type=int, default=0, help="0 = skip control benchmark")
+    ap.add_argument("--n-implicit", type=int, default=120, help="items per set for mirror_bias/short_gap (0 = skip)")
     ap.add_argument("--awake-budget", type=int, default=0, help="tokens per episode")
     ap.add_argument("--awake-reference", default="", help="sleep ledger json to derive the budget")
     ap.add_argument("--lr", type=float, default=1e-4, help="LoRA learning rate (tunable)")
@@ -92,7 +93,8 @@ def main():
 
     cfg = hz.RunConfig(seed=args.seed, n_episodes=args.n_episodes, k=args.k, mode=args.mode,
                        numbered=args.number_digits, max_tokens=args.max_tokens, n_probe=args.n_probe,
-                       n_heldout_eval=args.n_heldout_eval, control_items=args.control_items)
+                       n_heldout_eval=args.n_heldout_eval, control_items=args.control_items,
+                       n_implicit=args.n_implicit)
     arm = build_arm(args)          # B4: fail on a bad Awake budget before loading a model
     backend = build_backend(args)
     print(f"arm={arm.name} backend={backend.name} seed={cfg.seed} episodes={cfg.n_episodes} k={cfg.k} "

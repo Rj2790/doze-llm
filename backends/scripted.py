@@ -87,7 +87,7 @@ class FakeTrainableBackend(ScriptedBackend):
     variation of the seed puzzle (last five digits perturbed so the prefix is
     unchanged); a fraction `dream_error_rate` of dreams carry a wrong step."""
 
-    DREAM_MARKER = "Invent a NEW puzzle"
+    DREAM_MARKER = "Write a NEW string"      # the digits-proposal prompt (sleep/dreamer.py PROPOSE_MARKER)
 
     def __init__(self, learn_after_steps: int | None = None, dream_error_rate: float = 0.0, seed: int = 0,
                  noise: float = 0.0):
@@ -98,20 +98,26 @@ class FakeTrainableBackend(ScriptedBackend):
         self.trained: list[tuple[str, str]] = []
         self.gradient_steps = 0
         self.decays = 0
+        self.proposed: set[str] = set()      # digit strings this fake proposed as dreams
 
     def _dream(self, prompt: str) -> str:
+        """Digits-only proposal: perturb one of the last five digits (prefix kept)."""
         seed = list(nr.parse_digits_line(prompt))
         L = len(seed)
         i = self.rng.randrange(nr.prefix_len(L), L)
         seed[i] = self.rng.choice([d for d in nr.DIGITS if d != seed[i]])
-        inst = nr.Instance.from_digits("".join(seed))
-        body = nr.gold_response(inst, "work")
-        if self.rng.random() < self.dream_error_rate:      # a wrong dream: 3 wrong STEPS entries (fails C3)
+        digits = "".join(seed)
+        self.proposed.add(digits)
+        return nr.digits_line(digits)
+
+    def _solve_dream(self, inst: "nr.Instance") -> str:
+        """Solving a proposed string: gold, or (dream_error_rate) 3 wrong STEPS (fails C3)."""
+        if self.rng.random() < self.dream_error_rate:
             steps = list(inst.responses)
-            for j in self.rng.sample(range(L - 1), 3):
+            for j in self.rng.sample(range(inst.length - 1), 3):
                 steps[j] = [d for d in nr.DIGITS if d != steps[j]][0]
-            body = f"{nr._work_lines(inst.digits)}\nSTEPS: {' '.join(steps)}\nANSWER: {inst.answer}"
-        return f"{nr.digits_line(inst.digits)}\n{body}"
+            return f"{nr._work_lines(inst.digits)}\nSTEPS: {' '.join(steps)}\nANSWER: {inst.answer}"
+        return nr.gold_response(inst, "work")
 
     def generate(self, prompts: Sequence[str], max_tokens: int = 128,
                  temperature: float = 0.0) -> list[GenResult]:
@@ -119,16 +125,21 @@ class FakeTrainableBackend(ScriptedBackend):
         for p in prompts:
             if self.DREAM_MARKER in p:
                 t = self._dream(p)
-                out.append(GenResult(text=t, prompt_tokens=self.count_tokens(p),
-                                     completion_tokens=self.count_tokens(t)))
-            else:
-                out.extend(super().generate([p], max_tokens=max_tokens, temperature=temperature))
+                out.append(GenResult(text=t, prompt_tokens=self.count_tokens(p), completion_tokens=self.count_tokens(t)))
+                continue
+            toks = self._digits(p)
+            if nr.MASK not in toks and "".join(toks) in self.proposed and self.dream_error_rate > 0:
+                t = self._solve_dream(nr.Instance.from_digits("".join(toks)))
+                out.append(GenResult(text=t, prompt_tokens=self.count_tokens(p), completion_tokens=self.count_tokens(t)))
+                continue
+            out.extend(super().generate([p], max_tokens=max_tokens, temperature=temperature))
         return out
 
     def _state(self) -> dict:
         d = super()._state()
         d.update({"learn_after_steps": self.learn_after_steps, "dream_error_rate": self.dream_error_rate,
-                  "trained": self.trained, "gradient_steps": self.gradient_steps, "decays": self.decays})
+                  "trained": self.trained, "gradient_steps": self.gradient_steps, "decays": self.decays,
+                  "proposed": sorted(self.proposed)})
         return d
 
     def _load(self, d: dict) -> None:
@@ -136,6 +147,7 @@ class FakeTrainableBackend(ScriptedBackend):
         self.learn_after_steps, self.dream_error_rate = d["learn_after_steps"], d["dream_error_rate"]
         self.trained = [tuple(x) for x in d["trained"]]
         self.gradient_steps, self.decays = d["gradient_steps"], d["decays"]
+        self.proposed = set(d.get("proposed", []))
 
     def train(self, examples: Sequence[tuple[str, str]], steps: int, seed: int) -> TrainStats:
         if not examples or steps <= 0:

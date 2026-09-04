@@ -21,9 +21,18 @@ from backends.base import GenResult, TrainStats
 
 class HFBackend:
     def __init__(self, model_id: str = "Qwen/Qwen3-4B", system: str | None = None, lora: bool = False,
-                 lr: float = tu.DEFAULT_LR, device: str = "cuda", dtype: str = "bfloat16", seed: int = 0):
+                 lr: float = tu.DEFAULT_LR, device: str = "cuda", dtype: str = "bfloat16", seed: int = 0,
+                 deterministic: bool = True):
+        import os
+        if deterministic:
+            os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")   # must precede CUDA init
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
+        self.deterministic = deterministic
+        if deterministic:
+            torch.use_deterministic_algorithms(True, warn_only=True)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
 
         self.name = f"hf:{model_id}"
         self.seed = seed
@@ -192,7 +201,7 @@ class HFBackend:
 
     def describe(self) -> dict:
         trainable = [(n, p) for n, p in self.model.named_parameters() if p.requires_grad]
-        return {"backend": self.name, "seed": self.seed, "lora": self.has_lora,
+        return {"backend": self.name, "seed": self.seed, "lora": self.has_lora, "deterministic": self.deterministic,
                 "model_dtype": str(self.model.dtype),
                 "adapter_dtypes": sorted({str(p.dtype) for _, p in trainable}),
                 "trainable_params": int(sum(p.numel() for _, p in trainable)),

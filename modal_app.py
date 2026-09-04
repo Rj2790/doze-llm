@@ -38,6 +38,7 @@ MODEL_ID = "Qwen/Qwen3-4B"
 # parameter, applied via Function.with_options) or DOZE_GPU=... in the
 # environment. A100-80GB was the original unexamined default.
 GPU = os.environ.get("DOZE_GPU", "L4")
+DETERMINISTIC = os.environ.get("DOZE_DETERMINISTIC", "1") != "0"   # post-pilot default: deterministic CUDA algorithms
 RESULTS = "/results"
 HF_CACHE = "/hf-cache"
 
@@ -55,7 +56,7 @@ cache_vol = modal.Volume.from_name("doze-hf-cache", create_if_missing=True)
 
 def _run(arm: str, seed: int, n_episodes: int, k: int, n_probe: int, n_heldout_eval: int,
          control_items: int, awake_budget: int, lr: float, weight_decay: float, online_filter: bool,
-         run_tag: str = "") -> dict:
+         run_tag: str = "", deterministic: bool = True) -> dict:
     import subprocess
     import sys
     import time
@@ -80,7 +81,8 @@ def _run(arm: str, seed: int, n_episodes: int, k: int, n_probe: int, n_heldout_e
     print(f"gpu={gpu_name} arm={arm} seed={seed} episodes={n_episodes} k={k} tag={run_tag}", flush=True)
     if arm == "awake" and awake_budget <= 0:
         raise SystemExit("awake needs --awake-budget > 0 (derive it from the Sleep ledger)")   # B4: before model load
-    backend = HFBackend(MODEL_ID, system=nr.SYSTEM_PROMPT, lora=trainable, lr=lr, seed=seed)
+    backend = HFBackend(MODEL_ID, system=nr.SYSTEM_PROMPT, lora=trainable, lr=lr, seed=seed, deterministic=deterministic)
+    print(f"deterministic={deterministic}", flush=True)
     if arm == "baseline":
         a = BaselineArm()
     elif arm == "awake":
@@ -99,7 +101,7 @@ def _run(arm: str, seed: int, n_episodes: int, k: int, n_probe: int, n_heldout_e
     res.ledger.save(P["ledger"])
     results_vol.commit()
     eps = [e.seconds for e in res.episodes]
-    timing = {"gpu": gpu_name, "total_seconds": round(time.time() - t_start, 1),
+    timing = {"gpu": gpu_name, "deterministic": deterministic, "total_seconds": round(time.time() - t_start, 1),
               "episode_seconds_mean": round(sum(eps) / len(eps), 2) if eps else None,
               "checkpoint_seconds": [round(c.seconds, 1) for c in res.checkpoints],
               "night_seconds": [c.night_seconds for c in res.checkpoints if c.night_seconds is not None],
@@ -115,9 +117,9 @@ def _run(arm: str, seed: int, n_episodes: int, k: int, n_probe: int, n_heldout_e
 def run_arm_remote(arm: str, seed: int = 0, n_episodes: int = 600, k: int = 50, n_probe: int = 60,
                    n_heldout_eval: int = 201, control_items: int = 300, awake_budget: int = 0,
                    lr: float = 1e-4, weight_decay: float = 0.05, online_filter: bool = False,
-                   run_tag: str = "") -> dict:
+                   run_tag: str = "", deterministic: bool = DETERMINISTIC) -> dict:
     return _run(arm, seed, n_episodes, k, n_probe, n_heldout_eval, control_items, awake_budget, lr,
-                weight_decay, online_filter, run_tag)
+                weight_decay, online_filter, run_tag, deterministic)
 
 
 @app.function(gpu=GPU, timeout=2 * 3600, volumes={RESULTS: results_vol, HF_CACHE: cache_vol},
@@ -153,6 +155,51 @@ def preflight_remote(seed: int = 0, n_items: int = 40, n_dream_seeds: int = 10) 
     (Path(RESULTS) / f"preflight_seed{seed}.json").write_text(json.dumps(out, indent=1, default=str))
     results_vol.commit()
     return out
+
+
+@app.function(gpu=GPU, timeout=3 * 3600, volumes={RESULTS: results_vol, HF_CACHE: cache_vol},
+              secrets=[modal.Secret.from_name("huggingface")])
+def retro_frozen_remote(seed: int = 0, awake_budget: int = 236, n_implicit: int = 120, deterministic: bool = True) -> dict:
+    """Post-pilot retro-computation for the FROZEN arms (Baseline = untrained
+    base; Awake = base + critique rounds): mirror_bias, short_gap,
+    late_vs_early on the 201 held-out items, GSM8K accuracy + unparsable
+    fraction. Trained arms cannot be retro-computed (no adapters saved in
+    the pilot)."""
+    import os
+    import sys
+    sys.path.insert(0, "/root/doze"); os.chdir("/root/doze")
+    from arms import harness as hz
+    from arms.awake import AwakeArm
+    from arms.baseline import BaselineArm
+    from backends.hf_backend import HFBackend
+    from eval import control_bench as cb
+    from eval import compute_ledger as cl
+    from tasks import number_reduction as nr
+
+    backend = HFBackend(MODEL_ID, system=nr.SYSTEM_PROMPT, lora=False, seed=seed, deterministic=deterministic)
+    split = nr.make_split(seed=seed)
+    cfg = hz.RunConfig(seed=seed, n_implicit=n_implicit)
+    probe_items, heldout_items = hz.eval_items(split, cfg)
+    control = cb.load_frozen()
+    sets = hz.implicit_items(split, cfg)
+    out = {"seed": seed, "gpu": GPU, "deterministic": deterministic, "arms": {}}
+    for name, arm in (("baseline", BaselineArm()), ("awake", AwakeArm(token_budget_per_episode=awake_budget))):
+        ck = hz._checkpoint(arm, backend, cfg, 0, probe_items, heldout_items, control, cl.Ledger(arm=name), sets)
+        f = ck.flat(); f.pop("heldout_rows", None)
+        out["arms"][name] = f
+        print(name, json.dumps({k: f[k] for k in ("probe_accuracy", "heldout_accuracy", "control_accuracy", "control_unparsable",
+                                                  "mirror_bias", "mirror_bias_chance", "mirror_bias_n", "short_structured_acc",
+                                                  "short_unstructured_acc", "short_gap", "late_error_rate", "early_error_rate", "seconds")}), flush=True)
+    Path(RESULTS).mkdir(exist_ok=True)
+    (Path(RESULTS) / f"retro_frozen_seed{seed}.json").write_text(json.dumps(out, indent=1, default=str))
+    results_vol.commit()
+    return out
+
+
+@app.local_entrypoint()
+def retro_frozen(seed: int = 0, awake_budget: int = 236, gpu: str = GPU):
+    call = _gpu(retro_frozen_remote, gpu).spawn(seed, awake_budget)
+    print(f"spawned retro_frozen: call_id={call.object_id}; result -> doze-results /retro_frozen_seed{seed}.json", flush=True)
 
 
 @app.function(volumes={RESULTS: results_vol})
@@ -196,15 +243,16 @@ def pathcheck(n_episodes: int = 2, gpu: str = GPU):
 @app.local_entrypoint()
 def main(arm: str = "baseline", seed: int = 0, n_episodes: int = 600, k: int = 50, n_probe: int = 60,
          n_heldout_eval: int = 201, control_items: int = 300, awake_budget: int = 0, lr: float = 1e-4,
-         weight_decay: float = 0.05, online_filter: bool = False, gpu: str = GPU, run_tag: str = ""):
+         weight_decay: float = 0.05, online_filter: bool = False, gpu: str = GPU, run_tag: str = "",
+         deterministic: bool = DETERMINISTIC):
     import sys
     sys.path.insert(0, ".")
     from eval import orchestrate
     tag = run_tag or orchestrate.new_tag()
-    print(f"gpu={gpu} run_tag={tag}")
+    print(f"gpu={gpu} run_tag={tag} deterministic={deterministic}")
     # spawn, not .remote(): a blocking call is cancelled if this client dies, even under --detach
     call = _gpu(run_arm_remote, gpu).spawn(arm, seed, n_episodes, k, n_probe, n_heldout_eval, control_items,
-                                           awake_budget, lr, weight_decay, online_filter, tag)
+                                           awake_budget, lr, weight_decay, online_filter, tag, deterministic)
     print(f"spawned {arm} seed={seed}: call_id={call.object_id} run_tag={tag}", flush=True)
     print(f"Result file: doze-results volume /{tag}/runs/{arm}_seed{seed}.json (saved every checkpoint); "
           f"re-run the same command with --run-tag {tag} to resume after a preemption.", flush=True)
@@ -227,7 +275,8 @@ def grid_remote(seeds: str, n_episodes: int, online_filter: bool, gpu: str, arms
     from eval import orchestrate
 
     arm_list = [a.strip() for a in arms.split(",") if a.strip()]
-    assert "sleep" in arm_list, "sleep is the matching reference and must be in --arms"
+    if "awake" in arm_list:
+        assert "sleep" in arm_list, "awake's budget comes from sleep; include sleep in --arms"
     print(f"gpu={gpu} arms={arm_list} tag={run_tag}", flush=True)
     fn = _gpu(run_arm_remote, gpu)
 
@@ -314,7 +363,7 @@ def grid_remote(seeds: str, n_episodes: int, online_filter: bool, gpu: str, arms
         except cl.BudgetMismatch as e:
             verdict.update(ok=False, message=str(e))
             print(f"seed {seed}: BUDGET MISMATCH — do not compare\n{e}", flush=True)
-        summary = {"seed": seed, "gpu": gpu, "tag": run_tag, "verdict": verdict, "arms": {}}
+        summary = {"seed": seed, "gpu": gpu, "tag": run_tag, "deterministic": DETERMINISTIC, "verdict": verdict, "arms": {}}
         for a, r in results.items():
             summary["arms"][a] = {k: r[k] for k in ("criterion_episode", "ledger", "timing", "nights")}
             summary["arms"][a]["probe_curve"] = [(c["episode"], c["probe_accuracy"]) for c in r["checkpoints"]]

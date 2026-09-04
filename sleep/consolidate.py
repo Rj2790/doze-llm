@@ -71,6 +71,7 @@ def run_night(day: Sequence[Episode], backend: TrainableBackend, ledger: cl.Ledg
             "dreams_rejected_prefix_changed": dstats["rejected"].get("prefix_changed", 0),
             "dreams_structured": dstats["structured"], "dreams_structured_frac": dstats["structured_frac"],
             "dreams_rejected_unparsable": dstats["rejected"].get("unparsable", 0),
+            "dreams_rejected_duplicate": dstats["rejected"].get("duplicate", 0),
             "dreams_duplicates_of_source": dstats["duplicates"], "dreams_accepted": dstats["accepted"],
             "replay": len(replay), "train_set": len(train_set), "steps": st.steps,
             "training_tokens": st.training_tokens, "loss": st.loss, "buffer_size": len(buffer),

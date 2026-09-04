@@ -38,8 +38,8 @@ def test_online_filtered_one_step_every_episode():
     assert arm.name == "online"
     n_wrong = sum(not e.correct for e in res.episodes)
     assert 10 < n_wrong < 60                              # the fixture really produces misses
-    assert res.ledger.gradient_steps == 100 and arm.skipped == 0
-    assert [c["gradient_steps"] for c in res.ledger.checkpoints] == [0, 50, 100]
+    assert res.ledger.gradient_steps + arm.skipped == 100 and arm.skipped <= 3   # skips only before the first kept
+    assert [c["gradient_steps"] for c in res.ledger.checkpoints] == [0, 50 - arm.skipped, 100 - arm.skipped]
     assert res.nights == [] and be.decays == 0
     # every trained completion is a kept trajectory of the right instance
     kept_texts = {e.text.strip() for e in res.episodes if e.correct}
@@ -47,7 +47,7 @@ def test_online_filtered_one_step_every_episode():
         assert completion in kept_texts
         digits = "".join(nr.parse_digits_line(prompt))
         assert nr.score(nr.Instance.from_digits(digits), completion)["correct"]
-    assert arm.substitutions["today"] + arm.substitutions["recent"] == n_wrong
+    assert arm.substitutions["today"] + arm.substitutions["recent"] == n_wrong - arm.skipped
 
 
 def test_online_skips_and_logs_when_nothing_kept_yet():

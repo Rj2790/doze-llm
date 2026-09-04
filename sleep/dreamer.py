@@ -25,28 +25,68 @@ from sleep import filters
 from sleep.filters import Example
 from tasks import number_reduction as nr
 
-DREAM_TEMPERATURE = 0.8   # tunable; dreams need diversity
+DREAM_TEMPERATURE = 0.8   # tunable; the digits proposal needs diversity; the solve is greedy like the day
 
-DREAM_INSTRUCTION = (
-    "Above is a solved puzzle. Invent a NEW puzzle from it: keep the first seven digits exactly as "
-    "they are and change between one and three of the last five digits (positions 8 to 12), each "
-    "still 1, 4 or 9. Then solve the new string with the same rule. Output exactly: a line "
-    "'Digits: ' with the {length} new digits separated by spaces, then the {steps} comparison "
-    "lines as 'previous,digit->result', then 'STEPS:' with all {steps} results, then 'ANSWER:' "
-    "with the final result. Output only these lines."
+PROPOSE_MARKER = "Write a NEW string"
+PROPOSE_INSTRUCTION = (
+    "{marker}: keep the first seven digits exactly as they are and change between one and three of "
+    "the last five digits (positions 8 to 12); every digit must be 1, 4 or 9. Output exactly one line, "
+    "'Digits: ' followed by the {length} digits separated by spaces, and nothing else."
 )
+DREAM_INSTRUCTION = PROPOSE_INSTRUCTION   # legacy name
+
+
+def propose_prompt(seed: Example) -> str:
+    """Step 1 of the decoupled dreamer: propose new digits only (no solving)."""
+    length = len(seed.digits)
+    return (f"Here is a string of {length} digits, each 1, 4 or 9.\n{nr.digits_line(seed.digits)}\n\n"
+            f"{PROPOSE_INSTRUCTION.format(marker=PROPOSE_MARKER, length=length)}")
 
 
 def dream_prompt(seed: Example, mode: str, numbered: bool) -> str:
+    """Legacy one-step prompt (pilot). Kept for reference; not used by dream()."""
     length = len(seed.digits)
     solved = f"{nr.digits_line(seed.digits, numbered)}\n{seed.completion.strip()}"
-    return (f"{nr.rule_text(length)}\n\n{solved}\n\n"
-            f"{DREAM_INSTRUCTION.format(length=length, steps=length - 1)}")
+    return (f"{nr.rule_text(length)}\n\n{solved}\n\nAbove is a solved puzzle. Invent a NEW puzzle from it: "
+            f"{PROPOSE_INSTRUCTION.format(marker='write a new string', length=length)} Then solve it: "
+            f"the {length - 1} comparison lines as 'previous,digit->result', then 'STEPS:', then 'ANSWER:'. "
+            "Output only these lines (last five digits only).")
+
+
+def _verify_scores(inst: nr.Instance, body: str, split: nr.Split, mode: str) -> str:
+    s = nr.score(inst, body)
+    if s["answer"] is None or not s["steps_parsed"] or (mode == "work" and body.count("->") == 0):
+        return "unparsable"
+    if inst.prefix in split.heldout_prefixes:      # unreachable when the source is a training instance
+        return "heldout_prefix"
+    if not filters.keep_scores(s["correct"], s["steps_correct"], inst.length):
+        return "wrong"
+    return "ok"
+
+
+def parse_proposal(text: str, split: nr.Split, source: Example) -> tuple[nr.Instance | None, str]:
+    """Validate a proposed digit string: parsable, right length/alphabet,
+    same prefix as the source, not a verbatim copy."""
+    try:
+        toks = nr.parse_digits_line(text)
+    except ValueError:
+        return None, "unparsable"
+    if len(toks) != split.length or not set(toks) <= set(nr.DIGITS):
+        return None, "unparsable"
+    digits = "".join(toks)
+    inst = nr.Instance.from_digits(digits)
+    if inst.prefix != source.prefix:
+        return None, "prefix_changed"
+    if digits == source.digits:
+        return None, "duplicate"
+    if inst.prefix in split.heldout_prefixes:
+        return None, "heldout_prefix"
+    return inst, "ok"
 
 
 def verify(text: str, split: nr.Split, mode: str, source_prefix: str) -> tuple[Example | None, str]:
-    """Return (example, 'ok') or (None, reason). Reasons: unparsable,
-    prefix_changed, heldout_prefix, wrong. 'wrong' = fails the C3 keep rule."""
+    """Verify a combined 'Digits: ...' + solution text (used by tests/guard
+    checks). Reasons: unparsable, prefix_changed, heldout_prefix, wrong."""
     try:
         toks = nr.parse_digits_line(text)
     except ValueError:
@@ -57,48 +97,60 @@ def verify(text: str, split: nr.Split, mode: str, source_prefix: str) -> tuple[E
     inst = nr.Instance.from_digits(digits)
     body = text[text.rfind("Digits:"):].split("\n", 1)
     body = body[1].strip() if len(body) > 1 else ""
-    s = nr.score(inst, body)
-    if s["answer"] is None or not s["steps_parsed"] or (mode == "work" and body.count("->") == 0):
+    if nr.parse_answer(body) is None or not nr.parse_steps(body) or (mode == "work" and body.count("->") == 0):
         return None, "unparsable"
     if inst.prefix != source_prefix:
         return None, "prefix_changed"
-    if inst.prefix in split.heldout_prefixes:      # unreachable when the source is a training instance
-        return None, "heldout_prefix"
-    if not filters.keep_scores(s["correct"], s["steps_correct"], inst.length):
-        return None, "wrong"
+    reason = _verify_scores(inst, body, split, mode)
+    if reason != "ok":
+        return None, reason
     return Example(digits=digits, prompt="", completion=body, source="dream"), "ok"
 
 
 def dream(backend: Backend, kept: Sequence[Example], n_variations: int, split: nr.Split,
           mode: str, numbered: bool, max_tokens: int,
           temperature: float = DREAM_TEMPERATURE) -> tuple[list[Example], dict]:
+    """Decoupled dreaming (post-pilot): (1) propose new digits at `temperature`
+    for every kept trajectory x n_variations; reject unparsable / prefix
+    changed / duplicate; (2) solve each accepted string with the ordinary day
+    prompt, greedy; keep iff the C3 rule holds against the solver."""
     seeds = [e for e in kept for _ in range(n_variations)]
-    prompts = [dream_prompt(e, mode, numbered) for e in seeds]
-    out: list[Example] = []
     rejected: Counter = Counter()
     tokens = 0
-    structured = 0
-    duplicates = 0
+    out: list[Example] = []
     accepted: list[dict] = []
-    if prompts:
-        gens = backend.generate(prompts, max_tokens=max_tokens, temperature=temperature)
-        for seed, g in zip(seeds, gens):
+    structured = 0
+    if not seeds:
+        return out, {"generated": 0, "tokens": 0, "kept": 0, "rejected": {}, "structured": 0,
+                     "structured_frac": None, "duplicates": 0, "accepted": []}
+    proposals = backend.generate([propose_prompt(e) for e in seeds], max_tokens=48, temperature=temperature)
+    todo: list[tuple[Example, nr.Instance]] = []
+    for seed, g in zip(seeds, proposals):
+        tokens += g.completion_tokens
+        inst, reason = parse_proposal(g.text, split, seed)
+        if inst is None:
+            rejected[reason] += 1
+        else:
+            todo.append((seed, inst))
+    if todo:
+        solves = backend.generate([nr.format_prompt(inst, mode, numbered=numbered) for _, inst in todo],
+                                  max_tokens=max_tokens)
+        for (seed, inst), g in zip(todo, solves):
             tokens += g.completion_tokens
-            ex, reason = verify(g.text, split, mode, source_prefix=seed.prefix)
-            if ex is None:
+            body = g.text.strip()
+            reason = _verify_scores(inst, body, split, mode)
+            if reason != "ok":
                 rejected[reason] += 1
-            else:
-                inst = nr.Instance.from_digits(ex.digits)
-                ex.prompt = nr.format_prompt(inst, mode, numbered=numbered)
-                dup = ex.digits == seed.digits          # a verbatim copy of the source (logged, still accepted)
-                structured += inst.structured
-                duplicates += dup
-                accepted.append({"digits": ex.digits, "source": seed.digits, "structured": bool(inst.structured),
-                                 "duplicate": bool(dup), "tokens": backend.count_tokens(ex.completion)})
-                out.append(ex)
-    return out, {"generated": len(prompts), "tokens": tokens, "kept": len(out), "rejected": dict(rejected),
+                continue
+            ex = Example(digits=inst.digits, prompt=nr.format_prompt(inst, mode, numbered=numbered),
+                         completion=body, source="dream")
+            structured += inst.structured
+            accepted.append({"digits": inst.digits, "source": seed.digits, "structured": bool(inst.structured),
+                             "duplicate": False, "tokens": g.completion_tokens})
+            out.append(ex)
+    return out, {"generated": len(seeds), "tokens": tokens, "kept": len(out), "rejected": dict(rejected),
                  "structured": structured, "structured_frac": (structured / len(out)) if out else None,
-                 "duplicates": duplicates, "accepted": accepted}
+                 "duplicates": rejected.get("duplicate", 0), "accepted": accepted}
 
 
 def interleave(a: Sequence, b: Sequence) -> list:

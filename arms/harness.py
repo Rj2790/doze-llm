@@ -26,6 +26,7 @@ from typing import Protocol
 from backends.base import Backend, GenResult
 from eval import compute_ledger as cl
 from eval import control_bench as cb
+from eval import implicit
 from eval import shortcut_detector as sd
 from tasks import number_reduction as nr
 
@@ -45,6 +46,8 @@ class RunConfig:
     criterion_threshold: float = 0.70
     control_items: int = 0          # 0 = skip control benchmark (tests / local)
     control_max_tokens: int = 512
+    n_implicit: int = 120           # items per set for mirror_bias / short_gap (0 = skip); post-pilot
+    short_max_tokens: int = 16
 
 
 @dataclass
@@ -73,11 +76,24 @@ class Checkpoint:
     seconds: float                  # wall-clock of this checkpoint evaluation
     day_seconds_mean: float | None = None   # mean episode wall-clock since the previous checkpoint
     night_seconds: float | None = None
+    # post-pilot secondary metrics (DEVIATIONS 2026-09-04)
+    mirror: dict | None = None
+    short: dict | None = None
+    late_early: dict | None = None
+    control_unparsable: float | None = None
+    heldout_rows: list[dict] = field(default_factory=list)   # per held-out item: digits, parsed steps, answer
 
     def flat(self) -> dict:
+        m, sh, le = self.mirror or {}, self.short or {}, self.late_early or {}
         d = {"episode": self.episode, "probe_accuracy": self.probe.accuracy,
              "probe_n": self.probe.n, "probe_correct": self.probe.correct,
              "day_seconds_mean": self.day_seconds_mean, "night_seconds": self.night_seconds,
+             "mirror_bias": m.get("mirror_bias"), "mirror_bias_chance": m.get("chance"), "mirror_bias_n": m.get("n_error_steps"),
+             "short_structured_acc": sh.get("structured_acc"), "short_unstructured_acc": sh.get("unstructured_acc"),
+             "short_gap": sh.get("gap"),
+             "late_error_rate": le.get("late_error_rate"), "early_error_rate": le.get("early_error_rate"),
+             "late_n": le.get("n_late"), "early_n": le.get("n_early"),
+             "control_unparsable": self.control_unparsable, "heldout_rows": self.heldout_rows,
              "probe_p_value": self.probe.p_value, "probe_above_chance": self.probe.above_chance,
              "heldout_accuracy": self.heldout_accuracy, "heldout_n": self.heldout_n,
              "median_tokens_correct": self.median_tokens_correct,
@@ -123,11 +139,16 @@ def _checkpoint_from_flat(c: dict) -> Checkpoint:
     probe = sd.ProbeResult(n=c["probe_n"], correct=c["probe_correct"], accuracy=c["probe_accuracy"],
                            above_chance=c["probe_above_chance"], p_value=c["probe_p_value"])
     ledger = {"episode": c["episode"], **{k[len("ledger_"):]: v for k, v in c.items() if k.startswith("ledger_")}}
+    mirror = {"mirror_bias": c.get("mirror_bias"), "chance": c.get("mirror_bias_chance"), "n_error_steps": c.get("mirror_bias_n")}
+    short = {"structured_acc": c.get("short_structured_acc"), "unstructured_acc": c.get("short_unstructured_acc"), "gap": c.get("short_gap")}
+    le = {"late_error_rate": c.get("late_error_rate"), "early_error_rate": c.get("early_error_rate"),
+          "n_late": c.get("late_n"), "n_early": c.get("early_n")}
     return Checkpoint(episode=c["episode"], probe=probe, heldout_accuracy=c["heldout_accuracy"],
                       heldout_n=c["heldout_n"], median_tokens_correct=c["median_tokens_correct"],
                       control_accuracy=c["control_accuracy"], ledger=ledger, eval_tokens=c["eval_tokens"],
                       seconds=c["seconds"], day_seconds_mean=c.get("day_seconds_mean"),
-                      night_seconds=c.get("night_seconds"))
+                      night_seconds=c.get("night_seconds"), mirror=mirror, short=short, late_early=le,
+                      control_unparsable=c.get("control_unparsable"), heldout_rows=c.get("heldout_rows", []))
 
 
 def _restore(d: dict) -> tuple[list[Episode], list[Checkpoint], cl.Ledger, list[dict], int]:
@@ -201,9 +222,20 @@ def eval_items(split: nr.Split, cfg: RunConfig) -> tuple[list[nr.Instance], list
     return probe, heldout
 
 
+def implicit_items(split: nr.Split, cfg: RunConfig) -> tuple[list[nr.Instance], list[nr.Instance]]:
+    """(structured, unstructured) item sets for short_gap / mirror_bias; both
+    from held-out prefixes, n_implicit each (0 -> empty)."""
+    if cfg.n_implicit <= 0:
+        return [], []
+    structured = sd.stratified_probe_items(split.heldout, n=cfg.n_implicit, seed=cfg.seed + 7)
+    unstructured = nr.unstructured_heldout(split, n=cfg.n_implicit, seed=cfg.seed)
+    return structured, unstructured
+
+
 def _checkpoint(arm: Arm, backend: Backend, cfg: RunConfig, episode: int,
                 probe_items: Sequence[nr.Instance], heldout_items: Sequence[nr.Instance],
-                control: Sequence[cb.Item], ledger: cl.Ledger) -> Checkpoint:
+                control: Sequence[cb.Item], ledger: cl.Ledger,
+                implicit_sets: tuple[Sequence[nr.Instance], Sequence[nr.Instance]] = ((), ())) -> Checkpoint:
     t0 = time.time()
     used = 0
 
@@ -221,17 +253,30 @@ def _checkpoint(arm: Arm, backend: Backend, cfg: RunConfig, episode: int,
         if nr.score(x, r.text)["correct"]:
             n_correct += 1
             tok_correct.append(r.completion_tokens)
-    control_acc = None
+    heldout_rows = [{"digits": x.digits, "steps": "".join(nr.parse_steps(r.text) or []), "answer": nr.parse_answer(r.text)}
+                    for x, r in zip(heldout_items, held_out)]
+    late_early = implicit.late_vs_early(heldout_items, [r.text for r in held_out]) if heldout_items else None
+    control_acc, control_unp = None, None
     if control:
         ctrl_out = gen_many([cb.format_prompt(x) for x in control], cfg.control_max_tokens)
-        control_acc = cb.score(control, [r.text for r in ctrl_out]).accuracy
+        br = cb.score(control, [r.text for r in ctrl_out])
+        control_acc, control_unp = br.accuracy, br.unparsable_frac
+    mirror = short = None
+    s_items, u_items = implicit_sets
+    if s_items and u_items:
+        u_work = gen_many([nr.format_prompt(x, cfg.mode, numbered=cfg.numbered) for x in u_items], cfg.max_tokens)
+        mirror = implicit.mirror_bias(u_items, [r.text for r in u_work])
+        s_short = gen_many([nr.format_prompt(x, "short", numbered=cfg.numbered) for x in s_items], cfg.short_max_tokens)
+        u_short = gen_many([nr.format_prompt(x, "short", numbered=cfg.numbered) for x in u_items], cfg.short_max_tokens)
+        short = implicit.short_gap(s_items, [r.text for r in s_short], u_items, [r.text for r in u_short])
     return Checkpoint(
         episode=episode, probe=probe,
         heldout_accuracy=n_correct / len(heldout_items) if heldout_items else float("nan"),
         heldout_n=len(heldout_items),
         median_tokens_correct=statistics.median(tok_correct) if tok_correct else None,
         control_accuracy=control_acc, ledger=ledger.checkpoint(episode),
-        eval_tokens=used, seconds=time.time() - t0)
+        eval_tokens=used, seconds=time.time() - t0, mirror=mirror, short=short, late_early=late_early,
+        control_unparsable=control_unp, heldout_rows=heldout_rows)
 
 
 def run_arm(arm: Arm, backend: Backend, cfg: RunConfig,
@@ -248,6 +293,7 @@ def run_arm(arm: Arm, backend: Backend, cfg: RunConfig,
     split = nr.make_split(seed=cfg.seed, length=cfg.length)
     seq = episode_sequence(split, cfg)
     probe_items, heldout_items = eval_items(split, cfg)
+    implicit_sets = implicit_items(split, cfg)
     if control is None and cfg.control_items:
         control = cb.load_frozen()[: cfg.control_items]
     control = list(control or [])
@@ -292,20 +338,19 @@ def run_arm(arm: Arm, backend: Backend, cfg: RunConfig,
 
     def persist(partial: bool) -> None:
         if save_path is not None:
-            if partial:
-                sdir = state_dir(save_path)
-                sdir.mkdir(parents=True, exist_ok=True)
-                if hasattr(backend, "save_state"):
-                    backend.save_state(sdir)
-                if hasattr(arm, "save_state"):
-                    arm.save_state(sdir)
+            sdir = state_dir(save_path)          # saved at every checkpoint AND at the end (final adapter for retro-analysis)
+            sdir.mkdir(parents=True, exist_ok=True)
+            if hasattr(backend, "save_state"):
+                backend.save_state(sdir)
+            if hasattr(arm, "save_state"):
+                arm.save_state(sdir)
             result(partial).save(save_path)
             if on_checkpoint:
                 on_checkpoint()
 
     if start == 1:
         # A5: episode-0 checkpoint before any day episode (forgetting baseline, untrained probe)
-        ck0 = _checkpoint(arm, backend, cfg, 0, probe_items, heldout_items, control, ledger)
+        ck0 = _checkpoint(arm, backend, cfg, 0, probe_items, heldout_items, control, ledger, implicit_sets)
         eval_tokens += ck0.eval_tokens
         checkpoints.append(ck0)
         tracker.update(0, ck0.probe)
@@ -335,7 +380,7 @@ def run_arm(arm: Arm, backend: Backend, cfg: RunConfig,
             night_s = time.time() - tn
             if night_info:
                 nights.append({"episode": i, **night_info})
-            ck = _checkpoint(arm, backend, cfg, i, probe_items, heldout_items, control, ledger)
+            ck = _checkpoint(arm, backend, cfg, i, probe_items, heldout_items, control, ledger, implicit_sets)
             ck.day_seconds_mean = statistics.mean(e.seconds for e in day)
             ck.night_seconds = night_s
             eval_tokens += ck.eval_tokens
@@ -347,7 +392,5 @@ def run_arm(arm: Arm, backend: Backend, cfg: RunConfig,
                     f"tokens={ledger.tokens_generated} steps={ledger.gradient_steps} "
                     f"| episode {ck.day_seconds_mean:.1f}s night {night_s:.0f}s checkpoint {ck.seconds:.0f}s")
             persist(partial=(i < cfg.n_episodes))
-    res = result(partial=False)
-    if save_path is not None:
-        res.save(save_path)
-    return res
+    persist(partial=False)
+    return result(partial=False)

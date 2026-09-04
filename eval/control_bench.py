@@ -38,6 +38,11 @@ class BenchResult:
     n: int
     correct: int
     accuracy: float
+    unparsable: int = 0
+
+    @property
+    def unparsable_frac(self) -> float | None:
+        return (self.unparsable / self.n) if self.n else None
 
 
 _GOLD_RE = re.compile(r"####\s*(-?[\d,]*\.?\d+)")
@@ -109,8 +114,10 @@ def format_prompt(item: Item) -> str:
 
 def score(items: Sequence[Item], texts: Sequence[str]) -> BenchResult:
     assert len(items) == len(texts)
-    correct = sum(exact_match(parse_answer(t), x.gold) for x, t in zip(items, texts))
-    return BenchResult(n=len(items), correct=correct, accuracy=correct / len(items) if items else 0.0)
+    preds = [parse_answer(t) for t in texts]
+    correct = sum(exact_match(p, x.gold) for x, p in zip(items, preds))
+    return BenchResult(n=len(items), correct=correct, accuracy=correct / len(items) if items else 0.0,
+                       unparsable=sum(p is None for p in preds))
 
 
 def evaluate(generate: Callable[[str], str], items: Sequence[Item]) -> BenchResult:

@@ -254,3 +254,15 @@ are therefore unstructured strings solved literally, and the fraction of
 accepted dreams that are mirror-structured is logged per night. Dream
 verification uses the C3 keep rule (correct answer and ≥ 9/11 steps), not
 an exact-chain check.
+
+## Appendix B. Secondary insight metrics (added 2026-09-04, after the pilot)
+
+Added after seed 0 as **secondary** metrics; the primary metric and criterion
+in §6.1 are unchanged (see DEVIATIONS.md, 2026-09-04). At every checkpoint:
+(a) `mirror_bias` on 120 held-out unstructured strings, with chance level;
+(b) `short_gap` = short-mode accuracy on 120 structured minus 120
+unstructured held-out items; (c) `late_vs_early` conditional error rates
+(steps 9–11 | steps 1–8 correct vs steps 3–8 | steps 1–2 correct) from the
+work-mode held-out completions; (d) `volatility` = std of held-out accuracy
+across checkpoints. Plus the GSM8K unparsable fraction. These are reported
+for all arms; none is used for a go/no-go or stopping decision.

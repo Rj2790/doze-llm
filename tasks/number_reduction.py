@@ -179,6 +179,32 @@ def make_split(seed: int, length: int = DEFAULT_LENGTH,
                  train_prefixes=tr_pref, heldout_prefixes=ho_pref)
 
 
+_UNSTRUCTURED_CACHE: dict = {}
+
+
+def _unstructured_pool(length: int, heldout_prefixes: frozenset) -> list[Instance]:
+    key = (length, heldout_prefixes)
+    if key not in _UNSTRUCTURED_CACHE:
+        out = []
+        for pref in sorted(heldout_prefixes):
+            for tail in itertools.product(DIGITS, repeat=length - len(pref)):
+                inst = Instance.from_digits(pref + "".join(tail))
+                if not inst.structured:
+                    out.append(inst)
+        _UNSTRUCTURED_CACHE[key] = out
+    return _UNSTRUCTURED_CACHE[key]
+
+
+def unstructured_heldout(split: Split, n: int, seed: int) -> list[Instance]:
+    """n UNSTRUCTURED strings (no mirror) whose prefix is held out, exactly
+    uniform over answers, disjoint from the structured held-out/probe items.
+    Used by the implicit-shortcut metrics (mirror_bias, short_gap)."""
+    rng = random.Random(f"unstructured-{seed}")
+    used = {x.digits for x in split.heldout + split.probe}
+    pool = [x for x in _unstructured_pool(split.length, frozenset(split.heldout_prefixes)) if x.digits not in used]
+    return _stratified(pool, n, rng)
+
+
 # --------------------------------------------------------------------------
 # Prompting
 # --------------------------------------------------------------------------

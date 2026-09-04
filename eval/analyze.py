@@ -93,6 +93,13 @@ def summarize(root: str | Path, seeds: list[int], tol: float = 0.05) -> dict:
             a["probe_curves"].append([(c["episode"], c["probe_accuracy"]) for c in cks])
             if arm in FROZEN_ARMS:
                 a.setdefault("frozen_eval_identical", []).append(frozen_eval_identical(cks) if cks else None)
+            # post-pilot secondary metrics (None when the run predates them)
+            from eval import implicit as _imp
+            a.setdefault("volatility", []).append(_imp.volatility([c["heldout_accuracy"] for c in cks]))
+            last = cks[-1] if cks else {}
+            for key in ("mirror_bias", "mirror_bias_chance", "short_gap", "short_structured_acc", "short_unstructured_acc",
+                        "late_error_rate", "early_error_rate", "control_unparsable"):
+                a.setdefault(f"final_{key}", []).append(last.get(key))
     for a in arms.values():
         met = [e for e in a["criterion_episodes"] if e is not None]
         a["median_criterion_episode"] = statistics.median(met) if met else None
@@ -111,6 +118,14 @@ def report_markdown(summary: dict) -> str:
         m = lambda v: f"{statistics.mean(v):.3f}" if v else "—"
         lines.append(f"| {arm} | {a['median_criterion_episode']} | {a['n_censored']}/{len(a['seeds'])} | "
                      f"{m(fh)} | {m(fp)} | {m(fg)} |")
+    lines += ["", "| arm | volatility (std held-out) | mirror_bias (chance) | short_gap (struct / unstruct) | late vs early error | GSM8K unparsable |",
+              "|---|---|---|---|---|---|"]
+    for arm, a in sorted(summary["arms"].items()):
+        f = lambda k: [v for v in a.get(k, []) if v is not None]
+        m = lambda v, d=3: f"{statistics.mean(v):.{d}f}" if v else "—"
+        lines.append(f"| {arm} | {m(f('volatility'))} | {m(f('final_mirror_bias'))} ({m(f('final_mirror_bias_chance'))}) | "
+                     f"{m(f('final_short_gap'))} ({m(f('final_short_structured_acc'))} / {m(f('final_short_unstructured_acc'))}) | "
+                     f"{m(f('final_late_error_rate'))} vs {m(f('final_early_error_rate'))} | {m(f('final_control_unparsable'))} |")
     frozen = [(arm, a["frozen_eval_identical"]) for arm, a in sorted(summary["arms"].items()) if "frozen_eval_identical" in a]
     if frozen:
         lines += ["", "Eval-pipeline validation (frozen-arm eval identical at every checkpoint, per seed): "
