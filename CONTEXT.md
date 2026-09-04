@@ -468,59 +468,65 @@ CUDA after the first update (Sleep ep-50 probe 0.417 vs 0.350 in attempt 1;
 Online ep-50 held-out 0.527 vs 0.363). Consider
 `torch.use_deterministic_algorithms(True)` (tunable) for the grid.
 
-### 5d. Seed 0 results — Sleep and Online (original containers, salvaged 2026-09-03); Awake pending
+### 5d. Seed 0 results — Sleep, Online, Awake (complete 2026-09-04)
 
-Files: `results/final/{sleep,online}_seed0.json`, `results/final/ledgers/`.
-Backend hf:Qwen/Qwen3-4B on NVIDIA L4, PREREG v1.0 protocol, K=50, 600 episodes.
+Files: `results/final/{runs,ledgers}/<arm>_seed0.json`, `results/final/report.md`,
+`summary.json` (local; results/ is gitignored — the volume holds the originals:
+Sleep/Online under `/runs/` from the salvaged attempt-2 containers, Awake under
+`/seed0-awake/`). Backend hf:Qwen/Qwen3-4B, NVIDIA L4 for all three arms,
+PREREG v1.0, K=50, 600 episodes, 13 checkpoints (60 probe / 201 held-out /
+300 GSM8K).
 
-**Compute matching:** `check_matched({sleep, online})` = MATCHED. Sleep 600
-steps / 57,270 training tokens / 141,499 generated tokens (day + dreams);
-Online 593 steps / 58,088 / 58,806. Online skipped 7 steps before its first
-kept trajectory (1.2% deficit, inside tolerance). Awake budget from Sleep's
-total: 236 tokens/episode.
+**Compute matching — `check_seed` verdict persisted in all three run JSONs:
+MATCHED.** Awake 141,628 generated tokens vs Sleep 141,499 (+0.09%); Online
+593 steps vs 600 (−1.17%), 58,088 training tokens vs 57,270 (+1.43%). Awake
+budget 236 tokens/episode, realised 236.0; mean 2.44 critique rounds per day
+episode.
 
-**Wall-clock / cost (L4, $0.000222/s):** Sleep 3.40 h ($2.72): episodes
-1.31 h, nights 15 min, checkpoints 1.84 h. Online 3.22 h ($2.57). Plus
-~$3 of duplicate/preempted waste (§5c) and ~$1.7 from attempt 1 (§5b).
+**Wall-clock / cost (L4):** Sleep 3.40 h $2.72; Online 3.22 h $2.57; Awake
+8.43 h $6.74 (checkpoints 5.97 h: its critique rounds triple eval cost).
+Useful compute $12.03; failures cost ~$5.5 more (§5b–5c, two Awake
+false starts).
 
-**Primary metric (probe accuracy, 60 items, chance 0.33):** neither arm
-met the 0.70 criterion at any checkpoint; both curves sit at chance for all
-13 checkpoints (Sleep 0.25–0.42, Online 0.27–0.37). Median tokens per
-correct held-out answer stayed at 98 throughout for both (no token
-collapse). No shortcut discovery in 600 episodes for either arm.
+**Primary metric (probe, chance 0.33, criterion 0.70 × 2):** no arm met the
+criterion; all three censored at 600. Curves:
 
-| ep | Sleep probe / held-out / GSM8K | Online probe / held-out / GSM8K |
-|---|---|---|
-| 0 | 0.37 / 0.37 / 0.59 | 0.37 / 0.37 / 0.59 |
-| 100 | 0.32 / 0.58 / 0.48 | 0.37 / 0.52 / 0.71 |
-| 200 | 0.33 / 0.76 / 0.61 | 0.35 / 0.55 / 0.62 |
-| 300 | 0.28 / 0.76 / 0.62 | 0.33 / 0.94 / 0.64 |
-| 400 | 0.37 / 0.86 / 0.62 | 0.27 / 0.88 / 0.67 |
-| 500 | 0.25 / 0.92 / 0.56 | 0.32 / 0.84 / 0.71 |
-| 600 | 0.32 / 0.93 / 0.65 | 0.32 / 0.67 / 0.72 |
+| ep | 0 | 50 | 100 | 150 | 200 | 250 | 300 | 350 | 400 | 450 | 500 | 550 | 600 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Sleep | .37 | .42 | .32 | .27 | .33 | .35 | .28 | .30 | .37 | .32 | .25 | .33 | .32 |
+| Online | .37 | .32 | .37 | .35 | .35 | .33 | .33 | .35 | .27 | .30 | .32 | .32 | .32 |
+| Awake | .30 | .30 | .30 | .30 | .30 | .30 | .30 | .30 | .30 | .30 | .30 | .30 | .30 |
 
-**Task accuracy:** both learn the literal rule to ~0.93 held-out by the
-end (Online's final checkpoint dipped to 0.67 from 0.97 at ep 550; single
-checkpoint, 201 items). Day accuracy by 100-episode block: Sleep 0.50,
-0.56, 0.74, 0.84, 0.74, 0.93; Online 0.53, 0.56, 0.81, 0.86, 0.82, 0.91.
+Median tokens per correct held-out answer: 98 (Sleep, Online) and 294
+(Awake, ~3 rounds) at every checkpoint — no token collapse anywhere.
 
-**Forgetting (GSM8K, 300 items):** no net forgetting for either arm.
-Sleep dipped to 0.48 at ep 100 and recovered to 0.65 (+0.06 vs ep 0);
-Online rose almost monotonically to 0.72 (+0.14). H4's predicted direction
-(Sleep forgets less) is not what seed 0 shows.
+**Task accuracy (held-out, 201):** Sleep 0.373 → 0.930; Online 0.373 →
+0.667 (peak 0.965 at ep 550); Awake 0.403 flat (frozen; critique adds +0.03
+over single-shot). Day accuracy over 600 episodes: Sleep 0.718, Online
+0.748, Awake 0.413.
 
-**Dreams (12 nights):** 714 generated, 152 accepted (21%), of which 58
-were verbatim copies of the source and 94 real variations; only 4 of the
-94 real variations are mirror-structured. Rejected: 279 wrong, 283
-unparsable (40%; format drift grows with training), 0 held-out, 0
-prefix-changed. Real dream yield 13%. Keep rate rose 8/50 → 47/50; night
-pool 11 → 165 examples for 50 steps; mean night loss 0.06 → ~0.013.
+**Forgetting (GSM8K, 300, ep 600 − ep 0):** Sleep +0.060 (min 0.477 at ep
+100), Online +0.137 (never below ep 0), Awake 0.000 (frozen; 0.597). No arm
+forgot; the trainable arms improved. H4's predicted direction (Sleep < Online
+forgetting) is reversed on this seed.
 
-Interpretation for seed 0 only: the phase structure did not produce
-insight on this task at this scale (H1/H2 null so far), and the dreams as
-constructed (digits 1–7 fixed) mostly teach the literal rule on
-unstructured strings. Awake result and the H3 ablation (Sleep-NoDream) are
-still needed for the full seed-0 picture.
+**Eval-pipeline validation:** Awake's 13 checkpoints are identical
+(`frozen_eval_identical: [True]`), i.e. greedy evaluation is deterministic
+across 8.4 h on one L4.
+
+**Dreams (12 nights):** 714 generated, 152 accepted (58 verbatim copies, 94
+real variations, 4 of them mirror-structured), 279 wrong, 283 unparsable.
+Real yield 13%. Held-out / prefix-changed rejections 0.
+
+**Reading of seed 0 (one seed; not a result):** H1 and H2 null — no
+insight in any arm, Sleep and Online equal at chance on the probe; H4
+reversed; H3 untested (no Sleep-NoDream yet). Both LoRA arms learn the
+literal 11-step rule to >0.9 held-out without ever using the r11 = r6
+shortcut, which is the regime the task was designed to produce. The dream
+stream as constructed (digits 1–7 fixed) is almost entirely unstructured
+and cannot carry the mirror statistic. Cross-attempt non-determinism on
+CUDA (§5c) is of the same order as between-arm differences on held-out and
+GSM8K, so seeds 1–4 are required before any comparison is read.
 
 ## 6. Repo state
 
@@ -573,48 +579,24 @@ Any change to a frozen item goes in `DEVIATIONS.md` with a reason.
 
 ## 8. Immediate next steps, in order
 
-1. ~~Finish the three in-flight items~~ done 2026-09-02: stray copy deleted;
-   stratified probe + binomial test with tests; `--number-digits` variant
-   run and rejected (§4, §5 runs 5–6).
-2. ~~Pick the final prompt format~~ work mode, unnumbered. PREREG §6.1
-   fixed; calibration appendix added to PREREG. Frozen 2026-09-02 as
-   PREREG v1.0 (hash in PREREG header); `DEVIATIONS.md` created empty.
-3. ~~`eval/compute_ledger.py`~~ done, with tests (incl. backend-mixing guard).
-4. ~~`eval/control_bench.py`~~ done; 300 ids frozen; not yet run on a model.
-5. ~~Arms: Baseline and Awake~~ written and tested model-free; 4-bit smoke
-   against the real model in progress (see §5 / results/runs).
-6. `backends/hf_backend.py` and `modal_app.py` written but **never
-   executed** (no torch/modal locally). First cloud action: run the
-   Baseline arm for 4 episodes on Modal to validate the path.
-7. ~~`sleep/` components + Online, Sleep, Sleep-NoDream arms~~ written and
-   tested against a fake trainable backend; MLX LoRA path smoke-tested
-   locally (4-bit).
-8. ~~Fresh-session review~~ done 2026-09-02 (`REVIEW.md`); all A/B/C items
-   applied (PREREG §8a). Frozen: see PREREG header for the commit hash.
-9. ~~Modal path check~~ done 2026-09-02, all six validation items pass
-   (§5a). Original list: `modal run modal_app.py::main --arm baseline
-   --seed 0 --n-episodes 4 --k 2 --n-probe 6 --n-heldout-eval 4`, with the
-   first-execution validation list from REVIEW.md: (1) model.dtype bf16,
-   adapter params fp32, ~33M trainable; (2) chat template emits the empty
-   think block, generation stops at <|im_end|>, completion_tokens ≈
-   count_tokens(text) ±1; (3) two greedy calls identical; (4) train on one
-   repeated example: finite decreasing loss, training_tokens = completion
-   length + 1, lora_norm grows, decay_adapter(0.05) shrinks it by exactly
-   5%, reset_adapter returns it to zero; (5) starmap returns three results,
-   volume commit persists /results/runs, HF cache reused; (6) wall-clock
-   per episode and per checkpoint.
-10. ~~Pre-launch (A4)~~ done (§5a): ratio 1.000–0.975 across yields, no
-    adjustment. **Open decision before any trainable arm:** dream yield is
-    0 on the untrained model (§5a). Options: (a) run as designed and treat
-    yield-per-night as a reported metric (H3 may be uninformative if yield
-    stays ~0); (b) tunable prompt work on the dream instruction (e.g. ask
-    for changes only in the last five digits, which also removes the
-    held-out-prefix rejections) — prompt wording is tunable, but steering
-    which digits change is close to the hidden structure and must be
-    weighed; (c) defer. Builder recommendation: (a) for the first seed,
-    log yield per night, decide (b) with data.
-11. 5-seed grid on Modal; `eval/analyze.py`; `tasks/string_grammar.py` as
-    replication; write-up.
+Steps 1–10 of the original list are done (calibration, freeze, review
+amendments, path check, A4, seed-0 Sleep/Online/Awake; §5, §5a–5d).
+
+11. **Decisions before more runs** (each is tunable wording, but recorded in
+    DEVIATIONS.md if changed after seed 0): reject verbatim-copy dreams
+    (`duplicate`); dream format drift (40% unparsable); whether the dream
+    instruction stays at digits 8–12 given ~0 structured dreams. Also:
+    `torch.use_deterministic_algorithms(True)` for the grid (§5c).
+12. Seed 0: Sleep-NoDream and Baseline (H3 and the floor). ~$5 on L4.
+    Launch with `modal run --detach modal_app.py::grid --seeds 0 --arms
+    sleep,sleep_nodream,baseline --run-tag <tag>`; Sleep will re-run under
+    the new tag unless the salvaged files are copied into `/ <tag>/runs/`
+    first (the orchestrator then loads them).
+13. Seeds 1–4, all five arms, one GPU type, preemption-safe launch.
+14. `eval/analyze.py`: log-rank test on episode-to-criterion (all censored
+    so far), forgetting paired test; figures.
+15. `tasks/string_grammar.py` as replication; write-up (PREREG §10: a null
+    on H2 is publishable).
 
 ## 9. Working conventions
 
