@@ -94,3 +94,13 @@ def test_volatility():
     assert implicit.volatility([0.5, 0.5, 0.5]) == 0.0
     assert implicit.volatility([0.373, 0.527, 0.522, 0.692]) == pytest.approx(statistics.pstdev([0.373, 0.527, 0.522, 0.692]))
     assert implicit.volatility([0.4]) is None
+
+
+def test_short_gap_reports_unparsable_fraction():
+    structured = SPLIT.heldout[:6]
+    unstructured = nr.unstructured_heldout(SPLIT, n=6, seed=0)
+    good = [f"ANSWER: {x.answer}" for x in structured]
+    cut = ["1,4->9\n9,1->4\n4,9->1"] * 6                      # work lines, no ANSWER within the short budget
+    g = implicit.short_gap(structured, good, unstructured, cut)
+    assert g["structured_unparsable"] == 0.0 and g["unstructured_unparsable"] == 1.0
+    assert g["unstructured_acc"] == 0.0 and g["gap"] == 1.0

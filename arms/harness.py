@@ -90,7 +90,8 @@ class Checkpoint:
              "day_seconds_mean": self.day_seconds_mean, "night_seconds": self.night_seconds,
              "mirror_bias": m.get("mirror_bias"), "mirror_bias_chance": m.get("chance"), "mirror_bias_n": m.get("n_error_steps"),
              "short_structured_acc": sh.get("structured_acc"), "short_unstructured_acc": sh.get("unstructured_acc"),
-             "short_gap": sh.get("gap"),
+             "short_gap": sh.get("gap"), "short_structured_unparsable": sh.get("structured_unparsable"),
+             "short_unstructured_unparsable": sh.get("unstructured_unparsable"),
              "late_error_rate": le.get("late_error_rate"), "early_error_rate": le.get("early_error_rate"),
              "late_n": le.get("n_late"), "early_n": le.get("n_early"),
              "control_unparsable": self.control_unparsable, "heldout_rows": self.heldout_rows,
@@ -140,7 +141,8 @@ def _checkpoint_from_flat(c: dict) -> Checkpoint:
                            above_chance=c["probe_above_chance"], p_value=c["probe_p_value"])
     ledger = {"episode": c["episode"], **{k[len("ledger_"):]: v for k, v in c.items() if k.startswith("ledger_")}}
     mirror = {"mirror_bias": c.get("mirror_bias"), "chance": c.get("mirror_bias_chance"), "n_error_steps": c.get("mirror_bias_n")}
-    short = {"structured_acc": c.get("short_structured_acc"), "unstructured_acc": c.get("short_unstructured_acc"), "gap": c.get("short_gap")}
+    short = {"structured_acc": c.get("short_structured_acc"), "unstructured_acc": c.get("short_unstructured_acc"), "gap": c.get("short_gap"),
+             "structured_unparsable": c.get("short_structured_unparsable"), "unstructured_unparsable": c.get("short_unstructured_unparsable")}
     le = {"late_error_rate": c.get("late_error_rate"), "early_error_rate": c.get("early_error_rate"),
           "n_late": c.get("late_n"), "n_early": c.get("early_n")}
     return Checkpoint(episode=c["episode"], probe=probe, heldout_accuracy=c["heldout_accuracy"],

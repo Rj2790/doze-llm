@@ -98,6 +98,7 @@ def summarize(root: str | Path, seeds: list[int], tol: float = 0.05) -> dict:
             a.setdefault("volatility", []).append(_imp.volatility([c["heldout_accuracy"] for c in cks]))
             last = cks[-1] if cks else {}
             for key in ("mirror_bias", "mirror_bias_chance", "short_gap", "short_structured_acc", "short_unstructured_acc",
+                        "short_structured_unparsable", "short_unstructured_unparsable",
                         "late_error_rate", "early_error_rate", "control_unparsable"):
                 a.setdefault(f"final_{key}", []).append(last.get(key))
     for a in arms.values():

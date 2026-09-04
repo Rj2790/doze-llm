@@ -49,9 +49,13 @@ def mirror_bias(items: Sequence[nr.Instance], texts: Sequence[str]) -> dict:
 
 def short_gap(structured: Sequence[nr.Instance], s_texts: Sequence[str],
               unstructured: Sequence[nr.Instance], u_texts: Sequence[str]) -> dict:
-    sa = sum(nr.parse_answer(t) == x.answer for x, t in zip(structured, s_texts)) / max(len(structured), 1)
-    ua = sum(nr.parse_answer(t) == x.answer for x, t in zip(unstructured, u_texts)) / max(len(unstructured), 1)
-    return {"structured_acc": sa, "unstructured_acc": ua, "gap": sa - ua}
+    sp = [nr.parse_answer(t) for t in s_texts]
+    up = [nr.parse_answer(t) for t in u_texts]
+    sa = sum(p == x.answer for x, p in zip(structured, sp)) / max(len(structured), 1)
+    ua = sum(p == x.answer for x, p in zip(unstructured, up)) / max(len(unstructured), 1)
+    return {"structured_acc": sa, "unstructured_acc": ua, "gap": sa - ua,
+            "structured_unparsable": sum(p is None for p in sp) / max(len(sp), 1),
+            "unstructured_unparsable": sum(p is None for p in up) / max(len(up), 1)}
 
 
 def late_vs_early(items: Sequence[nr.Instance], texts: Sequence[str]) -> dict:
