@@ -626,6 +626,31 @@ anything, a small negative for task and control accuracy. Seeds 1–4 are
 needed before any of this is a result; the implicit-probe numbers above are
 the first for a trained arm.
 
+### 5g. Compute move: Modal → Vultr GPU VM (decided 2026-09-05)
+
+Modal wallet exhausted (~$1 left); the remaining grid (seeds 1–4, ~29 L4
+GPU-hours per seed) would cost ~$93 on Modal. Options weighed: ComputeGPU
+serverless (L4 $0.53/h; an inference-endpoint product with 30 s sync calls,
+undocumented job limits, storage "coming soon") — rejected for multi-hour
+batch jobs; Vultr with $250 free credit — chosen. Plan
+`vcg-a16-12c-128g-32vram` (2 × NVIDIA A16 16 GB, 12 vCPU, 128 GB RAM,
+700 GB disk, $0.942/h; sjc/sgp/blr). The 8 GB A16 slice cannot hold Qwen3-4B
+bf16 (8 GB of weights). Footprint per arm ≈ 12 GB (weights 8, LoRA+Adam
+0.5, activations/KV 2–3) → one arm per GPU, eval batch 8. Expected speed:
+A16 is ~1.5× slower than L4 at batch 1 and 3–6× on batched work; a seed ≈
+60–90 A16-GPU-hours ≈ 30–45 h wall on two GPUs, $28–42 of credit. VMs are
+not preempted; resume remains the safety net.
+
+Deployment (`deploy/vultr/`, no Modal dependency): `setup.sh` (driver if
+missing, py3.11 venv, cu121 torch, deps; HF cache and results on /data),
+`run_job.py` (one arm/seed/tag; `--awake-from-sleep`; `--backend scripted`
+dry run; tested), `runner.sh` (per-GPU sequential queue, resumable, logs
+under /data/results/<tag>/logs), `launch_seed.sh` (tmux sessions per GPU
+from `queue.plan_queues`, Awake after Sleep on the same GPU). Repo reaches
+the VM by rsync from the laptop (no GitHub credentials on the VM); results
+come back by rsync. Same validation list as Modal before seed 1 (§8 item 9),
+plus A16 timing.
+
 ## 6. Repo state
 
 ```
@@ -655,7 +680,7 @@ doze-llm/
   tests/     102 model-free tests
   results/   calibration*.json; runs/ (arm runs); ledgers/ (per-arm ledgers, read by analyze.py)
   .gitignore                .venv/, results/, data/*.jsonl, __pycache__/
-  modal_app.py              Modal entrypoint for the grid — not yet run
+  modal_app.py              Modal entrypoint (used for seed 0); deploy/vultr/ for the VM path
 ```
 Remote: https://github.com/Rj2790/doze-llm (private; `main`; freeze commit
 6cfc319 pushed 2026-09-02).

@@ -50,6 +50,13 @@ resume from their last checkpoint; a preempted orchestrator re-attaches.
 Re-attach a launch with `--run-tag <tag>`. All arms of a seed on one GPU
 type (default L4).
 
+## Vultr VM path (from 2026-09-05)
+
+`deploy/vultr/`: rsync the repo to /opt/doze, run `setup.sh` once, then
+`launch_seed.sh <seed>` (tmux per GPU, resumable). Results under
+/data/results/<tag>/; pull with rsync into results/final/<tag>/. Never store
+API keys in the repo; the Vultr key lives outside it (`~/.config/vultr/api_key`).
+
 ## GitHub
 
 This project uses only the **Rj2790** GitHub account (`gh auth switch -u Rj2790`
