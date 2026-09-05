@@ -1,0 +1,23 @@
+{
+  "backend": "mlx:mlx-community/Qwen3-4B-4bit",
+  "length": 12,
+  "n": 40,
+  "n_probe": 40,
+  "full_accuracy": 0.3,
+  "steps_exact": 0.0,
+  "steps_parsed": 1.0,
+  "answer_unparsable": 0.0,
+  "median_tokens_correct": 31.0,
+  "probe_accuracy": 0.375,
+  "probe_chance": 0.333,
+  "probe_above_chance": false,
+  "first_error_step_hist": {
+    "1": 8,
+    "2": 25,
+    "3": 4,
+    "5": 2,
+    "6": 1
+  },
+  "seconds_full": 50.7,
+  "seconds_probe": 26.9
+}

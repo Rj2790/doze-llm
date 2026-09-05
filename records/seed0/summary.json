@@ -1,0 +1,569 @@
+{
+ "seeds_checked": [
+  0
+ ],
+ "verdicts": [
+  {
+   "seed": 0,
+   "arms": [
+    "awake",
+    "baseline",
+    "online",
+    "sleep",
+    "sleep_nodream"
+   ],
+   "backend": "hf:Qwen/Qwen3-4B",
+   "tol": 0.05,
+   "ok": true,
+   "message": "compute budgets matched"
+  }
+ ],
+ "arms": {
+  "awake": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    0.0
+   ],
+   "final_heldout": [
+    0.40298507462686567
+   ],
+   "final_probe": [
+    0.3
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.3
+     ],
+     [
+      50,
+      0.3
+     ],
+     [
+      100,
+      0.3
+     ],
+     [
+      150,
+      0.3
+     ],
+     [
+      200,
+      0.3
+     ],
+     [
+      250,
+      0.3
+     ],
+     [
+      300,
+      0.3
+     ],
+     [
+      350,
+      0.3
+     ],
+     [
+      400,
+      0.3
+     ],
+     [
+      450,
+      0.3
+     ],
+     [
+      500,
+      0.3
+     ],
+     [
+      550,
+      0.3
+     ],
+     [
+      600,
+      0.3
+     ]
+    ]
+   ],
+   "seeds": [
+    0
+   ],
+   "frozen_eval_identical": [
+    true
+   ],
+   "volatility": [
+    0.0
+   ],
+   "final_mirror_bias": [
+    null
+   ],
+   "final_mirror_bias_chance": [
+    null
+   ],
+   "final_short_gap": [
+    null
+   ],
+   "final_short_structured_acc": [
+    null
+   ],
+   "final_short_unstructured_acc": [
+    null
+   ],
+   "final_short_structured_unparsable": [
+    null
+   ],
+   "final_short_unstructured_unparsable": [
+    null
+   ],
+   "final_late_error_rate": [
+    null
+   ],
+   "final_early_error_rate": [
+    null
+   ],
+   "final_control_unparsable": [
+    null
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  },
+  "baseline": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    0.0
+   ],
+   "final_heldout": [
+    0.373134328358209
+   ],
+   "final_probe": [
+    0.36666666666666664
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.36666666666666664
+     ],
+     [
+      50,
+      0.36666666666666664
+     ],
+     [
+      100,
+      0.36666666666666664
+     ],
+     [
+      150,
+      0.36666666666666664
+     ],
+     [
+      200,
+      0.36666666666666664
+     ],
+     [
+      250,
+      0.36666666666666664
+     ],
+     [
+      300,
+      0.36666666666666664
+     ],
+     [
+      350,
+      0.36666666666666664
+     ],
+     [
+      400,
+      0.36666666666666664
+     ],
+     [
+      450,
+      0.36666666666666664
+     ],
+     [
+      500,
+      0.36666666666666664
+     ],
+     [
+      550,
+      0.36666666666666664
+     ],
+     [
+      600,
+      0.36666666666666664
+     ]
+    ]
+   ],
+   "seeds": [
+    0
+   ],
+   "frozen_eval_identical": [
+    true
+   ],
+   "volatility": [
+    0.0
+   ],
+   "final_mirror_bias": [
+    0.35323383084577115
+   ],
+   "final_mirror_bias_chance": [
+    0.35572139303482586
+   ],
+   "final_short_gap": [
+    0.0
+   ],
+   "final_short_structured_acc": [
+    0.31666666666666665
+   ],
+   "final_short_unstructured_acc": [
+    0.31666666666666665
+   ],
+   "final_short_structured_unparsable": [
+    null
+   ],
+   "final_short_unstructured_unparsable": [
+    null
+   ],
+   "final_late_error_rate": [
+    0.5119047619047619
+   ],
+   "final_early_error_rate": [
+    0.43143459915611815
+   ],
+   "final_control_unparsable": [
+    0.0
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  },
+  "online": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    0.13666666666666671
+   ],
+   "final_heldout": [
+    0.6666666666666666
+   ],
+   "final_probe": [
+    0.31666666666666665
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.36666666666666664
+     ],
+     [
+      50,
+      0.31666666666666665
+     ],
+     [
+      100,
+      0.36666666666666664
+     ],
+     [
+      150,
+      0.35
+     ],
+     [
+      200,
+      0.35
+     ],
+     [
+      250,
+      0.3333333333333333
+     ],
+     [
+      300,
+      0.3333333333333333
+     ],
+     [
+      350,
+      0.35
+     ],
+     [
+      400,
+      0.26666666666666666
+     ],
+     [
+      450,
+      0.3
+     ],
+     [
+      500,
+      0.31666666666666665
+     ],
+     [
+      550,
+      0.31666666666666665
+     ],
+     [
+      600,
+      0.31666666666666665
+     ]
+    ]
+   ],
+   "seeds": [
+    0
+   ],
+   "volatility": [
+    0.18842928348040086
+   ],
+   "final_mirror_bias": [
+    null
+   ],
+   "final_mirror_bias_chance": [
+    null
+   ],
+   "final_short_gap": [
+    null
+   ],
+   "final_short_structured_acc": [
+    null
+   ],
+   "final_short_unstructured_acc": [
+    null
+   ],
+   "final_short_structured_unparsable": [
+    null
+   ],
+   "final_short_unstructured_unparsable": [
+    null
+   ],
+   "final_late_error_rate": [
+    null
+   ],
+   "final_early_error_rate": [
+    null
+   ],
+   "final_control_unparsable": [
+    null
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  },
+  "sleep_nodream": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    0.24
+   ],
+   "final_heldout": [
+    0.9701492537313433
+   ],
+   "final_probe": [
+    0.26666666666666666
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.36666666666666664
+     ],
+     [
+      50,
+      0.25
+     ],
+     [
+      100,
+      0.31666666666666665
+     ],
+     [
+      150,
+      0.35
+     ],
+     [
+      200,
+      0.21666666666666667
+     ],
+     [
+      250,
+      0.23333333333333334
+     ],
+     [
+      300,
+      0.23333333333333334
+     ],
+     [
+      350,
+      0.21666666666666667
+     ],
+     [
+      400,
+      0.18333333333333332
+     ],
+     [
+      450,
+      0.23333333333333334
+     ],
+     [
+      500,
+      0.25
+     ],
+     [
+      550,
+      0.2
+     ],
+     [
+      600,
+      0.26666666666666666
+     ]
+    ]
+   ],
+   "seeds": [
+    0
+   ],
+   "volatility": [
+    0.17447764211759495
+   ],
+   "final_mirror_bias": [
+    0.29411764705882354
+   ],
+   "final_mirror_bias_chance": [
+    0.3235294117647059
+   ],
+   "final_short_gap": [
+    0.0
+   ],
+   "final_short_structured_acc": [
+    0.0
+   ],
+   "final_short_unstructured_acc": [
+    0.0
+   ],
+   "final_short_structured_unparsable": [
+    null
+   ],
+   "final_short_unstructured_unparsable": [
+    null
+   ],
+   "final_late_error_rate": [
+    0.010178117048346057
+   ],
+   "final_early_error_rate": [
+    0.02038369304556355
+   ],
+   "final_control_unparsable": [
+    0.0
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  },
+  "sleep": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    0.05999999999999994
+   ],
+   "final_heldout": [
+    0.9303482587064676
+   ],
+   "final_probe": [
+    0.31666666666666665
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.36666666666666664
+     ],
+     [
+      50,
+      0.4166666666666667
+     ],
+     [
+      100,
+      0.31666666666666665
+     ],
+     [
+      150,
+      0.26666666666666666
+     ],
+     [
+      200,
+      0.3333333333333333
+     ],
+     [
+      250,
+      0.35
+     ],
+     [
+      300,
+      0.2833333333333333
+     ],
+     [
+      350,
+      0.3
+     ],
+     [
+      400,
+      0.36666666666666664
+     ],
+     [
+      450,
+      0.31666666666666665
+     ],
+     [
+      500,
+      0.25
+     ],
+     [
+      550,
+      0.3333333333333333
+     ],
+     [
+      600,
+      0.31666666666666665
+     ]
+    ]
+   ],
+   "seeds": [
+    0
+   ],
+   "volatility": [
+    0.16728844093686893
+   ],
+   "final_mirror_bias": [
+    null
+   ],
+   "final_mirror_bias_chance": [
+    null
+   ],
+   "final_short_gap": [
+    null
+   ],
+   "final_short_structured_acc": [
+    null
+   ],
+   "final_short_unstructured_acc": [
+    null
+   ],
+   "final_short_structured_unparsable": [
+    null
+   ],
+   "final_short_unstructured_unparsable": [
+    null
+   ],
+   "final_late_error_rate": [
+    null
+   ],
+   "final_early_error_rate": [
+    null
+   ],
+   "final_control_unparsable": [
+    null
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  }
+ }
+}

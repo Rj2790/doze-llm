@@ -1,0 +1,481 @@
+{
+ "model_load_seconds": 24.9,
+ "validation": {
+  "1_describe": {
+   "backend": "hf:Qwen/Qwen3-4B",
+   "seed": 0,
+   "lora": true,
+   "model_dtype": "torch.bfloat16",
+   "adapter_dtypes": [
+    "torch.float32"
+   ],
+   "trainable_params": 33030144,
+   "n_layers": 36
+  },
+  "1_pass": true,
+  "2_template_has_empty_think": true,
+  "2_stopped_before_budget": true,
+  "2_completion_tokens": 100,
+  "2_count_tokens_text": 99,
+  "2_no_special_tokens_in_text": true,
+  "2_pass": true,
+  "2_sample": "1,9->4  \n4,4->4  \n4,9->1  \n1,1->1  \n1,4->9  \n9,4->1  \n1,4->9  \n9,4->1  \n4,4->4  \n4,4->4  \n4,1->9  \nSTEPS: 4 4 1 1 9 1 9 1 4 4 4 9  \nANSWER: 9",
+  "3_pass": true,
+  "4_losses": [
+   0.3907,
+   0.0032,
+   0.0001,
+   0.1917,
+   0.0007,
+   0.0008
+  ],
+  "4_loss_finite": true,
+  "4_loss_decreasing": true,
+  "4_training_tokens": 588,
+  "4_expected_tokens": 588,
+  "4_norm_before_after_decay_reset": [
+   0.0,
+   1.3048866987228394,
+   1.2396421432495117,
+   0.0
+  ],
+  "4_decay_ratio": 0.9499998309913145,
+  "4_seconds": 2.6,
+  "4_pass": true
+ },
+ "agreement_rows": [
+  {
+   "digits": "194911414441",
+   "text": "1,9->4  \n4,4->4  \n4,9->1  \n1,1->1  \n1,4->9  \n9,4->1  \n1,4->9  \n9,4->1  \n4,4->4  \n4,4->4  \n4,1->9  \nSTEPS: 4 4 1 1 9 1 9 1 4 4 4 9  \nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 6,
+   "steps_exact": false,
+   "tokens": 100,
+   "kept": false
+  },
+  {
+   "digits": "494999491919",
+   "text": "4,9->1\n1,4->9\n9,9->9\n9,9->9\n9,4->1\n1,9->4\n4,9->1\n1,1->1\n1,9->4\n4,1->9\n9,9->9\nSTEPS: 1 9 9 9 1 4 1 1 4 9 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 4,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "441914419991",
+   "text": "4,4->4\n4,1->9\n9,9->9\n9,1->4\n4,4->4\n4,1->9\n9,9->9\n9,9->9\n9,9->9\n9,1->4\nSTEPS: 4 9 9 4 4 9 9 9 9 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 8,
+   "steps_exact": false,
+   "tokens": 90,
+   "kept": false
+  },
+  {
+   "digits": "144449991919",
+   "text": "1,4->9  \n9,4->4  \n4,4->4  \n4,4->4  \n4,4->4  \n4,9->1  \n1,9->4  \n4,9->1  \n1,1->1  \n1,9->4  \n4,9->1  \nSTEPS: 9 4 4 4 4 1 4 1 1 4 1  \nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 6,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "994144111111",
+   "text": "9,9->9\n9,4->1\n1,1->1\n1,4->9\n9,4->1\n1,1->1\n1,1->1\n1,1->1\n1,1->1\n1,1->1\nSTEPS: 9 1 1 9 1 1 1 1 1 1 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "steps_exact": true,
+   "tokens": 92,
+   "kept": true
+  },
+  {
+   "digits": "999111944144",
+   "text": "9,9->9\n9,9->9\n9,1->4\n1,1->1\n1,1->1\n1,9->4\n9,4->1\n4,4->4\n4,1->4\n1,4->9\n4,4->4\nSTEPS: 9 9 9 4 1 1 4 1 4 4 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 4,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "449114191119",
+   "text": "4,4->4\n4,9->1\n1,1->1\n1,4->9\n9,1->4\n4,1->9\n9,1->4\n4,1->9\n9,1->4\n1,9->4\nSTEPS: 4 1 1 9 4 9 4 9 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 3,
+   "steps_exact": false,
+   "tokens": 88,
+   "kept": false
+  },
+  {
+   "digits": "444499441914",
+   "text": "4,4->4\n4,4->4\n4,4->4\n4,9->1\n1,9->4\n4,4->4\n4,1->9\n9,9->9\n9,1->4\n4,4->4\nSTEPS: 4 4 4 1 4 4 9 9 4 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 8,
+   "steps_exact": false,
+   "tokens": 90,
+   "kept": false
+  },
+  {
+   "digits": "411419444144",
+   "text": "4,1->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\n1,9->4\n4,4->4\n4,4->4\n4,1->9\n9,4->1\n1,4->9\nSTEPS: 9 4 4 9 1 4 4 4 9 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 4,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "444111114141",
+   "text": "4,4->4\n4,4->4\n4,1->9\n9,1->4\n4,1->9\n9,1->4\n4,1->9\n9,4->1\n1,1->1\n1,4->9\n9,1->4\nSTEPS: 4 4 4 9 4 9 4 9 1 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 3,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "911919991119",
+   "text": "9,1->4\n4,1->9\n9,9->9\n9,1->4\n4,9->1\n1,9->4\n4,9->1\n1,9->4\n4,1->9\n9,1->4\n4,9->1\nSTEPS: 4 9 9 4 1 4 1 4 9 4 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 7,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "914499119191",
+   "text": "9,1->4\n4,4->4\n4,9->1\n1,9->4\n4,9->1\n1,9->4\n4,1->9\n9,9->9\n9,1->4\n4,9->1\n1,1->1\nSTEPS: 4 4 1 4 1 4 9 9 4 1 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 2,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "911199919491",
+   "text": "9,1->4\n4,1->9\n9,1->4\n4,9->1\n1,9->4\n4,9->1\n1,9->4\n4,1->9\n9,4->1\n1,9->4\n4,1->9\nSTEPS: 4 9 4 1 4 1 4 9 1 4 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 6,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "119911919991",
+   "text": "1,1->1\n1,9->4\n4,9->1\n1,9->4\n4,1->9\n9,1->4\n4,9->1\n1,9->4\n4,9->1\n1,9->4\n4,1->9\nSTEPS: 1 4 1 4 9 4 1 4 1 4 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 4,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "919944994449",
+   "text": "9,1->4\n4,9->1\n1,9->4\n4,9->1\n1,4->9\n9,4->4\n4,9->1\n1,9->4\n4,4->4\n4,4->4\n4,9->1\nSTEPS: 4 1 4 1 9 4 1 4 4 4 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 7,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "199499194949",
+   "text": "1,9->4  \n4,9->1  \n1,4->9  \n9,9->9  \n9,9->9  \n9,1->4  \n4,9->1  \n1,4->9  \n9,4->1  \n1,9->4  \n4,9->1  \nSTEPS: 4 1 9 9 9 4 1 9 1 4 1  \nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 8,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "949414191919",
+   "text": "9,4->1\n1,9->4\n4,4->4\n4,1->9\n9,4->1\n1,1->1\n1,9->4\n4,1->9\n9,9->9\n9,1->4\n4,9->1\nSTEPS: 1 4 4 9 1 1 4 9 9 4 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "steps_exact": true,
+   "tokens": 98,
+   "kept": true
+  },
+  {
+   "digits": "114949994449",
+   "text": "1,1->1\n1,4->9\n9,9->9\n9,4->1\n1,9->4\n4,9->1\n1,9->4\n4,9->1\n1,4->9\n9,4->1\n1,9->4\nSTEPS: 1 9 9 1 4 1 4 1 9 1 4\nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 7,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "499199114141",
+   "text": "4,9->1\n1,9->4\n4,9->1\n1,1->1\n1,9->4\n4,9->1\n1,1->1\n1,4->9\n9,1->4\n4,1->9\nSTEPS: 1 4 1 1 4 1 1 9 4 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 3,
+   "steps_exact": false,
+   "tokens": 90,
+   "kept": false
+  },
+  {
+   "digits": "114414191119",
+   "text": "1,1->1\n1,4->9\n9,4->1\n1,1->1\n1,4->9\n9,1->4\n4,1->9\n9,1->4\n4,1->9\n9,1->4\n4,9->1\nSTEPS: 1 9 1 1 9 4 9 4 9 4 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 6,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "911491949494",
+   "text": "9,1->4\n4,1->9\n9,4->1\n1,9->4\n4,1->9\n9,9->9\n9,4->1\n1,9->4\n4,4->4\n4,9->1\n9,4->1\nSTEPS: 4 9 1 4 9 1 9 4 1 4 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 6,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "911444141414",
+   "text": "9,1->4\n4,1->9\n9,4->1\n1,4->9\n9,4->1\n1,4->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\n4,1->9\nSTEPS: 4 9 1 9 1 9 4 4 9 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 6,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "941494114941",
+   "text": "9,4->1\n1,1->1\n1,4->9\n9,9->9\n9,4->1\n1,1->1\n1,4->9\n9,9->9\n9,4->1\n4,1->9\n1,9->4\nSTEPS: 1 1 9 9 1 1 9 9 1 9 4\nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 7,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "494994199199",
+   "text": "4,9->1\n1,4->9\n9,9->9\n9,9->9\n9,4->1\n1,1->1\n1,9->4\n4,9->1\n1,9->4\n4,1->9\n9,9->9\nSTEPS: 1 9 9 9 1 1 4 1 4 9 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 8,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "149414149194",
+   "text": "1,4->9  \n9,9->9  \n9,4->1  \n1,1->1  \n1,4->9  \n9,1->4  \n4,1->9  \n9,4->1  \n1,9->4  \n4,1->9  \n9,4->1  \nSTEPS: 9 9 1 1 9 4 9 1 4 9 1  \nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 7,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "111444449994",
+   "text": "1,1->1\n1,1->1\n1,4->9\n9,4->1\n1,4->9\n9,4->1\n1,4->9\n9,9->9\n9,9->9\n9,4->1\nSTEPS: 1 1 9 1 9 1 9 9 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 9,
+   "steps_exact": false,
+   "tokens": 90,
+   "kept": true
+  },
+  {
+   "digits": "999191119491",
+   "text": "9,9->9\n9,9->9\n9,1->4\n4,9->1\n1,1->1\n1,1->1\n1,1->1\n1,9->4\n4,4->4\n4,9->1\n4,1->9\nSTEPS: 9 9 9 4 1 1 1 4 4 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 8,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "199141194149",
+   "text": "1,9->4  \n4,9->1  \n1,1->1  \n1,4->9  \n9,1->4  \n4,1->9  \n9,1->4  \n4,9->1  \n1,4->9  \n9,4->1  \n4,9->1  \nSTEPS: 4 1 1 9 4 9 4 1 9 1 1  \nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 7,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "144994444144",
+   "text": "1,4->9  \n9,4->4  \n4,4->4  \n4,9->1  \n1,9->4  \n4,4->4  \n4,4->4  \n4,4->4  \n4,1->9  \n9,4->4  \n4,4->4  \nSTEPS: 9 4 4 1 4 4 4 4 9 4 4  \nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 3,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "919999119191",
+   "text": "9,1->4\n4,9->1\n1,9->4\n4,9->1\n1,9->4\n4,9->1\n1,1->1\n1,9->4\n4,1->9\n9,9->9\n9,1->4\nSTEPS: 4 1 4 1 4 1 1 4 9 9\nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 5,
+   "steps_exact": false,
+   "tokens": 96,
+   "kept": false
+  },
+  {
+   "digits": "444491494149",
+   "text": "4,4->4\n4,4->4\n4,4->4\n4,9->1\n1,1->1\n1,4->9\n9,9->9\n9,4->1\n1,4->9\n4,9->1\nSTEPS: 4 4 4 1 1 9 9 1 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 8,
+   "steps_exact": false,
+   "tokens": 90,
+   "kept": false
+  },
+  {
+   "digits": "144994419491",
+   "text": "1,4->9  \n9,4->4  \n4,4->4  \n4,9->1  \n1,9->4  \n4,4->4  \n4,1->9  \n9,4->4  \n4,9->1  \n1,4->9  \n9,1->4  \nSTEPS: 9 4 4 1 4 4 9 4 1 9 4  \nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 4,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "494194114141",
+   "text": "4,9->1\n1,4->9\n9,1->4\n4,9->1\n1,4->9\n9,4->1\n1,1->1\n1,4->9\n9,1->4\n4,1->9\n1,4->9\nSTEPS: 1 9 4 1 9 1 1 9 4 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 6,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "144111994949",
+   "text": "1,4->9  \n9,4->1  \n1,1->1  \n1,1->1  \n1,1->1  \n1,9->4  \n4,9->1  \n1,9->4  \n4,4->4  \n4,9->1  \n1,9->4  \nSTEPS: 9 1 1 1 1 4 1 4 4 1 4  \nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 9,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": true
+  },
+  {
+   "digits": "491914949194",
+   "text": "4,9->1\n1,1->1\n1,9->4\n4,1->9\n9,4->1\n1,9->4\n4,4->4\n4,9->1\n1,9->4\n4,1->9\n9,4->1\nSTEPS: 1 1 4 9 1 4 4 1 4 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 8,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "419919444944",
+   "text": "4,1->9\n9,9->9\n9,1->4\n4,9->1\n1,4->9\n9,4->1\n1,4->9\n9,4->1\n1,9->4\n4,4->4\n4,4->4\nSTEPS: 9 9 4 1 9 1 9 1 4 4 4\nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 2,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "941441449494",
+   "text": "9,4->1\n1,1->1\n1,4->9\n9,4->1\n1,4->9\n9,4->1\n1,4->9\n9,9->9\n9,4->1\n1,4->9\n9,4->1\nSTEPS: 1 1 9 1 9 1 9 9 1 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 4,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "411114414141",
+   "text": "4,1->9\n9,1->4\n4,1->9\n9,1->4\n4,1->9\n9,4->1\n1,4->9\n9,1->4\n4,1->9\n9,4->1\n1,1->1\nSTEPS: 9 4 9 4 9 1 9 4 9 1 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 5,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  },
+  {
+   "digits": "914911449494",
+   "text": "9,1->4\n4,4->1\n1,9->4\n4,1->9\n9,1->4\n4,1->9\n9,4->1\n1,4->9\n9,4->1\n4,9->1\nSTEPS: 4 1 4 9 4 9 1 9 1 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 4,
+   "steps_exact": false,
+   "tokens": 90,
+   "kept": false
+  },
+  {
+   "digits": "114194994149",
+   "text": "1,1->1\n1,4->9\n9,1->4\n4,9->1\n1,4->9\n9,9->9\n9,4->1\n1,9->4\n4,4->4\n4,1->9\n9,9->9\nSTEPS: 1 9 4 1 9 9 1 4 4 9 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 8,
+   "steps_exact": false,
+   "tokens": 98,
+   "kept": false
+  }
+ ],
+ "agreement_summary": {
+  "n": 40,
+  "accuracy": 0.275,
+  "steps_exact": 0.05,
+  "kept": 4,
+  "kept_tokens_mean": 94.5,
+  "kept_tokens_median": 95.0,
+  "all_tokens_mean": 96.4
+ },
+ "agreement_seconds": 29.6,
+ "train_rows_summary": {
+  "n": 40,
+  "accuracy": 0.3,
+  "steps_exact": 0.075,
+  "kept": 7,
+  "kept_tokens_mean": 97.14285714285714,
+  "kept_tokens_median": 98,
+  "all_tokens_mean": 97.4
+ },
+ "dreams": {
+  "seeds": 7,
+  "generated": 14,
+  "kept": 0,
+  "rejected": {
+   "heldout_prefix": 5,
+   "wrong": 9
+  },
+  "yield": 0.0,
+  "dream_tokens_generated_total": 1670,
+  "dream_completion_tokens_mean": null,
+  "dream_completion_tokens_median": null,
+  "seconds": 13.9
+ }
+}

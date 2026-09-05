@@ -1,0 +1,34 @@
+{
+ "compare": {
+  "n": 40,
+  "same_answer": 31,
+  "same_text": 30,
+  "both_correct": 8,
+  "only_a_correct": 2,
+  "only_b_correct": 3,
+  "a": {
+   "n": 40,
+   "accuracy": 0.25,
+   "steps_exact": 0.075,
+   "kept": 3,
+   "kept_tokens_mean": 95,
+   "kept_tokens_median": 97,
+   "all_tokens_mean": 95.6
+  },
+  "b": {
+   "n": 40,
+   "accuracy": 0.275,
+   "steps_exact": 0.05,
+   "kept": 4,
+   "kept_tokens_mean": 94.5,
+   "kept_tokens_median": 95.0,
+   "all_tokens_mean": 96.4
+  }
+ },
+ "first_diff_line_hist": {
+  "6": 1,
+  "7": 2,
+  "10": 3,
+  "11": 4
+ }
+}

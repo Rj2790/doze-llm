@@ -1,0 +1,23 @@
+{
+  "backend": "mlx:mlx-community/Qwen3-4B-bf16",
+  "length": 12,
+  "n": 40,
+  "n_probe": 40,
+  "full_accuracy": 0.3,
+  "steps_exact": 0.0,
+  "steps_parsed": 0.85,
+  "answer_unparsable": 0.05,
+  "median_tokens_correct": 31.0,
+  "probe_accuracy": 0.5,
+  "probe_chance": 0.333,
+  "probe_above_chance": true,
+  "first_error_step_hist": {
+    "1": 2,
+    "2": 24,
+    "3": 2,
+    "4": 4,
+    "5": 2
+  },
+  "seconds_full": 123.0,
+  "seconds_probe": 42.9
+}
