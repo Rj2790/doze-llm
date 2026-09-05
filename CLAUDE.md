@@ -50,6 +50,12 @@ resume from their last checkpoint; a preempted orchestrator re-attaches.
 Re-attach a launch with `--run-tag <tag>`. All arms of a seed on one GPU
 type (default L4).
 
+## Lightning AI Studios
+
+Studio `doze-llm` (teamspace general). Launch jobs with `deploy/vultr/runner.sh`
+and `DOZE_STOP_WHEN_DONE=1`; never leave auto-sleep off without a running job
+(idle L4 ≈ 1.3 credits/h). Credentials live in `.env` (LIGHTNING_*), never in the repo.
+
 ## Vultr VM path (from 2026-09-05)
 
 `deploy/vultr/`: rsync the repo to /opt/doze, run `setup.sh` once, then

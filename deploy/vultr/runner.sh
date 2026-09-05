@@ -19,3 +19,7 @@ for ARM in "$@"; do
   echo "$(date -u +%FT%TZ) gpu$GPU done  $ARM seed$SEED exit=$?" >> "$DOZE_RESULTS/$TAG/logs/runner_gpu$GPU.log"
 done
 echo "$(date -u +%FT%TZ) gpu$GPU QUEUE_DONE" >> "$DOZE_RESULTS/$TAG/logs/runner_gpu$GPU.log"
+# Lightning Studios: stop the machine when the queue is done so an idle GPU never bills (2026-09-05: ~14 credits lost idling)
+if [ "${DOZE_STOP_WHEN_DONE:-0}" = "1" ]; then
+  "$PY" -c "from lightning_sdk import Studio; Studio().stop()" >> "$DOZE_RESULTS/$TAG/logs/runner_gpu$GPU.log" 2>&1 || true
+fi

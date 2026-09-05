@@ -651,6 +651,29 @@ the VM by rsync from the laptop (no GitHub credentials on the VM); results
 come back by rsync. Same validation list as Modal before seed 1 (§8 item 9),
 plus A16 timing.
 
+### 5h. Lightning AI Studios (2026-09-05) — seed 1 Sleep; idle-credit incident
+
+Vultr GPU plans require a support approval (ticket pending). Lightning AI
+(user rushiljain2001, teamspace general, 30 org credits) used instead:
+Studio `doze-llm`, L4, torch 2.8 cu128, Python 3.12; repo uploaded as a
+tarball (zero-byte files break single-file upload; `deploy/vultr/queue.py`
+shadowed stdlib `queue` and broke torch import → renamed `gpu_queue.py`).
+Validation (4-episode Baseline): same numbers as Modal's L4 path check,
+4.9 s/episode, 40 s small checkpoint. `L4_X_2` could not be started on this
+account (HTTP 400) — single L4 only.
+
+**Incident:** after disabling auto-sleep for the planned launch, the network
+dropped mid-sequence and the Studio idled on an L4 for ~8 h with nothing
+running: ~14 of 30 credits lost. Implied L4 rate ≈ 1.3 credits/h. Guards
+added: `runner.sh` stops the Studio when its queue finishes
+(`DOZE_STOP_WHEN_DONE=1`), and the monitor stops it on QUEUE_DONE. Rule:
+never leave a Studio with auto-sleep off unless a job is running on it.
+
+Seed 1 Sleep launched 04:38 UTC on the single L4 (~6 h at the deterministic
+pace, ≈ 8 credits). Remaining credits (~16) cover Sleep plus at most
+Baseline (~2.7 h); Online, Sleep-NoDream and Awake for seed 1 go to Vultr
+when approved.
+
 ## 6. Repo state
 
 ```
