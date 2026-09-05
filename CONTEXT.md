@@ -701,7 +701,8 @@ doze-llm/
   sleep/     filters.py replay_buffer.py dreamer.py consolidate.py
   data/      gsm8k_test.jsonl (1319 rows, original OpenAI release)
   tests/     102 model-free tests
-  results/   calibration*.json; runs/ (arm runs); ledgers/ (per-arm ledgers, read by analyze.py)
+  results/   git-ignored working area (calibration*.json, final/, vm/)
+  records/   COMMITTED artefacts: seed0/ (all arms + report), seed1/, calibration/, retro/, infra/, TIMELINE.md
   .gitignore                .venv/, results/, data/*.jsonl, __pycache__/
   modal_app.py              Modal entrypoint (used for seed 0); deploy/vultr/ for the VM path
 ```
