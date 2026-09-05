@@ -1,0 +1,239 @@
+{
+ "seeds_checked": [
+  1
+ ],
+ "verdicts": [
+  {
+   "seed": 1,
+   "arms": [
+    "baseline",
+    "sleep"
+   ],
+   "backend": "hf:Qwen/Qwen3-4B",
+   "tol": 0.05,
+   "ok": true,
+   "message": "compute budgets matched"
+  }
+ ],
+ "arms": {
+  "baseline": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    0.0
+   ],
+   "final_heldout": [
+    0.47761194029850745
+   ],
+   "final_probe": [
+    0.4166666666666667
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.4166666666666667
+     ],
+     [
+      50,
+      0.4166666666666667
+     ],
+     [
+      100,
+      0.4166666666666667
+     ],
+     [
+      150,
+      0.4166666666666667
+     ],
+     [
+      200,
+      0.4166666666666667
+     ],
+     [
+      250,
+      0.4166666666666667
+     ],
+     [
+      300,
+      0.4166666666666667
+     ],
+     [
+      350,
+      0.4166666666666667
+     ],
+     [
+      400,
+      0.4166666666666667
+     ],
+     [
+      450,
+      0.4166666666666667
+     ],
+     [
+      500,
+      0.4166666666666667
+     ],
+     [
+      550,
+      0.4166666666666667
+     ],
+     [
+      600,
+      0.4166666666666667
+     ]
+    ]
+   ],
+   "seeds": [
+    1
+   ],
+   "frozen_eval_identical": [
+    true
+   ],
+   "volatility": [
+    0.0
+   ],
+   "final_mirror_bias": [
+    0.3298429319371728
+   ],
+   "final_mirror_bias_chance": [
+    0.337696335078534
+   ],
+   "final_short_gap": [
+    0.0
+   ],
+   "final_short_structured_acc": [
+    0.3416666666666667
+   ],
+   "final_short_unstructured_acc": [
+    0.3416666666666667
+   ],
+   "final_short_structured_unparsable": [
+    0.0
+   ],
+   "final_short_unstructured_unparsable": [
+    0.0
+   ],
+   "final_late_error_rate": [
+    0.40540540540540543
+   ],
+   "final_early_error_rate": [
+    0.4006024096385542
+   ],
+   "final_control_unparsable": [
+    0.0
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  },
+  "sleep": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    -0.08000000000000002
+   ],
+   "final_heldout": [
+    0.8109452736318408
+   ],
+   "final_probe": [
+    0.36666666666666664
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.4166666666666667
+     ],
+     [
+      50,
+      0.38333333333333336
+     ],
+     [
+      100,
+      0.3333333333333333
+     ],
+     [
+      150,
+      0.38333333333333336
+     ],
+     [
+      200,
+      0.4166666666666667
+     ],
+     [
+      250,
+      0.4166666666666667
+     ],
+     [
+      300,
+      0.38333333333333336
+     ],
+     [
+      350,
+      0.4
+     ],
+     [
+      400,
+      0.35
+     ],
+     [
+      450,
+      0.38333333333333336
+     ],
+     [
+      500,
+      0.4666666666666667
+     ],
+     [
+      550,
+      0.3333333333333333
+     ],
+     [
+      600,
+      0.36666666666666664
+     ]
+    ]
+   ],
+   "seeds": [
+    1
+   ],
+   "volatility": [
+    0.16130146313255497
+   ],
+   "final_mirror_bias": [
+    0.2696629213483146
+   ],
+   "final_mirror_bias_chance": [
+    0.34269662921348315
+   ],
+   "final_short_gap": [
+    0.033333333333333326
+   ],
+   "final_short_structured_acc": [
+    0.39166666666666666
+   ],
+   "final_short_unstructured_acc": [
+    0.35833333333333334
+   ],
+   "final_short_structured_unparsable": [
+    0.0
+   ],
+   "final_short_unstructured_unparsable": [
+    0.0
+   ],
+   "final_late_error_rate": [
+    0.036281179138321996
+   ],
+   "final_early_error_rate": [
+    0.11833333333333333
+   ],
+   "final_control_unparsable": [
+    0.0
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  }
+ }
+}

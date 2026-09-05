@@ -669,10 +669,27 @@ added: `runner.sh` stops the Studio when its queue finishes
 (`DOZE_STOP_WHEN_DONE=1`), and the monitor stops it on QUEUE_DONE. Rule:
 never leave a Studio with auto-sleep off unless a job is running on it.
 
-Seed 1 Sleep launched 04:38 UTC on the single L4 (~6 h at the deterministic
-pace, ≈ 8 credits). Remaining credits (~16) cover Sleep plus at most
-Baseline (~2.7 h); Online, Sleep-NoDream and Awake for seed 1 go to Vultr
-when approved.
+**Seed 1 on Lightning (complete 2026-09-05):** Sleep 04:38–09:03 UTC
+(4.42 h, 600 steps, 101,136 generated / 58,424 training tokens) then
+Baseline 09:04–11:38 UTC (2.57 h, 57,978 tokens), chained on one L4; Studio
+stopped itself. `check_seed(records/seed1)`: MATCHED (Sleep reference).
+Files: `records/seed1/`. ≈ 9 credits; ≈ 7 left.
+
+| arm | probe curve | held-out 0→600 | GSM8K 0→600 | volatility |
+|---|---|---|---|---|
+| Sleep | .42 .38 .33 .38 .42 .42 .38 .40 .35 .38 .47 .33 .37 | 0.478 → 0.811 (peak 0.896) | 0.577 → 0.497 (−0.08) | 0.161 |
+| Baseline | .42 flat (13 identical checkpoints) | 0.478 | 0.577 | 0.000 |
+
+Sleep seed 1 secondary metrics at ep 600: mirror_bias 0.270 vs chance
+0.343 (n=89); short_gap +0.03 with 0% short-mode unparsable; late/early
+error 0.036 / 0.118; GSM8K unparsable 0%. Dreams (two-step): 642
+proposals, 191 accepted (real yield 30%), 300 source copies rejected, 68
+wrong, 7 unparsable (1%), 69 out of spec, 20 within-night repeats, 5
+structured. Unlike seed 0's Sleep (+0.06 on GSM8K), seed 1's Sleep forgot
+(−0.08): cross-seed variance on H4. Probe null again.
+
+Still missing for seed 1: Online, Sleep-NoDream, Awake (Vultr when
+approved, or new credits).
 
 ## 6. Repo state
 

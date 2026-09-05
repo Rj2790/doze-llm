@@ -18,6 +18,6 @@ All dates 2026. GPU costs are list prices at the time (Modal L4 $0.80/h, A100-80
 | 09-05 | Modal wallet ~$1; Vultr GPU plan gated (support ticket); Lightning AI chosen for seed 1 | — | — | — |
 | 09-05 | Lightning validation (4-episode Baseline) | L4 Studio | pass; 4.9 s/episode | ~0.3 credits |
 | 09-05 | Idle Studio after failed L4_X_2 switch + laptop network drop | L4 Studio | ~8 h idle, ~14 of 30 credits lost; guards added (runner stops Studio; monitor) | −14 credits |
-| 09-05 | Seed 1 Sleep (two-step dreamer) then Baseline, chained | L4 Studio | in progress; Studio stops itself at queue end | ≈ 11.5 credits expected |
+| 09-05 | Seed 1 Sleep (two-step dreamer) then Baseline, chained | L4 Studio | complete; Sleep 4.42 h, Baseline 2.57 h; MATCHED; Studio stopped itself | ≈ 9 credits |
 
 Seed-0 useful compute: $18.73; seed-0 waste from failures: ≈ $6.3. Remaining plan: Online, Sleep-NoDream, Awake for seed 1 and seeds 2–4 on Vultr (approval pending) or new credits.
