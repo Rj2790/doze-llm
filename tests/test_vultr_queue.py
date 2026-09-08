@@ -28,3 +28,15 @@ def test_run_job_dry_run_scripted(tmp_path):
                            "--k", "2", "--n-probe", "6", "--n-heldout-eval", "3", "--control-items", "0", "--n-implicit", "0"],
                           capture_output=True, text=True, cwd=Path(__file__).resolve().parents[1])
     assert out2.returncode == 0 and "awake_budget=" in out2.stdout, out2.stderr[-2000:]
+
+
+def test_plan_multi_balances_and_orders_awake_after_sleep():
+    from deploy.vultr.gpu_queue import plan_multi, EXPECTED_HOURS
+    items = [(1, "online"), (1, "sleep_nodream"), (1, "awake")] + [(s, a) for s in (2, 3, 4) for a in ("sleep", "sleep_nodream", "online", "baseline", "awake")]
+    q = plan_multi(items, 2)
+    assert sorted(sum(q, [])) == sorted(items)
+    for s in (2, 3, 4):
+        holder = next(x for x in q if (s, "sleep") in x)
+        assert (s, "awake") in holder and holder.index((s, "awake")) > holder.index((s, "sleep"))
+    loads = [sum(EXPECTED_HOURS[a] for _, a in x) for x in q]
+    assert max(loads) - min(loads) <= EXPECTED_HOURS["awake"]     # balanced within one job
