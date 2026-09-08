@@ -21,3 +21,5 @@ All dates 2026. GPU costs are list prices at the time (Modal L4 $0.80/h, A100-80
 | 09-05 | Seed 1 Sleep (two-step dreamer) then Baseline, chained | L4 Studio | complete; Sleep 4.42 h, Baseline 2.57 h; MATCHED; Studio stopped itself | ≈ 9 credits |
 
 Seed-0 useful compute: $18.73; seed-0 waste from failures: ≈ $6.3. Remaining plan: Online, Sleep-NoDream, Awake for seed 1 and seeds 2–4 on Vultr (approval pending) or new credits.
+| 09-07 | Vultr GPU access approved after Trust & Safety ticket | — | — | — |
+| 09-08 | Vultr `vcg-a16-12c-128g-32vram`: blr instance unbootable (host timeout, destroyed); sgp instance created; setup + validation pass (6.5 s/episode, 96 s small checkpoint) | 2×A16 | grid launched 07:59 UTC: seed 1 (online, nodream, awake) + seeds 2–4 all arms; ~5–6 days | ≈ $120–130 of $300 credit (projected) |

@@ -691,6 +691,31 @@ structured. Unlike seed 0's Sleep (+0.06 on GSM8K), seed 1's Sleep forgot
 Still missing for seed 1: Online, Sleep-NoDream, Awake (Vultr when
 approved, or new credits).
 
+### 5i. Vultr grid launch (2026-09-08)
+
+Vultr GPU access approved 09-07 (Trust & Safety). Instance
+`doze-llm-a16-sgp` (id 8b8aa0a1…, `vcg-a16-12c-128g-32vram`, 2 × NVIDIA
+A16-16Q, Ubuntu 22.04.5, driver preinstalled, IP 207.148.68.114, Singapore;
+a Bangalore instance could not be powered on — host-side "Unable to start
+server" for 40 min — and was destroyed; the Singapore create needed three
+tries because the deleted instance still counted toward the monthly fee
+cap). Setup: py3.11 venv, torch 2.5.1+cu121, transformers 5.16.1, peft
+0.20.0; 118 tests pass on the VM. Validation (4-episode Baseline, GPU 0):
+identical results to L4/Modal; 6.5 s/episode (1.3× L4), 96 s per small
+checkpoint (2.4× L4); 8.8 GB used at eval batch 8.
+
+Launched 07:59 UTC via `deploy/vultr/run_all.sh` (nohup on the VM, resumable,
+immune to laptop disconnects) with `plan_multi` queues:
+- gpu0: 2:sleep 4:sleep 1:sleep_nodream 2:online 3:online 4:online 2:awake 4:awake
+- gpu1: 3:sleep 1:awake 1:online 2:sleep_nodream 3:sleep_nodream 4:sleep_nodream 2:baseline 3:baseline 4:baseline 3:awake
+(≈ 53 and 55 L4-hour-equivalents each). Seed 1's Sleep and Baseline files
+(Lightning) were placed under /data/results/seed1/ so 1:awake derives its
+budget from them. Estimate at 2.2–2.5× L4: 120–135 h per queue in parallel,
+5–6 days, ≈ $120–130 of the $300 credit. Results: /data/results/seed<N>/
+(runs/, ledgers/, logs/); pulled into records/seed<N>/ as they complete.
+Teardown: destroy the instance when both queues report QUEUE_DONE (a
+stopped instance still bills).
+
 ## 6. Repo state
 
 ```
