@@ -1,3 +1,5 @@
 2026-09-08T07:59:07Z gpu1 start sleep seed3
 2026-09-08T16:30:40Z gpu1 done  sleep seed3 exit=0
 2026-09-08T16:30:41Z gpu1 start awake seed1
+2026-09-09T09:54:26Z gpu1 done  awake seed1 exit=0
+2026-09-09T09:54:26Z gpu1 start online seed1

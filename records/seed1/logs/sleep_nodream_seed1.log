@@ -13,3 +13,5 @@ gpu=NVIDIA A16-16Q arm=sleep_nodream seed=1 tag=seed1 deterministic=True backend
 [sleep_nodream seed=1] ep=350 probe=0.383 heldout=0.721 control=0.5333333333333333 tokens=34356 steps=350 | episode 13.7s night 61s checkpoint 1634s
 [sleep_nodream seed=1] ep=400 probe=0.350 heldout=0.841 control=0.62 tokens=39286 steps=400 | episode 13.7s night 61s checkpoint 1658s
 [sleep_nodream seed=1] ep=450 probe=0.383 heldout=0.910 control=0.5533333333333333 tokens=44194 steps=450 | episode 13.6s night 61s checkpoint 1744s
+[sleep_nodream seed=1] ep=500 probe=0.467 heldout=0.930 control=0.5633333333333334 tokens=49096 steps=500 | episode 13.6s night 61s checkpoint 1745s
+[sleep_nodream seed=1] ep=550 probe=0.383 heldout=0.851 control=0.62 tokens=53982 steps=550 | episode 13.6s night 61s checkpoint 1669s
