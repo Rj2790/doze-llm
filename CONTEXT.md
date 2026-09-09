@@ -716,6 +716,14 @@ budget from them. Estimate at 2.2–2.5× L4: 120–135 h per queue in parallel,
 Teardown: destroy the instance when both queues report QUEUE_DONE (a
 stopped instance still bills).
 
+**Progress 2026-09-09 03:50 UTC (20 h in):** Sleep seeds 2, 3, 4 complete
+(8.9–9.0 h each on A16; all probe curves at chance; held-out 0.876–0.965;
+GSM8K deltas +0.05 / −0.06 / +0.19; dreams two-step, real yield ~30%).
+Running: seed 1 Awake (ep 350; Awake checkpoints take ~71 min on A16 →
+~19 h per Awake arm) and seed 1 Sleep-NoDream (ep 100). No errors, no
+OOM (peak 14.0 GB on the NoDream process). Remaining ≈ 71 h (gpu0) / 84 h
+(gpu1) → finish ≈ 2026-09-12 midday UTC; spent ≈ $19 so far.
+
 ## 6. Repo state
 
 ```
