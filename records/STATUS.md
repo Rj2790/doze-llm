@@ -66,14 +66,43 @@ verdict into the run files; requires the seed's `sleep` ledger.
   then the analysis plan of PREREG §7 (log-rank on episode-to-criterion —
   all censored so far — and the paired forgetting comparison).
 
+## Known caveats for the analysis (keep with the data)
+
+- **Seed 1 mixes GPU types.** Sleep and Baseline ran on a Lightning L4; Online,
+  Sleep-NoDream and Awake ran on the Vultr A16. Same code, deterministic mode
+  on both, but the untrained episode-0 evaluation differs slightly between
+  GPU types (seed 1 on L4: probe 0.417 / held-out 0.478 / GSM8K 0.577; on
+  A16: 0.400 / 0.463 / 0.583). Seeds 2–4 are entirely on the A16; seed 0 is
+  entirely on Modal L4 (pilot code for Sleep/Online/Awake). Report per-seed
+  comparisons within GPU type where it matters; note the seed-1 mix.
+- **Pilot vs post-pilot code.** Seed 0's Sleep/Online/Awake used the one-step
+  dreamer and non-deterministic CUDA; everything later uses the two-step
+  dreamer (duplicate/out-of-spec rejection) and deterministic CUDA
+  (DEVIATIONS.md 2026-09-04). Seed 0's Sleep therefore had a different dream
+  stream from seeds 1–4.
+- **Secondary metrics exist only for post-pilot runs** (all seeds ≥ 1 and
+  seed 0's Sleep-NoDream/Baseline); mirror_bias becomes uninformative when
+  held-out accuracy > 0.9 (few error steps); short_gap is only readable while
+  short-mode unparsable is ~0.
+- **Frozen arms:** Awake/Baseline checkpoints are identical by construction on
+  one GPU; `frozen_eval_identical` in the analysis confirms it per run.
+
 ## Progress table
 
 | seed | sleep | sleep_nodream | online | baseline | awake | matched |
 |---|---|---|---|---|---|---|
-| 0 | ✓ pilot (Modal) | ✓ | ✓ pilot | ✓ | ✓ pilot | ✓ |
-| 1 | ✓ (Lightning) | running gpu0 | queued gpu1 | ✓ (Lightning) | running gpu1 (ep 550) | — |
-| 2 | ✓ | queued | queued | queued | queued | — |
-| 3 | ✓ | queued | queued | queued | queued | — |
-| 4 | ✓ | queued | queued | queued | queued | — |
+| 0 | ✓ pilot (Modal L4) | ✓ (Modal L4) | ✓ pilot | ✓ (Modal L4) | ✓ pilot | ✓ |
+| 1 | ✓ (Lightning L4) | ✓ (A16, 8.5 h) | running gpu1 (A16) | ✓ (Lightning L4) | ✓ (A16, 17.4 h) | pending online |
+| 2 | ✓ (A16) | queued gpu1 | running gpu0 | queued gpu1 | queued gpu0 | — |
+| 3 | ✓ (A16) | queued gpu1 | queued gpu0 | queued gpu1 | queued gpu1 | — |
+| 4 | ✓ (A16) | queued gpu1 | queued gpu0 | queued gpu1 | queued gpu0 | — |
 
-Last updated: 2026-09-09 08:30 UTC (14:00 IST)
+Seed 1 Sleep-NoDream (A16, 8.52 h): probe 0.33–0.47 (chance), held-out
+0.463 → 0.886 (peak 0.930 at ep 500), GSM8K 0.583 → 0.553; 600 steps,
+58,782 training tokens, 58,882 generated. Seed 1 Awake (A16, 17.4 h):
+101,422 generated tokens vs Sleep 101,136 (+0.3%, matched); frozen eval
+0.350 / 0.453 / 0.587 at all 13 checkpoints.
+
+Projected completion of the whole grid: 13 Sep 2026 ~06:30 IST.
+
+Last updated: 2026-09-09 16:25 IST

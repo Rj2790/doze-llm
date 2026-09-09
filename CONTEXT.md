@@ -724,6 +724,12 @@ Running: seed 1 Awake (ep 350; Awake checkpoints take ~71 min on A16 →
 OOM (peak 14.0 GB on the NoDream process). Remaining ≈ 71 h (gpu0) / 84 h
 (gpu1) → finish ≈ 2026-09-12 midday UTC; spent ≈ $19 so far.
 
+**Caveat recorded 2026-09-09:** seed 1 mixes GPU types (Sleep, Baseline on
+Lightning L4; Online, Sleep-NoDream, Awake on Vultr A16); untrained ep-0
+evaluations differ slightly across the two (0.417/0.478/0.577 vs
+0.400/0.463/0.583). Seeds 2–4 are entirely on the A16. Details and other
+analysis caveats: `records/STATUS.md`.
+
 ## 6. Repo state
 
 ```
