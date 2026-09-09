@@ -4,3 +4,16 @@ gpu=NVIDIA A16-16Q arm=online seed=1 tag=seed1 deterministic=True backend=hf:Qwe
 [online seed=1] ep=0 probe=0.400 heldout=0.463 control=0.5833333333333334 1659s
 /opt/doze/.venv/lib/python3.11/site-packages/torch/autograd/graph.py:825: UserWarning: Flash Attention defaults to a non-deterministic algorithm. To explicitly enable determinism call torch.use_deterministic_algorithms(True, warn_only=False). (Triggered internally at ../aten/src/ATen/native/transformers/cuda/attention_backward.cu:102.)
   return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[online seed=1] ep=50 probe=0.400 heldout=0.567 control=0.58 tokens=6210 steps=39 | episode 18.1s night 0s checkpoint 1736s
+[online seed=1] ep=100 probe=0.300 heldout=0.662 control=0.5966666666666667 tokens=11030 steps=89 | episode 14.6s night 0s checkpoint 1830s
+[online seed=1] ep=150 probe=0.383 heldout=0.741 control=0.7333333333333333 tokens=15790 steps=139 | episode 14.6s night 0s checkpoint 1656s
+[online seed=1] ep=200 probe=0.317 heldout=0.572 control=0.7333333333333333 tokens=20610 steps=189 | episode 14.7s night 0s checkpoint 1626s
+[online seed=1] ep=250 probe=0.333 heldout=0.617 control=0.7033333333333334 tokens=25486 steps=239 | episode 14.9s night 0s checkpoint 1625s
+[online seed=1] ep=300 probe=0.283 heldout=0.711 control=0.7233333333333334 tokens=30340 steps=289 | episode 14.8s night 0s checkpoint 1670s
+[online seed=1] ep=350 probe=0.333 heldout=0.766 control=0.7233333333333334 tokens=35318 steps=339 | episode 15.2s night 0s checkpoint 1885s
+[online seed=1] ep=400 probe=0.317 heldout=0.920 control=0.7866666666666666 tokens=40528 steps=389 | episode 15.8s night 0s checkpoint 1713s
+[online seed=1] ep=450 probe=0.317 heldout=0.910 control=0.7866666666666666 tokens=45212 steps=439 | episode 14.3s night 0s checkpoint 1713s
+[online seed=1] ep=500 probe=0.350 heldout=0.881 control=0.7733333333333333 tokens=49992 steps=489 | episode 14.6s night 0s checkpoint 1635s
+[online seed=1] ep=550 probe=0.333 heldout=0.866 control=0.7666666666666667 tokens=54648 steps=539 | episode 14.2s night 0s checkpoint 1653s
+[online seed=1] ep=600 probe=0.367 heldout=0.900 control=0.76 tokens=59306 steps=589 | episode 14.3s night 0s checkpoint 1689s
+timing {"gpu": "NVIDIA A16-16Q", "deterministic": true, "total_seconds": 31112.5, "episode_seconds_mean": 15.0, "checkpoint_seconds": [1658.7, 1736.3, 1830.2, 1656.5, 1625.7, 1625.2, 1670.1, 1884.8, 1713.3, 1712.8, 1634.9, 1652.6, 1688.7], "night_seconds": [2.86102294921875e-06, 2.86102294921875e-06, 2.1457672119140625e-06, 1.430511474609375e-06, 1.1920928955078125e-06, 2.1457672119140625e-06, 2.384185791015625e-06, 1.430511474609375e-06, 1.1920928955078125e-06, 1.9073486328125e-06, 2.86102294921875e-06, 1.1920928955078125e-06], "resumed_from": null, "criterion_episode": null, "ledger": {"tokens_generated": 59306, "gradient_steps": 589, "training_tokens": 57116, "gpu_seconds": 9001.375}}
