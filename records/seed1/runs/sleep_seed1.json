@@ -23,8 +23,11 @@
  "matched": {
   "seed": 1,
   "arms": [
+   "awake",
    "baseline",
-   "sleep"
+   "online",
+   "sleep",
+   "sleep_nodream"
   ],
   "backend": "hf:Qwen/Qwen3-4B",
   "tol": 0.05,

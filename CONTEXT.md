@@ -730,6 +730,27 @@ evaluations differ slightly across the two (0.417/0.478/0.577 vs
 0.400/0.463/0.583). Seeds 2–4 are entirely on the A16. Details and other
 analysis caveats: `records/STATUS.md`.
 
+### 5j. Seed 1 complete (2026-09-10 00:30 IST)
+
+`check_seed(records/seed1)`: MATCHED across all five arms. Sleep (Lightning
+L4) and Baseline (Lightning L4); Online, Sleep-NoDream, Awake (Vultr A16).
+
+| arm | probe range | held-out 0→600 | GSM8K 0→600 | volatility |
+|---|---|---|---|---|
+| Baseline | 0.42 flat | 0.478 | 0.577 | 0 |
+| Awake | 0.35 flat | 0.453 | 0.587 | 0 |
+| Online | 0.28–0.40 | 0.463 → 0.900 (max 0.920) | 0.583 → 0.760 (+0.177) | 0.147 |
+| Sleep | 0.33–0.47 | 0.478 → 0.811 (max 0.896) | 0.577 → 0.497 (−0.080) | 0.161 |
+| Sleep-NoDream | 0.33–0.47 | 0.463 → 0.886 (max 0.930) | 0.583 → 0.553 (−0.030) | 0.150 |
+
+No arm met the criterion. Same shape as seed 0: Online ends highest on the
+task and gains most on GSM8K; Sleep is lowest of the three trained arms on
+both; dreams (two-step, 30% real yield) did not help versus NoDream (H3
+direction negative again). Secondary metrics at ep 600: mirror_bias Online
+0.167 (chance 0.333, n=30), Sleep 0.270 (0.343, n=89), NoDream 0.333
+(0.343); late/early error Online 0.020/0.062, Sleep 0.036/0.118, NoDream
+0.046/0.084; GSM8K unparsable 0% everywhere. Files: `records/seed1/`.
+
 ## 6. Repo state
 
 ```

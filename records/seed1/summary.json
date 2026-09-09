@@ -6,8 +6,11 @@
   {
    "seed": 1,
    "arms": [
+    "awake",
     "baseline",
-    "sleep"
+    "online",
+    "sleep",
+    "sleep_nodream"
    ],
    "backend": "hf:Qwen/Qwen3-4B",
    "tol": 0.05,
@@ -16,6 +19,117 @@
   }
  ],
  "arms": {
+  "awake": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    0.0
+   ],
+   "final_heldout": [
+    0.4527363184079602
+   ],
+   "final_probe": [
+    0.35
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.35
+     ],
+     [
+      50,
+      0.35
+     ],
+     [
+      100,
+      0.35
+     ],
+     [
+      150,
+      0.35
+     ],
+     [
+      200,
+      0.35
+     ],
+     [
+      250,
+      0.35
+     ],
+     [
+      300,
+      0.35
+     ],
+     [
+      350,
+      0.35
+     ],
+     [
+      400,
+      0.35
+     ],
+     [
+      450,
+      0.35
+     ],
+     [
+      500,
+      0.35
+     ],
+     [
+      550,
+      0.35
+     ],
+     [
+      600,
+      0.35
+     ]
+    ]
+   ],
+   "seeds": [
+    1
+   ],
+   "frozen_eval_identical": [
+    true
+   ],
+   "volatility": [
+    0.0
+   ],
+   "final_mirror_bias": [
+    0.32663316582914576
+   ],
+   "final_mirror_bias_chance": [
+    0.3316582914572864
+   ],
+   "final_short_gap": [
+    0.04166666666666663
+   ],
+   "final_short_structured_acc": [
+    0.36666666666666664
+   ],
+   "final_short_unstructured_acc": [
+    0.325
+   ],
+   "final_short_structured_unparsable": [
+    0.0
+   ],
+   "final_short_unstructured_unparsable": [
+    0.0
+   ],
+   "final_late_error_rate": [
+    0.4117647058823529
+   ],
+   "final_early_error_rate": [
+    0.42549019607843136
+   ],
+   "final_control_unparsable": [
+    0.0
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  },
   "baseline": {
    "criterion_episodes": [
     null
@@ -120,6 +234,222 @@
    ],
    "final_early_error_rate": [
     0.4006024096385542
+   ],
+   "final_control_unparsable": [
+    0.0
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  },
+  "online": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    0.17666666666666664
+   ],
+   "final_heldout": [
+    0.900497512437811
+   ],
+   "final_probe": [
+    0.36666666666666664
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.4
+     ],
+     [
+      50,
+      0.4
+     ],
+     [
+      100,
+      0.3
+     ],
+     [
+      150,
+      0.38333333333333336
+     ],
+     [
+      200,
+      0.31666666666666665
+     ],
+     [
+      250,
+      0.3333333333333333
+     ],
+     [
+      300,
+      0.2833333333333333
+     ],
+     [
+      350,
+      0.3333333333333333
+     ],
+     [
+      400,
+      0.31666666666666665
+     ],
+     [
+      450,
+      0.31666666666666665
+     ],
+     [
+      500,
+      0.35
+     ],
+     [
+      550,
+      0.3333333333333333
+     ],
+     [
+      600,
+      0.36666666666666664
+     ]
+    ]
+   ],
+   "seeds": [
+    1
+   ],
+   "volatility": [
+    0.14689372259802716
+   ],
+   "final_mirror_bias": [
+    0.16666666666666666
+   ],
+   "final_mirror_bias_chance": [
+    0.3333333333333333
+   ],
+   "final_short_gap": [
+    -0.033333333333333326
+   ],
+   "final_short_structured_acc": [
+    0.3416666666666667
+   ],
+   "final_short_unstructured_acc": [
+    0.375
+   ],
+   "final_short_structured_unparsable": [
+    0.11666666666666667
+   ],
+   "final_short_unstructured_unparsable": [
+    0.125
+   ],
+   "final_late_error_rate": [
+    0.0196078431372549
+   ],
+   "final_early_error_rate": [
+    0.0617816091954023
+   ],
+   "final_control_unparsable": [
+    0.0
+   ],
+   "median_criterion_episode": null,
+   "n_censored": 1
+  },
+  "sleep_nodream": {
+   "criterion_episodes": [
+    null
+   ],
+   "forgetting": [
+    -0.030000000000000027
+   ],
+   "final_heldout": [
+    0.8855721393034826
+   ],
+   "final_probe": [
+    0.38333333333333336
+   ],
+   "probe_curves": [
+    [
+     [
+      0,
+      0.4
+     ],
+     [
+      50,
+      0.45
+     ],
+     [
+      100,
+      0.4166666666666667
+     ],
+     [
+      150,
+      0.38333333333333336
+     ],
+     [
+      200,
+      0.36666666666666664
+     ],
+     [
+      250,
+      0.43333333333333335
+     ],
+     [
+      300,
+      0.3333333333333333
+     ],
+     [
+      350,
+      0.38333333333333336
+     ],
+     [
+      400,
+      0.35
+     ],
+     [
+      450,
+      0.38333333333333336
+     ],
+     [
+      500,
+      0.4666666666666667
+     ],
+     [
+      550,
+      0.38333333333333336
+     ],
+     [
+      600,
+      0.38333333333333336
+     ]
+    ]
+   ],
+   "seeds": [
+    1
+   ],
+   "volatility": [
+    0.15035362633419969
+   ],
+   "final_mirror_bias": [
+    0.3333333333333333
+   ],
+   "final_mirror_bias_chance": [
+    0.3425925925925926
+   ],
+   "final_short_gap": [
+    0.13333333333333336
+   ],
+   "final_short_structured_acc": [
+    0.43333333333333335
+   ],
+   "final_short_unstructured_acc": [
+    0.3
+   ],
+   "final_short_structured_unparsable": [
+    0.0
+   ],
+   "final_short_unstructured_unparsable": [
+    0.0
+   ],
+   "final_late_error_rate": [
+    0.045548654244306416
+   ],
+   "final_early_error_rate": [
+    0.08416666666666667
    ],
    "final_control_unparsable": [
     0.0
