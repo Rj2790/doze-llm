@@ -1,0 +1,8 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [00:02<00:05,  2.97s/it]Fetching 3 files:  67%|██████▋   | 2/3 [00:13<00:07,  7.45s/it]Fetching 3 files: 100%|██████████| 3/3 [00:14<00:00,  4.49s/it]Fetching 3 files: 100%|██████████| 3/3 [00:14<00:00,  4.84s/it]
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   8%|▊         | 31/398 [00:00<00:01, 309.26it/s]Loading weights:  17%|█▋        | 69/398 [00:00<00:00, 342.89it/s]Loading weights:  27%|██▋       | 108/398 [00:00<00:00, 353.75it/s]Loading weights:  36%|███▌      | 144/398 [00:00<00:00, 317.45it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 860.32it/s]
+gpu=NVIDIA A16-16Q arm=baseline seed=0 tag=val deterministic=True backend=hf:Qwen/Qwen3-4B batch=8
+[baseline seed=0] ep=0 probe=0.167 heldout=0.750 control=0.5333333333333333 96s
+[baseline seed=0] ep=2 probe=0.167 heldout=0.750 control=0.5333333333333333 tokens=198 steps=0 | episode 6.6s night 0s checkpoint 95s
+[baseline seed=0] ep=4 probe=0.167 heldout=0.750 control=0.5333333333333333 tokens=394 steps=0 | episode 6.4s night 0s checkpoint 96s
+timing {"gpu": "NVIDIA A16-16Q", "deterministic": true, "total_seconds": 389.2, "episode_seconds_mean": 6.53, "checkpoint_seconds": [95.5, 95.4, 95.6], "night_seconds": [9.5367431640625e-07, 1.4781951904296875e-05], "resumed_from": null, "criterion_episode": null, "ledger": {"tokens_generated": 394, "gradient_steps": 0, "training_tokens": 0, "gpu_seconds": 26.107}}

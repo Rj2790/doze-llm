@@ -1,0 +1,23 @@
+{
+ "gpu": "NVIDIA A16-16Q",
+ "deterministic": true,
+ "total_seconds": 389.2,
+ "episode_seconds_mean": 6.53,
+ "checkpoint_seconds": [
+  95.5,
+  95.4,
+  95.6
+ ],
+ "night_seconds": [
+  9.5367431640625e-07,
+  1.4781951904296875e-05
+ ],
+ "resumed_from": null,
+ "criterion_episode": null,
+ "ledger": {
+  "tokens_generated": 394,
+  "gradient_steps": 0,
+  "training_tokens": 0,
+  "gpu_seconds": 26.107
+ }
+}

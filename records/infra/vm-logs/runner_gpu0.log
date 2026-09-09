@@ -1,0 +1,5 @@
+2026-09-08T07:59:07Z gpu0 start sleep seed2
+2026-09-08T16:55:44Z gpu0 done  sleep seed2 exit=0
+2026-09-08T16:55:44Z gpu0 start sleep seed4
+2026-09-09T01:52:35Z gpu0 done  sleep seed4 exit=0
+2026-09-09T01:52:35Z gpu0 start sleep_nodream seed1

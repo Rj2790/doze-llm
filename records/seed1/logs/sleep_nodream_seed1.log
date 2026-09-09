@@ -1,0 +1,15 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   6%|▋         | 25/398 [00:00<00:01, 212.58it/s]Loading weights:  15%|█▍        | 58/398 [00:00<00:01, 272.03it/s]Loading weights:  22%|██▏       | 86/398 [00:00<00:01, 228.79it/s]Loading weights:  28%|██▊       | 110/398 [00:00<00:01, 231.98it/s]Loading weights:  40%|████      | 160/398 [00:00<00:00, 311.84it/s]Loading weights:  49%|████▉     | 195/398 [00:00<00:00, 307.03it/s]Loading weights:  57%|█████▋    | 227/398 [00:00<00:00, 285.90it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 477.64it/s]
+gpu=NVIDIA A16-16Q arm=sleep_nodream seed=1 tag=seed1 deterministic=True backend=hf:Qwen/Qwen3-4B batch=8
+[sleep_nodream seed=1] ep=0 probe=0.400 heldout=0.463 control=0.5833333333333334 1682s
+/opt/doze/.venv/lib/python3.11/site-packages/torch/autograd/graph.py:825: UserWarning: Flash Attention defaults to a non-deterministic algorithm. To explicitly enable determinism call torch.use_deterministic_algorithms(True, warn_only=False). (Triggered internally at ../aten/src/ATen/native/transformers/cuda/attention_backward.cu:102.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[sleep_nodream seed=1] ep=50 probe=0.450 heldout=0.483 control=0.6033333333333334 tokens=4810 steps=50 | episode 13.5s night 61s checkpoint 1682s
+[sleep_nodream seed=1] ep=100 probe=0.417 heldout=0.582 control=0.5333333333333333 tokens=9732 steps=100 | episode 13.7s night 61s checkpoint 1657s
+[sleep_nodream seed=1] ep=150 probe=0.383 heldout=0.662 control=0.5566666666666666 tokens=14676 steps=150 | episode 13.8s night 61s checkpoint 1665s
+[sleep_nodream seed=1] ep=200 probe=0.367 heldout=0.642 control=0.59 tokens=19608 steps=200 | episode 13.8s night 61s checkpoint 1675s
+[sleep_nodream seed=1] ep=250 probe=0.433 heldout=0.667 control=0.56 tokens=24500 steps=250 | episode 13.6s night 61s checkpoint 1628s
+[sleep_nodream seed=1] ep=300 probe=0.333 heldout=0.701 control=0.58 tokens=29434 steps=300 | episode 13.7s night 61s checkpoint 1632s
+[sleep_nodream seed=1] ep=350 probe=0.383 heldout=0.721 control=0.5333333333333333 tokens=34356 steps=350 | episode 13.7s night 61s checkpoint 1634s
+[sleep_nodream seed=1] ep=400 probe=0.350 heldout=0.841 control=0.62 tokens=39286 steps=400 | episode 13.7s night 61s checkpoint 1658s
+[sleep_nodream seed=1] ep=450 probe=0.383 heldout=0.910 control=0.5533333333333333 tokens=44194 steps=450 | episode 13.6s night 61s checkpoint 1744s
