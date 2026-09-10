@@ -62,9 +62,12 @@ verdict into the run files; requires the seed's `sleep` ledger.
   cost; blocked by the account's monthly fee cap (one $688/mo plan). Limit
   increase requested by the user; if granted, split the not-yet-started items
   across the new VM's GPUs.
-- After the grid: run `eval/analyze.py` over all seeds, write CONTEXT §5j,
-  then the analysis plan of PREREG §7 (log-rank on episode-to-criterion —
-  all censored so far — and the paired forgetting comparison).
+- After the grid: `python -m eval.analyze --final --results records --seeds 0,1,2,3,4`
+  writes `records/analysis_final.md` (+ .json): PREREG §7 log-rank tests
+  (censored at 600), paired exact sign-flip test for H4, per-arm summaries,
+  and an exploratory update-schedule comparison. `analysis_preliminary.md`
+  is the same report over the arms finished so far (labelled preliminary).
+  Then write the result section in CONTEXT.md and update the explainer artifact.
 
 ## Known caveats for the analysis (keep with the data)
 
