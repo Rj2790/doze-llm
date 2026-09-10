@@ -1,3 +1,16 @@
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
 Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:  11%|█         | 44/398 [00:00<00:00, 434.07it/s]Loading weights:  24%|██▍       | 95/398 [00:00<00:00, 426.93it/s]Loading weights:  35%|███▍      | 138/398 [00:00<00:00, 409.81it/s]Loading weights:  45%|████▍     | 179/398 [00:00<00:00, 397.55it/s]Loading weights:  55%|█████▌    | 219/398 [00:00<00:00, 394.83it/s]Loading weights:  68%|██████▊   | 269/398 [00:00<00:00, 418.95it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 595.79it/s]
 gpu=NVIDIA A16-16Q arm=online seed=4 tag=seed4 deterministic=True backend=hf:Qwen/Qwen3-4B batch=8
+[online seed=4] ep=0 probe=0.250 heldout=0.398 control=0.5833333333333334 1672s
+/opt/doze/.venv/lib/python3.11/site-packages/torch/autograd/graph.py:825: UserWarning: Flash Attention defaults to a non-deterministic algorithm. To explicitly enable determinism call torch.use_deterministic_algorithms(True, warn_only=False). (Triggered internally at ../aten/src/ATen/native/transformers/cuda/attention_backward.cu:102.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[online seed=4] ep=50 probe=0.367 heldout=0.433 control=0.7133333333333334 tokens=4886 steps=47 | episode 14.8s night 0s checkpoint 1693s
+[online seed=4] ep=100 probe=0.333 heldout=0.647 control=0.5066666666666667 tokens=11029 steps=97 | episode 18.3s night 0s checkpoint 1621s
+[online seed=4] ep=150 probe=0.333 heldout=0.711 control=0.71 tokens=15827 steps=147 | episode 14.7s night 0s checkpoint 1777s
+[online seed=4] ep=200 probe=0.233 heldout=0.697 control=0.7033333333333334 tokens=20647 steps=197 | episode 14.8s night 0s checkpoint 1929s
+[online seed=4] ep=250 probe=0.200 heldout=0.846 control=0.7733333333333333 tokens=25537 steps=247 | episode 15.2s night 0s checkpoint 1926s
+[online seed=4] ep=300 probe=0.200 heldout=0.955 control=0.7766666666666666 tokens=30427 steps=297 | episode 15.1s night 0s checkpoint 1842s
+[online seed=4] ep=350 probe=0.217 heldout=0.950 control=0.7333333333333333 tokens=35319 steps=347 | episode 15.1s night 0s checkpoint 1889s
+[online seed=4] ep=400 probe=0.217 heldout=0.935 control=0.7533333333333333 tokens=40219 steps=397 | episode 15.2s night 0s checkpoint 1899s
+[online seed=4] ep=450 probe=0.333 heldout=0.891 control=0.6866666666666666 tokens=45111 steps=447 | episode 15.1s night 0s checkpoint 1844s
+[online seed=4] ep=500 probe=0.383 heldout=1.000 control=0.7466666666666667 tokens=50011 steps=497 | episode 15.0s night 0s checkpoint 1787s
