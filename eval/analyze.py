@@ -139,8 +139,18 @@ def main() -> None:
     ap.add_argument("--results", default="results")
     ap.add_argument("--seeds", default="0,1,2,3,4")
     ap.add_argument("--tol", type=float, default=0.05)
+    ap.add_argument("--final", action="store_true", help="PREREG §7 analysis over the records layout (<root>/seed<N>/)")
+    ap.add_argument("--out", default="", help="markdown output path for --final")
     args = ap.parse_args()
     seeds = [int(s) for s in args.seeds.split(",")]
+    if args.final:
+        fa = final_analysis(args.results, seeds, layout="per-seed", tol=args.tol)
+        md = final_report_markdown(fa)
+        out = Path(args.out or (Path(args.results) / ("analysis_preliminary.md" if fa["preliminary"] else "analysis_final.md")))
+        out.write_text(md)
+        (out.with_suffix(".json")).write_text(json.dumps(fa, indent=1, default=str))
+        print(md)
+        return
     summary = summarize(args.results, seeds, args.tol)       # raises before any output if unmatched
     out = Path(args.results) / "report.md"
     out.write_text(report_markdown(summary))
@@ -157,6 +167,149 @@ def main() -> None:
         fig.savefig(Path(args.results) / "probe_curves.png", dpi=150)
     except ImportError:
         print("(matplotlib not installed; no figure)")
+
+
+
+
+# =============================================================================
+# Final analysis (PREREG §7) over the records layout: <root>/seed<N>/{runs,ledgers}
+# =============================================================================
+
+from eval import stats as _stats  # noqa: E402
+
+ARMS = ("baseline", "awake", "online", "sleep", "sleep_nodream")
+N_EPISODES = 600
+
+
+def seed_root(root: str | Path, seed: int, layout: str) -> Path:
+    root = Path(root)
+    return root / f"seed{seed}" if layout == "per-seed" else root
+
+
+def _seed_summary(run: dict) -> dict:
+    cks = run["checkpoints"]
+    held = [c["heldout_accuracy"] for c in cks]
+    ctrl = [c["control_accuracy"] for c in cks]
+    probe = [c["probe_accuracy"] for c in cks]
+    last3 = held[-3:] if len(held) >= 3 else held
+    # per-checkpoint change in control accuracy (for Sleep arms this is the post-night change)
+    steps = [ctrl[i] - ctrl[i - 1] for i in range(1, len(ctrl)) if ctrl[i] is not None and ctrl[i - 1] is not None]
+    return {"final_heldout": held[-1], "peak_heldout": max(held), "last3_heldout": sum(last3) / len(last3),
+            "forgetting": (ctrl[-1] - ctrl[0]) if ctrl and ctrl[0] is not None and ctrl[-1] is not None else None,
+            "control_min": min(c for c in ctrl if c is not None) if any(c is not None for c in ctrl) else None,
+            "probe_max": max(probe), "probe_final": probe[-1], "criterion_episode": run["criterion_episode"],
+            "volatility": statistics.pstdev(held) if len(held) > 1 else None,
+            "post_update_control_changes": steps, "backend": run.get("backend"),
+            "tokens": run["ledger"]["tokens_generated"], "steps": run["ledger"]["gradient_steps"]}
+
+
+def final_analysis(root: str | Path, seeds: list[int], layout: str = "per-seed", required_seeds: int = 5,
+                   tol: float = 0.05) -> dict:
+    """Gate every seed (check_seed), then compute PREREG §7: H1–H3 via
+    log-rank on episode-to-criterion (censored at 600), H4 via a paired
+    sign-flip test on GSM8K change (Sleep − Online), plus robust per-seed
+    summaries and an exploratory schedule comparison."""
+    verdicts, per_seed = [], {a: {} for a in ARMS}
+    for s in seeds:
+        r = seed_root(root, s, layout)
+        verdicts.append(check_seed(r, s, tol))
+        for arm, p in _runs(r, s).items():
+            run = json.loads(p.read_text())
+            if run.get("partial"):
+                continue
+            per_seed.setdefault(arm, {})[s] = _seed_summary(run)
+
+    def surv(arm):
+        return [((per_seed[arm][s]["criterion_episode"] or N_EPISODES), per_seed[arm][s]["criterion_episode"] is not None)
+                for s in sorted(per_seed.get(arm, {}))]
+
+    def paired(arm_a, arm_b, key):
+        common = sorted(set(per_seed.get(arm_a, {})) & set(per_seed.get(arm_b, {})))
+        diffs = [per_seed[arm_a][s][key] - per_seed[arm_b][s][key] for s in common
+                 if per_seed[arm_a][s][key] is not None and per_seed[arm_b][s][key] is not None]
+        out = _stats.sign_flip_test(diffs); out["seeds"] = common; out["diffs"] = diffs
+        return out
+
+    H = {}
+    # H1: Sleep reaches criterion before Baseline, Awake, Online (log-rank vs each; events needed)
+    lr1 = {other: _stats.logrank(surv("sleep"), surv(other)) for other in ("baseline", "awake", "online") if per_seed.get(other)}
+    any_event = any(v["events"] > 0 for v in lr1.values())
+    met = sum(1 for s in per_seed.get("sleep", {}).values() if s["criterion_episode"] is not None)
+    H["H1"] = {"verdict": "supported" if any_event and all(v["p"] is not None and v["p"] < 0.05 and v["observed_a"] > v["expected_a"] for v in lr1.values()) else "not supported",
+               "logrank": lr1, "note": f"Sleep met the criterion in {met}/{len(per_seed.get('sleep', {}))} seeds" + ("; all arms censored at 600 — log-rank degenerate" if not any_event else "")}
+    lr2 = _stats.logrank(surv("sleep"), surv("online"))
+    H["H2"] = {"verdict": "supported" if (not lr2["degenerate"] and lr2["p"] < 0.05 and lr2["observed_a"] > lr2["expected_a"]) else "not supported",
+               "logrank": lr2, "paired_heldout_last3": paired("sleep", "online", "last3_heldout"),
+               "note": "load-bearing comparison; episode-to-criterion, censored at 600"}
+    lr3 = _stats.logrank(surv("sleep"), surv("sleep_nodream"))
+    H["H3"] = {"verdict": "supported" if (not lr3["degenerate"] and lr3["p"] < 0.05 and lr3["observed_a"] > lr3["expected_a"]) else "not supported",
+               "logrank": lr3, "paired_heldout_last3": paired("sleep", "sleep_nodream", "last3_heldout")}
+    h4 = paired("sleep", "online", "forgetting")     # predicted: Sleep forgets less -> Sleep's delta > Online's -> mean > 0
+    direction = "predicted" if (h4["mean"] is not None and h4["mean"] > 0) else ("reversed" if h4["mean"] is not None and h4["mean"] < 0 else "none")
+    H["H4"] = {"verdict": "supported" if (h4["p"] is not None and h4["p"] < 0.05 and direction == "predicted") else "not supported",
+               "paired": h4, "direction": direction, "note": "GSM8K change ep600−ep0, Sleep − Online, exact sign-flip test"}
+
+    paired_out = {"H4_forgetting_sleep_minus_online": h4,
+                  "heldout_last3_sleep_minus_online": paired("sleep", "online", "last3_heldout"),
+                  "heldout_last3_sleep_minus_nodream": paired("sleep", "sleep_nodream", "last3_heldout"),
+                  "forgetting_sleep_minus_nodream": paired("sleep", "sleep_nodream", "forgetting"),
+                  "forgetting_nodream_minus_online": paired("sleep_nodream", "online", "forgetting")}
+
+    # exploratory: update schedule (Online per-step vs Sleep nightly) on control and task
+    sched = {}
+    for arm in ("online", "sleep", "sleep_nodream"):
+        rows = per_seed.get(arm, {})
+        if not rows:
+            continue
+        deltas = [r["forgetting"] for r in rows.values() if r["forgetting"] is not None]
+        changes = [x for r in rows.values() for x in r["post_update_control_changes"]]
+        sched[arm] = {"n": len(rows), "gsm8k_delta_mean": statistics.mean(deltas) if deltas else None,
+                      "gsm8k_delta_per_seed": {s: r["forgetting"] for s, r in rows.items()},
+                      "gsm8k_positive_seeds": sum(1 for d in deltas if d > 0),
+                      "heldout_peak_mean": statistics.mean(r["peak_heldout"] for r in rows.values()),
+                      "heldout_last3_mean": statistics.mean(r["last3_heldout"] for r in rows.values()),
+                      "post_update_gsm8k_change_mean": statistics.mean(changes) if changes else None,
+                      "post_update_gsm8k_change_min": min(changes) if changes else None,
+                      "volatility_mean": statistics.mean(r["volatility"] for r in rows.values() if r["volatility"] is not None)}
+
+    complete = all(len(per_seed.get(a, {})) >= required_seeds for a in ARMS)
+    return {"seeds_checked": seeds, "verdicts": verdicts, "per_seed": per_seed, "hypotheses": H, "paired": paired_out,
+            "exploratory": {"schedule": sched}, "preliminary": not complete, "required_seeds": required_seeds}
+
+
+def final_report_markdown(fa: dict) -> str:
+    L = ["# doze-llm — preregistered analysis (PREREG §7)", ""]
+    if fa["preliminary"]:
+        L += [f"**PRELIMINARY — fewer than {fa['required_seeds']} complete seeds for at least one arm. Not the final result.**", ""]
+    L += [f"Seeds: {fa['seeds_checked']}; compute matching passed for every seed listed (check_seed).", ""]
+    L += ["## Hypotheses", "", "| hypothesis | test | result | verdict |", "|---|---|---|---|"]
+    H = fa["hypotheses"]
+    def lr(v):
+        return "all censored (degenerate)" if v.get("degenerate") else f"χ²={v['statistic']:.2f}, p={v['p']:.3f}, events={v['events']}"
+    h1 = "; ".join(f"vs {k}: {lr(v)}" for k, v in H["H1"]["logrank"].items())
+    L.append(f"| H1 insight (Sleep first to criterion) | log-rank | {h1}. {H['H1']['note']} | **{H['H1']['verdict']}** |")
+    L.append(f"| H2 phase structure (Sleep vs Online) | log-rank | {lr(H['H2']['logrank'])} | **{H['H2']['verdict']}** |")
+    L.append(f"| H3 dreaming (Sleep vs NoDream) | log-rank | {lr(H['H3']['logrank'])} | **{H['H3']['verdict']}** |")
+    p4 = H["H4"]["paired"]
+    L.append(f"| H4 retention (Sleep forgets less than Online) | paired sign-flip on GSM8K Δ | mean Sleep−Online {p4['mean']:+.3f} (n={p4['n']}, p={p4['p']}); direction {H['H4']['direction']} | **{H['H4']['verdict']}** |")
+    L += ["", "## Per-arm summary (mean over seeds)", "", "| arm | n | peak held-out | last-3 held-out | GSM8K Δ | probe max | criterion met |", "|---|---|---|---|---|---|---|"]
+    for arm in ARMS:
+        rows = fa["per_seed"].get(arm, {})
+        if not rows:
+            continue
+        v = list(rows.values())
+        m = lambda k: statistics.mean(r[k] for r in v if r[k] is not None)
+        L.append(f"| {arm} | {len(v)} | {m('peak_heldout'):.3f} | {m('last3_heldout'):.3f} | {m('forgetting'):+.3f} | {m('probe_max'):.3f} | {sum(r['criterion_episode'] is not None for r in v)}/{len(v)} |")
+    L += ["", "## Paired comparisons (per seed; exact sign-flip test)", "", "| comparison | diffs | mean | p |", "|---|---|---|---|"]
+    for k, v in fa["paired"].items():
+        L.append(f"| {k} | {[round(x, 3) for x in v['diffs']]} | {v['mean']:+.3f} | {v['p']} |" if v["mean"] is not None else f"| {k} | — | — | — |")
+    L += ["", "## Exploratory: update schedule (not preregistered)", "",
+          "Online applies one verified self-training step per episode; Sleep and Sleep-NoDream apply 50 per night. Same steps, same tokens.", "",
+          "| arm | n | GSM8K Δ mean | seeds with Δ>0 | mean per-checkpoint GSM8K change | worst single-checkpoint change | peak held-out | last-3 held-out | volatility |", "|---|---|---|---|---|---|---|---|---|"]
+    for arm, e in fa["exploratory"]["schedule"].items():
+        L.append(f"| {arm} | {e['n']} | {e['gsm8k_delta_mean']:+.3f} | {e['gsm8k_positive_seeds']}/{e['n']} | {e['post_update_gsm8k_change_mean']:+.4f} | {e['post_update_gsm8k_change_min']:+.3f} | {e['heldout_peak_mean']:.3f} | {e['heldout_last3_mean']:.3f} | {e['volatility_mean']:.3f} |")
+    L += ["", "Caveats: seed 0's Sleep/Online/Awake used the pilot code (one-step dreamer, non-deterministic CUDA); seed 1 mixes GPU types (L4 for Sleep/Baseline, A16 otherwise); insight hypotheses are fully censored when no arm reaches the criterion, so the log-rank test carries no information beyond 'never met'."]
+    return "\n".join(L) + "\n"
 
 
 if __name__ == "__main__":

@@ -19,17 +19,27 @@
   "short_max_tokens": 16
  },
  "criterion_episode": null,
- "eval_tokens": 210698,
- "matched": null,
+ "eval_tokens": 262017,
+ "matched": {
+  "seed": 4,
+  "arms": [
+   "online",
+   "sleep"
+  ],
+  "backend": "hf:Qwen/Qwen3-4B",
+  "tol": 0.05,
+  "ok": true,
+  "message": "compute budgets matched"
+ },
  "partial": true,
  "resumed_from": null,
  "ledger": {
   "arm": "sleep_nodream",
   "backend": "hf:Qwen/Qwen3-4B",
-  "tokens_generated": 14542,
-  "gradient_steps": 150,
-  "training_tokens": 14536,
-  "gpu_seconds": 2232.963404893875,
+  "tokens_generated": 19450,
+  "gradient_steps": 200,
+  "training_tokens": 19408,
+  "gpu_seconds": 2988.503128528595,
   "checkpoints": [
    {
     "episode": 0,
@@ -58,6 +68,13 @@
     "gradient_steps": 150,
     "training_tokens": 14536,
     "gpu_seconds": 2232.963
+   },
+   {
+    "episode": 200,
+    "tokens_generated": 19450,
+    "gradient_steps": 200,
+    "training_tokens": 19408,
+    "gpu_seconds": 2988.503
    }
   ]
  },
@@ -4221,6 +4238,1046 @@
    "ledger_gradient_steps": 150,
    "ledger_training_tokens": 14536,
    "ledger_gpu_seconds": 2232.963
+  },
+  {
+   "episode": 200,
+   "probe_accuracy": 0.3333333333333333,
+   "probe_n": 60,
+   "probe_correct": 20,
+   "day_seconds_mean": 13.90130811214447,
+   "night_seconds": 60.475377559661865,
+   "mirror_bias": 0.30120481927710846,
+   "mirror_bias_chance": 0.3313253012048193,
+   "mirror_bias_n": 83,
+   "short_structured_acc": 0.35833333333333334,
+   "short_unstructured_acc": 0.35833333333333334,
+   "short_gap": 0.0,
+   "short_structured_unparsable": 0.0,
+   "short_unstructured_unparsable": 0.0,
+   "late_error_rate": 0.020356234096692113,
+   "early_error_rate": 0.09248554913294797,
+   "late_n": 131,
+   "early_n": 173,
+   "control_unparsable": 0.0,
+   "heldout_rows": [
+    {
+     "digits": "141911191919",
+     "steps": "94111119941",
+     "answer": "1"
+    },
+    {
+     "digits": "911199911111",
+     "steps": "49414111111",
+     "answer": "1"
+    },
+    {
+     "digits": "194111419491",
+     "steps": "44949114411",
+     "answer": "1"
+    },
+    {
+     "digits": "941441191919",
+     "steps": "11911149941",
+     "answer": "1"
+    },
+    {
+     "digits": "991199941114",
+     "steps": "9499911119",
+     "answer": "9"
+    },
+    {
+     "digits": "444444491119",
+     "steps": "4444411114",
+     "answer": "4"
+    },
+    {
+     "digits": "944419994449",
+     "steps": "19114144441",
+     "answer": "1"
+    },
+    {
+     "digits": "449419911411",
+     "steps": "41941494494",
+     "answer": "4"
+    },
+    {
+     "digits": "111194944144",
+     "steps": "11144191191",
+     "answer": "1"
+    },
+    {
+     "digits": "949194111111",
+     "steps": "14911111111",
+     "answer": "1"
+    },
+    {
+     "digits": "414499111411",
+     "steps": "91994944949",
+     "answer": "9"
+    },
+    {
+     "digits": "494199191419",
+     "steps": "19414994499",
+     "answer": "9"
+    },
+    {
+     "digits": "111491149494",
+     "steps": "11994914419",
+     "answer": "9"
+    },
+    {
+     "digits": "499994949994",
+     "steps": "14144199991",
+     "answer": "1"
+    },
+    {
+     "digits": "419491191119",
+     "steps": "99149494941",
+     "answer": "1"
+    },
+    {
+     "digits": "419194494449",
+     "steps": "99419199199",
+     "answer": "9"
+    },
+    {
+     "digits": "499199941114",
+     "steps": "14999991111",
+     "answer": "9"
+    },
+    {
+     "digits": "414199191919",
+     "steps": "91141149941",
+     "answer": "1"
+    },
+    {
+     "digits": "199419991119",
+     "steps": "41941411114",
+     "answer": "4"
+    },
+    {
+     "digits": "144444414941",
+     "steps": "91919194419",
+     "answer": "9"
+    },
+    {
+     "digits": "919914149994",
+     "steps": "4149119991",
+     "answer": "1"
+    },
+    {
+     "digits": "941194949994",
+     "steps": "11144199991",
+     "answer": "1"
+    },
+    {
+     "digits": "141111944944",
+     "steps": "94949919919",
+     "answer": "9"
+    },
+    {
+     "digits": "449991114941",
+     "steps": "41411199119",
+     "answer": "9"
+    },
+    {
+     "digits": "441194149194",
+     "steps": "49419441144",
+     "answer": "4"
+    },
+    {
+     "digits": "449119119191",
+     "steps": "41149411494",
+     "answer": "4"
+    },
+    {
+     "digits": "919914144144",
+     "steps": "41491191191",
+     "answer": "1"
+    },
+    {
+     "digits": "144941149194",
+     "steps": "91449441144",
+     "answer": "4"
+    },
+    {
+     "digits": "499911999499",
+     "steps": "14114144141",
+     "answer": "1"
+    },
+    {
+     "digits": "941199494149",
+     "steps": "11141991199",
+     "answer": "9"
+    },
+    {
+     "digits": "419999114141",
+     "steps": "99994911949",
+     "answer": "9"
+    },
+    {
+     "digits": "191999111411",
+     "steps": "49994949111",
+     "answer": "1"
+    },
+    {
+     "digits": "114991414141",
+     "steps": "19944911949",
+     "answer": "9"
+    },
+    {
+     "digits": "414144411911",
+     "steps": "91191949949",
+     "answer": "9"
+    },
+    {
+     "digits": "491949991119",
+     "steps": "11441411114",
+     "answer": "4"
+    },
+    {
+     "digits": "119914941114",
+     "steps": "14119911191",
+     "answer": "1"
+    },
+    {
+     "digits": "499944199199",
+     "steps": "14191141141",
+     "answer": "1"
+    },
+    {
+     "digits": "911194944944",
+     "steps": "49419919919",
+     "answer": "9"
+    },
+    {
+     "digits": "941199419191",
+     "steps": "11141941149",
+     "answer": "9"
+    },
+    {
+     "digits": "914914199499",
+     "steps": "44119414414",
+     "answer": "4"
+    },
+    {
+     "digits": "114199491119",
+     "steps": "19414411114",
+     "answer": "4"
+    },
+    {
+     "digits": "149149491419",
+     "steps": "99441994499",
+     "answer": "9"
+    },
+    {
+     "digits": "949494191119",
+     "steps": "14419411114",
+     "answer": "4"
+    },
+    {
+     "digits": "441419991919",
+     "steps": "49114149941",
+     "answer": "1"
+    },
+    {
+     "digits": "111494149994",
+     "steps": "11991199991",
+     "answer": "1"
+    },
+    {
+     "digits": "414919491919",
+     "steps": "91499149941",
+     "answer": "1"
+    },
+    {
+     "digits": "444499499499",
+     "steps": "44144144141",
+     "answer": "1"
+    },
+    {
+     "digits": "991994999199",
+     "steps": "94141999414",
+     "answer": "4"
+    },
+    {
+     "digits": "499494994149",
+     "steps": "14419914491",
+     "answer": "1"
+    },
+    {
+     "digits": "914914191119",
+     "steps": "44119411141",
+     "answer": "1"
+    },
+    {
+     "digits": "911919991119",
+     "steps": "49941411114",
+     "answer": "4"
+    },
+    {
+     "digits": "114444141414",
+     "steps": "19191194491",
+     "answer": "1"
+    },
+    {
+     "digits": "194999491419",
+     "steps": "44141994499",
+     "answer": "9"
+    },
+    {
+     "digits": "499994419991",
+     "steps": "14144499994",
+     "answer": "4"
+    },
+    {
+     "digits": "411411414141",
+     "steps": "94494491194",
+     "answer": "4"
+    },
+    {
+     "digits": "191944149194",
+     "steps": "49919441144",
+     "answer": "4"
+    },
+    {
+     "digits": "149149419191",
+     "steps": "99441911494",
+     "answer": "4"
+    },
+    {
+     "digits": "941991141414",
+     "steps": "11411194491",
+     "answer": "1"
+    },
+    {
+     "digits": "149444499999",
+     "steps": "99191999999",
+     "answer": "9"
+    },
+    {
+     "digits": "441999919191",
+     "steps": "49999411494",
+     "answer": "4"
+    },
+    {
+     "digits": "191949149494",
+     "steps": "49914914419",
+     "answer": "9"
+    },
+    {
+     "digits": "414111444944",
+     "steps": "91111919919",
+     "answer": "9"
+    },
+    {
+     "digits": "149911919191",
+     "steps": "99499411494",
+     "answer": "4"
+    },
+    {
+     "digits": "194419494449",
+     "steps": "44991441914",
+     "answer": "4"
+    },
+    {
+     "digits": "441944149194",
+     "steps": "49919411441",
+     "answer": "1"
+    },
+    {
+     "digits": "114441491119",
+     "steps": "19194499499",
+     "answer": "9"
+    },
+    {
+     "digits": "119491149994",
+     "steps": "14411199991",
+     "answer": "1"
+    },
+    {
+     "digits": "114419949994",
+     "steps": "19114199991",
+     "answer": "1"
+    },
+    {
+     "digits": "941449911111",
+     "steps": "1191411111",
+     "answer": "1"
+    },
+    {
+     "digits": "444919911111",
+     "steps": "4411411111",
+     "answer": "1"
+    },
+    {
+     "digits": "141941411411",
+     "steps": "94194494494",
+     "answer": "4"
+    },
+    {
+     "digits": "919994941114",
+     "steps": "41419911119",
+     "answer": "9"
+    },
+    {
+     "digits": "994191111411",
+     "steps": "91149494494",
+     "answer": "4"
+    },
+    {
+     "digits": "419414149194",
+     "steps": "99119441144",
+     "answer": "4"
+    },
+    {
+     "digits": "941991441114",
+     "steps": "11411911119",
+     "answer": "9"
+    },
+    {
+     "digits": "149444419191",
+     "steps": "9919191149",
+     "answer": "9"
+    },
+    {
+     "digits": "494141919191",
+     "steps": "19449941149",
+     "answer": "9"
+    },
+    {
+     "digits": "111119914941",
+     "steps": "11114119911",
+     "answer": "1"
+    },
+    {
+     "digits": "999141999999",
+     "steps": "9449999999",
+     "answer": "9"
+    },
+    {
+     "digits": "194999414441",
+     "steps": "44141944449",
+     "answer": "9"
+    },
+    {
+     "digits": "144919991419",
+     "steps": "91499944994",
+     "answer": "4"
+    },
+    {
+     "digits": "419494414141",
+     "steps": "99144491194",
+     "answer": "4"
+    },
+    {
+     "digits": "419411119491",
+     "steps": "99111111411",
+     "answer": "1"
+    },
+    {
+     "digits": "499991444144",
+     "steps": "14149191191",
+     "answer": "1"
+    },
+    {
+     "digits": "919914114941",
+     "steps": "41491199119",
+     "answer": "9"
+    },
+    {
+     "digits": "494114149994",
+     "steps": "1949119991",
+     "answer": "1"
+    },
+    {
+     "digits": "144911949994",
+     "steps": "91494199991",
+     "answer": "1"
+    },
+    {
+     "digits": "911149414441",
+     "steps": "49441944449",
+     "answer": "9"
+    },
+    {
+     "digits": "919111494149",
+     "steps": "41111991199",
+     "answer": "9"
+    },
+    {
+     "digits": "911194941114",
+     "steps": "49419911119",
+     "answer": "9"
+    },
+    {
+     "digits": "949114194149",
+     "steps": "14944991199",
+     "answer": "9"
+    },
+    {
+     "digits": "414114994149",
+     "steps": "91199119914",
+     "answer": "4"
+    },
+    {
+     "digits": "114911499199",
+     "steps": "19949141141",
+     "answer": "1"
+    },
+    {
+     "digits": "949441999999",
+     "steps": "1444999999",
+     "answer": "9"
+    },
+    {
+     "digits": "914994199999",
+     "steps": "4414499999",
+     "answer": "9"
+    },
+    {
+     "digits": "999919411911",
+     "steps": "99941949949",
+     "answer": "9"
+    },
+    {
+     "digits": "941194994449",
+     "steps": "11144144441",
+     "answer": "1"
+    },
+    {
+     "digits": "449119111911",
+     "steps": "41149494111",
+     "answer": "1"
+    },
+    {
+     "digits": "944419944144",
+     "steps": "19114191191",
+     "answer": "1"
+    },
+    {
+     "digits": "949449911411",
+     "steps": "14441494494",
+     "answer": "4"
+    },
+    {
+     "digits": "499114149494",
+     "steps": "14944914419",
+     "answer": "9"
+    },
+    {
+     "digits": "149111419991",
+     "steps": "9949449994",
+     "answer": "4"
+    },
+    {
+     "digits": "414941194949",
+     "steps": "91449419914",
+     "answer": "4"
+    },
+    {
+     "digits": "141911441114",
+     "steps": "94111911119",
+     "answer": "9"
+    },
+    {
+     "digits": "119999194449",
+     "steps": "1414994441",
+     "answer": "1"
+    },
+    {
+     "digits": "911919941914",
+     "steps": "49941449944",
+     "answer": "4"
+    },
+    {
+     "digits": "199199999499",
+     "steps": "41141414414",
+     "answer": "4"
+    },
+    {
+     "digits": "914949494449",
+     "steps": "44199144441",
+     "answer": "1"
+    },
+    {
+     "digits": "411141499999",
+     "steps": "9491199999",
+     "answer": "9"
+    },
+    {
+     "digits": "194149441914",
+     "steps": "44914499449",
+     "answer": "9"
+    },
+    {
+     "digits": "114149449494",
+     "steps": "19441914419",
+     "answer": "9"
+    },
+    {
+     "digits": "114911419491",
+     "steps": "19949114411",
+     "answer": "1"
+    },
+    {
+     "digits": "991494119991",
+     "steps": "9441949994",
+     "answer": "4"
+    },
+    {
+     "digits": "191994944444",
+     "steps": "4999144444",
+     "answer": "4"
+    },
+    {
+     "digits": "149191111111",
+     "steps": "99411111111",
+     "answer": "1"
+    },
+    {
+     "digits": "911149444944",
+     "steps": "49441919919",
+     "answer": "9"
+    },
+    {
+     "digits": "119914499199",
+     "steps": "14119141141",
+     "answer": "1"
+    },
+    {
+     "digits": "191141941114",
+     "steps": "49449911119",
+     "answer": "9"
+    },
+    {
+     "digits": "914944994949",
+     "steps": "44191991441",
+     "answer": "1"
+    },
+    {
+     "digits": "111191941114",
+     "steps": "11149911119",
+     "answer": "9"
+    },
+    {
+     "digits": "411191119191",
+     "steps": "94994941149",
+     "answer": "9"
+    },
+    {
+     "digits": "414199144144",
+     "steps": "91141191191",
+     "answer": "1"
+    },
+    {
+     "digits": "444119994949",
+     "steps": "49414199141",
+     "answer": "1"
+    },
+    {
+     "digits": "441141941114",
+     "steps": "49494911119",
+     "answer": "9"
+    },
+    {
+     "digits": "141911911411",
+     "steps": "94111494911",
+     "answer": "1"
+    },
+    {
+     "digits": "949494141914",
+     "steps": "14419449944",
+     "answer": "4"
+    },
+    {
+     "digits": "414119991919",
+     "steps": "91114149941",
+     "answer": "1"
+    },
+    {
+     "digits": "914914141914",
+     "steps": "44119449944",
+     "answer": "4"
+    },
+    {
+     "digits": "949494111411",
+     "steps": "14419494494",
+     "answer": "4"
+    },
+    {
+     "digits": "111191114141",
+     "steps": "11149491194",
+     "answer": "4"
+    },
+    {
+     "digits": "949949919191",
+     "steps": "14199941149",
+     "answer": "9"
+    },
+    {
+     "digits": "141919111911",
+     "steps": "94114949949",
+     "answer": "9"
+    },
+    {
+     "digits": "111194914941",
+     "steps": "11144119911",
+     "answer": "1"
+    },
+    {
+     "digits": "491419914141",
+     "steps": "11941491194",
+     "answer": "4"
+    },
+    {
+     "digits": "911499411911",
+     "steps": "49141949949",
+     "answer": "9"
+    },
+    {
+     "digits": "494114991119",
+     "steps": "19491411114",
+     "answer": "4"
+    },
+    {
+     "digits": "191491991419",
+     "steps": "49149944994",
+     "answer": "4"
+    },
+    {
+     "digits": "414941114141",
+     "steps": "91449491194",
+     "answer": "4"
+    },
+    {
+     "digits": "191994991119",
+     "steps": "49991411114",
+     "answer": "4"
+    },
+    {
+     "digits": "149444119491",
+     "steps": "99191114411",
+     "answer": "1"
+    },
+    {
+     "digits": "911449191119",
+     "steps": "49199411114",
+     "answer": "4"
+    },
+    {
+     "digits": "194999411911",
+     "steps": "44141949949",
+     "answer": "9"
+    },
+    {
+     "digits": "449119149494",
+     "steps": "41149144191",
+     "answer": "1"
+    },
+    {
+     "digits": "941194991919",
+     "steps": "11144149941",
+     "answer": "1"
+    },
+    {
+     "digits": "444919919491",
+     "steps": "44114114411",
+     "answer": "1"
+    },
+    {
+     "digits": "191119114141",
+     "steps": "49499491194",
+     "answer": "4"
+    },
+    {
+     "digits": "494449141914",
+     "steps": "19199449944",
+     "answer": "4"
+    },
+    {
+     "digits": "994119194149",
+     "steps": "91114991199",
+     "answer": "9"
+    },
+    {
+     "digits": "191114144144",
+     "steps": "49491191191",
+     "answer": "1"
+    },
+    {
+     "digits": "411441919191",
+     "steps": "94449941149",
+     "answer": "9"
+    },
+    {
+     "digits": "941441199199",
+     "steps": "11911141141",
+     "answer": "1"
+    },
+    {
+     "digits": "144919949494",
+     "steps": "91499144191",
+     "answer": "1"
+    },
+    {
+     "digits": "114444199199",
+     "steps": "19191141141",
+     "answer": "1"
+    },
+    {
+     "digits": "119919199999",
+     "steps": "1411499999",
+     "answer": "9"
+    },
+    {
+     "digits": "911991119191",
+     "steps": "49994941149",
+     "answer": "9"
+    },
+    {
+     "digits": "114144194149",
+     "steps": "1944499199",
+     "answer": "9"
+    },
+    {
+     "digits": "444444494949",
+     "steps": "44444199141",
+     "answer": "1"
+    },
+    {
+     "digits": "999194111411",
+     "steps": "99419494494",
+     "answer": "4"
+    },
+    {
+     "digits": "411199991419",
+     "steps": "94999994999",
+     "answer": "9"
+    },
+    {
+     "digits": "994941999999",
+     "steps": "9144999999",
+     "answer": "9"
+    },
+    {
+     "digits": "944191914141",
+     "steps": "19411491194",
+     "answer": "4"
+    },
+    {
+     "digits": "994444994149",
+     "steps": "91919991199",
+     "answer": "9"
+    },
+    {
+     "digits": "499199914441",
+     "steps": "14999994449",
+     "answer": "9"
+    },
+    {
+     "digits": "449191199499",
+     "steps": "41149414414",
+     "answer": "4"
+    },
+    {
+     "digits": "999149494149",
+     "steps": "94419914491",
+     "answer": "1"
+    },
+    {
+     "digits": "119149991919",
+     "steps": "11491414941",
+     "answer": "1"
+    },
+    {
+     "digits": "944991414141",
+     "steps": "19994491194",
+     "answer": "4"
+    },
+    {
+     "digits": "941941999999",
+     "steps": "1144999999",
+     "answer": "9"
+    },
+    {
+     "digits": "919411111411",
+     "steps": "41949494494",
+     "answer": "4"
+    },
+    {
+     "digits": "994941444144",
+     "steps": "91449191191",
+     "answer": "1"
+    },
+    {
+     "digits": "414199111111",
+     "steps": "9114111111",
+     "answer": "1"
+    },
+    {
+     "digits": "419994949194",
+     "steps": "99914419941",
+     "answer": "1"
+    },
+    {
+     "digits": "941991919991",
+     "steps": "11411499994",
+     "answer": "4"
+    },
+    {
+     "digits": "449119419991",
+     "steps": "4114499994",
+     "answer": "4"
+    },
+    {
+     "digits": "441141999999",
+     "steps": "49494999999",
+     "answer": "9"
+    },
+    {
+     "digits": "944994919991",
+     "steps": "19991499994",
+     "answer": "4"
+    },
+    {
+     "digits": "419994941914",
+     "steps": "99991449944",
+     "answer": "4"
+    },
+    {
+     "digits": "449119491119",
+     "steps": "411441114",
+     "answer": "4"
+    },
+    {
+     "digits": "144911914941",
+     "steps": "91494119911",
+     "answer": "1"
+    },
+    {
+     "digits": "999994994949",
+     "steps": "99991419914",
+     "answer": "4"
+    },
+    {
+     "digits": "194944114941",
+     "steps": "44191199119",
+     "answer": "9"
+    },
+    {
+     "digits": "141441999999",
+     "steps": "9444999999",
+     "answer": "9"
+    },
+    {
+     "digits": "919494441114",
+     "steps": "41991911119",
+     "answer": "9"
+    },
+    {
+     "digits": "149444191919",
+     "steps": "99191149941",
+     "answer": "1"
+    },
+    {
+     "digits": "114991411411",
+     "steps": "19944944949",
+     "answer": "9"
+    },
+    {
+     "digits": "914114949994",
+     "steps": "44944199991",
+     "answer": "1"
+    },
+    {
+     "digits": "919991191919",
+     "steps": "41411149941",
+     "answer": "1"
+    },
+    {
+     "digits": "949194114941",
+     "steps": "14991199119",
+     "answer": "9"
+    },
+    {
+     "digits": "114914914941",
+     "steps": "19944119911",
+     "answer": "1"
+    },
+    {
+     "digits": "414414419991",
+     "steps": "91944499994",
+     "answer": "4"
+    },
+    {
+     "digits": "194111449994",
+     "steps": "4494919991",
+     "answer": "1"
+    },
+    {
+     "digits": "194941194149",
+     "steps": "44194991199",
+     "answer": "9"
+    },
+    {
+     "digits": "441911144444",
+     "steps": "4994944444",
+     "answer": "4"
+    },
+    {
+     "digits": "119999199199",
+     "steps": "14149941141",
+     "answer": "1"
+    },
+    {
+     "digits": "144919419491",
+     "steps": "91499114411",
+     "answer": "1"
+    },
+    {
+     "digits": "191944141914",
+     "steps": "49919449944",
+     "answer": "4"
+    },
+    {
+     "digits": "441919994949",
+     "steps": "49941419914",
+     "answer": "4"
+    },
+    {
+     "digits": "914114999199",
+     "steps": "44944141141",
+     "answer": "1"
+    },
+    {
+     "digits": "494411149994",
+     "steps": "19111119991",
+     "answer": "1"
+    },
+    {
+     "digits": "414119999199",
+     "steps": "91114141141",
+     "answer": "1"
+    },
+    {
+     "digits": "494491491919",
+     "steps": "19149149941",
+     "answer": "1"
+    }
+   ],
+   "probe_p_value": 0.5484112242104289,
+   "probe_above_chance": false,
+   "heldout_accuracy": 0.8109452736318408,
+   "heldout_n": 201,
+   "median_tokens_correct": 98,
+   "control_accuracy": 0.6333333333333333,
+   "eval_tokens": 51319,
+   "seconds": 1670.7,
+   "ledger_tokens_generated": 19450,
+   "ledger_gradient_steps": 200,
+   "ledger_training_tokens": 19408,
+   "ledger_gpu_seconds": 2988.503
   }
  ],
  "nights": [
@@ -4312,6 +5369,36 @@
    "buffer_size": 63,
    "weight_decay": 0.05,
    "seconds": 60.4,
+   "empty_night": false
+  },
+  {
+   "episode": 200,
+   "night": 4,
+   "day_episodes": 50,
+   "kept": 35,
+   "new": 35,
+   "dreams_generated": 0,
+   "dreams_kept": 0,
+   "dreams_rejected": {},
+   "dream_tokens": 0,
+   "dreams_rejected_wrong": 0,
+   "dreams_rejected_heldout": 0,
+   "dreams_rejected_prefix_changed": 0,
+   "dreams_structured": 0,
+   "dreams_structured_frac": null,
+   "dreams_rejected_unparsable": 0,
+   "dreams_rejected_duplicate": 0,
+   "dreams_rejected_out_of_spec": 0,
+   "dreams_duplicates_of_source": 0,
+   "dreams_accepted": [],
+   "replay": 35,
+   "train_set": 70,
+   "steps": 50,
+   "training_tokens": 4872,
+   "loss": 0.00847144649735128,
+   "buffer_size": 98,
+   "weight_decay": 0.05,
+   "seconds": 60.5,
    "empty_night": false
   }
  ],
@@ -5965,6 +7052,556 @@
    "tokens": 98,
    "rounds": 1,
    "seconds": 13.95527195930481
+  },
+  {
+   "episode": 151,
+   "digits": "444194444944",
+   "text": "4,4->4\n4,4->4\n4,4->4\n4,1->9\n9,9->9\n9,4->1\n1,4->9\n9,4->1\n1,4->9\n9,9->9\n9,4->1\nSTEPS: 4 4 4 9 9 1 9 1 9 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 4,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 14.201925277709961
+  },
+  {
+   "episode": 152,
+   "digits": "444491914141",
+   "text": "4,4->4\n4,4->4\n4,4->4\n4,9->1\n1,1->1\n1,9->4\n4,1->9\n9,4->1\n1,1->1\n1,4->9\n9,1->4\nSTEPS: 4 4 4 1 1 4 9 1 1 9 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.675055265426636
+  },
+  {
+   "episode": 153,
+   "digits": "141491141414",
+   "text": "1,4->9  \n9,1->4  \n4,4->4  \n4,9->1  \n1,1->1  \n1,1->1  \n1,4->9  \n9,1->4  \n4,4->4  \n4,1->9  \n9,4->1  \nSTEPS: 9 4 4 1 1 1 9 4 4 9 1  \nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.835966348648071
+  },
+  {
+   "episode": 154,
+   "digits": "144991444944",
+   "text": "1,4->9  \n9,4->1  \n1,4->9  \n9,9->9  \n9,1->4  \n4,4->4  \n4,4->4  \n4,4->4  \n4,9->1  \n1,4->9  \n9,4->1  \nSTEPS: 9 1 9 9 4 4 4 4 1 9 1  \nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 2,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.813533782958984
+  },
+  {
+   "episode": 155,
+   "digits": "949119494149",
+   "text": "9,4->1\n1,9->4\n4,1->9\n9,1->4\n4,9->1\n1,4->9\n9,9->9\n9,4->1\n1,1->1\n1,4->9\n9,9->9\nSTEPS: 1 4 9 4 1 9 9 1 1 9 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.915128469467163
+  },
+  {
+   "episode": 156,
+   "digits": "199944449194",
+   "text": "1,9->4\n4,9->1\n1,9->4\n4,4->4\n4,4->4\n4,4->4\n4,4->4\n4,9->1\n1,1->1\n1,9->4\n4,4->4\nSTEPS: 4 1 4 4 4 4 4 1 1 4 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.767295122146606
+  },
+  {
+   "episode": 157,
+   "digits": "994411441414",
+   "text": "9,9->9\n9,4->1\n1,4->9\n9,1->4\n4,1->9\n9,4->1\n1,4->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\nSTEPS: 9 1 9 4 9 1 9 4 4 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.809058427810669
+  },
+  {
+   "episode": 158,
+   "digits": "144199441114",
+   "text": "1,4->9  \n9,4->1  \n1,1->1  \n1,9->4  \n4,9->1  \n1,4->9  \n9,4->1  \n1,1->1  \n1,1->1  \n1,1->1  \n1,4->9  \nSTEPS: 9 1 1 4 1 9 1 1 1 1 9  \nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.700298309326172
+  },
+  {
+   "episode": 159,
+   "digits": "999941144144",
+   "text": "9,9->9\n9,9->9\n9,9->9\n9,4->1\n1,1->1\n1,1->1\n1,4->9\n9,4->1\n1,1->1\n1,4->9\n9,4->1\nSTEPS: 9 9 9 1 1 1 9 1 1 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.805479049682617
+  },
+  {
+   "episode": 160,
+   "digits": "149944441414",
+   "text": "1,4->9  \n9,9->9  \n9,4->1  \n1,4->9  \n9,4->1  \n1,4->9  \n9,4->1  \n1,4->9  \n9,1->4  \n4,4->4  \n4,1->9  \n1,4->9  \nSTEPS: 9 9 1 9 1 9 1 9 4 4 9 9  \nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 3,
+   "tokens": 106,
+   "rounds": 1,
+   "seconds": 15.229044914245605
+  },
+  {
+   "episode": 161,
+   "digits": "919444419491",
+   "text": "9,1->4\n4,9->1\n1,4->9\n9,4->1\n1,4->9\n9,4->1\n1,1->1\n1,9->4\n4,4->4\n4,9->1\n1,1->1\nSTEPS: 4 1 9 1 9 1 1 4 4 1 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.816186904907227
+  },
+  {
+   "episode": 162,
+   "digits": "191994441114",
+   "text": "1,9->4\n4,1->9\n9,9->9\n9,9->9\n9,4->1\n1,4->9\n9,4->1\n1,1->1\n1,1->1\n1,1->1\n1,4->9\nSTEPS: 4 9 9 9 1 9 1 1 1 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.874667406082153
+  },
+  {
+   "episode": 163,
+   "digits": "144944499499",
+   "text": "1,4->9  \n9,4->1  \n1,4->9  \n9,9->9  \n9,4->1  \n1,4->9  \n9,4->1  \n1,9->4  \n4,9->1  \n1,4->9  \n9,9->9  \nSTEPS: 9 1 9 9 1 9 1 4 1 9 9  \nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 4,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.902756690979004
+  },
+  {
+   "episode": 164,
+   "digits": "499941114441",
+   "text": "4,9->1\n1,9->4\n4,9->1\n1,4->9\n9,1->4\n4,1->9\n9,1->4\n4,4->4\n4,4->4\n4,4->4\n4,1->9\nSTEPS: 1 4 1 9 4 9 4 4 4 4 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.702519655227661
+  },
+  {
+   "episode": 165,
+   "digits": "411914944944",
+   "text": "4,1->9\n9,1->4\n4,9->1\n1,1->1\n1,4->9\n9,9->9\n9,4->1\n1,4->9\n9,9->9\n9,4->1\n1,4->9\nSTEPS: 9 4 1 1 9 9 1 9 9 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.85640025138855
+  },
+  {
+   "episode": 166,
+   "digits": "144491194149",
+   "text": "1,4->9  \n9,4->1  \n1,4->9  \n9,9->9  \n9,1->4  \n4,1->9  \n9,9->9  \n9,4->1  \n1,1->1  \n1,4->9  \n9,9->9  \nSTEPS: 9 1 9 9 4 9 9 1 1 9 9  \nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.743537902832031
+  },
+  {
+   "episode": 167,
+   "digits": "411944441114",
+   "text": "4,1->9\n9,1->4\n4,9->1\n1,4->9\n9,4->1\n1,4->9\n9,4->1\n1,1->1\n1,1->1\n1,1->1\n1,4->9\nSTEPS: 9 4 1 9 1 9 1 1 1 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.820007562637329
+  },
+  {
+   "episode": 168,
+   "digits": "494114419191",
+   "text": "4,9->1\n1,4->9\n9,4->1\n1,1->1\n1,4->9\n9,4->1\n1,1->1\n1,9->4\n4,1->9\n9,9->9\n9,1->4\nSTEPS: 1 9 1 1 9 1 1 4 9 9 4\nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 2,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.73089861869812
+  },
+  {
+   "episode": 169,
+   "digits": "199119149494",
+   "text": "1,9->4\n4,9->1\n1,1->1\n1,1->1\n1,9->4\n4,1->9\n9,4->1\n1,9->4\n4,4->4\n4,9->1\n1,4->9\nSTEPS: 4 1 1 1 4 9 1 4 4 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.931219100952148
+  },
+  {
+   "episode": 170,
+   "digits": "414441191919",
+   "text": "4,1->9\n9,4->1\n1,4->9\n9,4->1\n1,4->9\n9,1->4\n4,1->9\n9,9->9\n9,1->4\n4,9->1\n1,9->4\nSTEPS: 9 1 9 1 9 4 9 9 4 1 4\nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 5,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.680712699890137
+  },
+  {
+   "episode": 171,
+   "digits": "449999991919",
+   "text": "4,4->4\n4,9->1\n1,9->4\n4,9->1\n1,9->4\n4,9->1\n1,9->4\n4,1->9\n9,9->9\n9,1->4\n4,9->1\nSTEPS: 4 1 4 1 4 1 4 9 9 4 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.849968671798706
+  },
+  {
+   "episode": 172,
+   "digits": "994141994449",
+   "text": "9,9->9\n9,4->1\n1,1->1\n1,4->9\n9,1->4\n4,9->1\n1,9->4\n4,4->4\n4,4->4\n4,4->4\n4,9->1\nSTEPS: 9 1 1 9 4 1 4 4 4 4 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 14.009109258651733
+  },
+  {
+   "episode": 173,
+   "digits": "149194919191",
+   "text": "1,4->9  \n9,9->9  \n9,1->4  \n4,9->1  \n1,4->9  \n9,9->9  \n9,1->4  \n4,9->1  \n1,1->1  \n1,9->4  \n4,1->9  \nSTEPS: 9 9 4 1 9 9 4 1 1 4 9  \nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.98849630355835
+  },
+  {
+   "episode": 174,
+   "digits": "949494441414",
+   "text": "9,4->1\n1,9->4\n4,4->4\n4,9->1\n1,4->9\n9,4->1\n1,4->9\n9,4->1\n1,1->1\n1,4->9\n9,4->1\nSTEPS: 1 4 4 1 9 1 9 1 1 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 9,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 14.126603126525879
+  },
+  {
+   "episode": 175,
+   "digits": "411149949994",
+   "text": "4,1->9\n9,1->4\n4,1->9\n9,4->1\n1,9->4\n4,9->1\n1,4->9\n9,9->9\n9,9->9\n9,9->9\n9,4->1\nSTEPS: 9 4 9 1 4 1 9 9 9 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.955119132995605
+  },
+  {
+   "episode": 176,
+   "digits": "114419141114",
+   "text": "1,1->1\n1,4->9\n9,4->1\n1,1->1\n1,9->4\n4,1->9\n9,4->1\n1,1->1\n1,1->1\n1,1->1\n1,4->9\nSTEPS: 1 9 1 1 4 9 1 1 1 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.932778596878052
+  },
+  {
+   "episode": 177,
+   "digits": "499449141414",
+   "text": "4,9->1\n1,9->4\n4,4->4\n4,4->4\n4,9->1\n1,1->1\n1,4->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\nSTEPS: 1 4 4 4 1 1 9 4 4 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.907696723937988
+  },
+  {
+   "episode": 178,
+   "digits": "949494411111",
+   "text": "9,4->1\n1,9->4\n4,4->4\n4,9->1\n1,4->9\n9,4->1\n1,4->9\n9,1->4\n4,1->9\n9,1->4\n4,1->9\nSTEPS: 1 4 4 1 9 1 9 4 9 4 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 6,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.93699336051941
+  },
+  {
+   "episode": 179,
+   "digits": "199914999499",
+   "text": "1,9->4\n4,9->1\n1,9->4\n4,1->9\n9,4->1\n1,9->4\n4,9->1\n1,9->4\n4,4->4\n4,9->1\n1,9->4\nSTEPS: 4 1 4 9 1 4 1 4 4 1 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.953884363174438
+  },
+  {
+   "episode": 180,
+   "digits": "941944999199",
+   "text": "9,4->1\n1,1->1\n1,9->4\n4,4->4\n4,4->4\n4,9->1\n1,9->4\n4,9->1\n1,1->1\n1,9->4\n4,9->1\nSTEPS: 1 1 4 4 4 1 4 1 1 4 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.638949394226074
+  },
+  {
+   "episode": 181,
+   "digits": "449444911911",
+   "text": "4,4->4\n4,9->1\n1,4->9\n9,4->1\n1,4->9\n9,4->1\n1,9->4\n4,1->9\n9,1->4\n4,9->1\n1,1->1\nSTEPS: 4 1 9 1 9 1 4 9 4 1 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 7,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.908988952636719
+  },
+  {
+   "episode": 182,
+   "digits": "911949141114",
+   "text": "9,1->4\n4,1->9\n9,9->9\n9,4->1\n1,9->4\n4,1->9\n9,4->1\n1,1->1\n1,1->1\n1,1->1\n1,4->9\nSTEPS: 4 9 9 1 4 9 1 1 1 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.828599691390991
+  },
+  {
+   "episode": 183,
+   "digits": "444119141414",
+   "text": "4,4->4\n4,4->4\n4,1->9\n9,1->4\n4,9->1\n1,1->1\n1,4->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\nSTEPS: 4 4 9 4 1 1 9 4 4 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.812086820602417
+  },
+  {
+   "episode": 184,
+   "digits": "499411141114",
+   "text": "4,9->1\n1,9->4\n4,4->4\n4,1->9\n9,1->4\n4,1->9\n9,1->4\n4,4->4\n4,1->9\n9,1->4\n4,4->4\nSTEPS: 1 4 4 9 4 9 4 4 9 4 4\nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 6,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.749059200286865
+  },
+  {
+   "episode": 185,
+   "digits": "911949449194",
+   "text": "9,1->4\n4,1->9\n9,9->9\n9,4->1\n1,9->4\n4,4->4\n4,4->4\n4,9->1\n1,1->1\n1,9->4\n4,4->4\nSTEPS: 4 9 9 1 4 4 4 1 1 4 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.91910696029663
+  },
+  {
+   "episode": 186,
+   "digits": "994941141914",
+   "text": "9,9->9\n9,4->1\n1,9->4\n4,4->4\n4,1->9\n9,1->4\n4,4->4\n4,1->9\n9,9->9\n9,1->4\n4,4->4\nSTEPS: 9 1 4 4 9 4 4 9 9 4 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 14.035720586776733
+  },
+  {
+   "episode": 187,
+   "digits": "444199994149",
+   "text": "4,4->4\n4,4->4\n4,4->4\n4,1->9\n9,9->9\n9,9->9\n9,9->9\n9,4->1\n1,1->1\n1,4->9\n9,9->9\nSTEPS: 4 4 4 9 9 9 9 1 1 9 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 10,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.845283508300781
+  },
+  {
+   "episode": 188,
+   "digits": "911419911111",
+   "text": "9,1->4\n4,1->9\n9,4->1\n1,1->1\n1,9->4\n4,9->1\n1,1->1\n1,1->1\n1,1->1\n1,1->1\n1,1->1\nSTEPS: 4 9 1 1 4 1 1 1 1 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 10,
+   "tokens": 96,
+   "rounds": 1,
+   "seconds": 13.62392544746399
+  },
+  {
+   "episode": 189,
+   "digits": "194949991419",
+   "text": "1,9->4\n4,4->4\n4,9->1\n1,4->9\n9,9->9\n9,9->9\n9,1->4\n4,4->4\n4,1->9\n9,9->9\n9,9->9\nSTEPS: 4 4 1 9 9 9 4 4 9 9 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 9,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 14.16616177558899
+  },
+  {
+   "episode": 190,
+   "digits": "441994144144",
+   "text": "4,4->4\n4,1->9\n9,9->9\n9,4->1\n1,1->1\n1,4->9\n9,4->1\n1,1->1\n1,4->9\n9,4->1\n1,4->9\nSTEPS: 4 9 9 1 1 9 1 1 9 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 5,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.942460060119629
+  },
+  {
+   "episode": 191,
+   "digits": "119119144144",
+   "text": "1,1->1\n1,9->4\n4,1->9\n9,1->4\n4,9->1\n1,1->1\n1,4->9\n9,4->1\n1,1->1\n1,4->9\n9,4->1\nSTEPS: 1 1 4 9 4 1 1 9 1 1 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 3,
+   "tokens": 100,
+   "rounds": 1,
+   "seconds": 14.377659320831299
+  },
+  {
+   "episode": 192,
+   "digits": "911441441914",
+   "text": "9,1->4\n4,1->9\n9,4->1\n1,4->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\n1,1->1\n1,9->4\n4,1->9\nSTEPS: 4 9 1 9 4 4 9 1 1 4 9\nANSWER: 9",
+   "answer": "9",
+   "correct": false,
+   "steps_correct": 7,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 14.221083879470825
+  },
+  {
+   "episode": 193,
+   "digits": "414944941414",
+   "text": "4,1->9\n9,4->1\n1,9->4\n4,4->4\n4,4->4\n4,9->1\n1,4->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\nSTEPS: 9 1 4 4 4 1 9 4 4 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 14.121458292007446
+  },
+  {
+   "episode": 194,
+   "digits": "119194141414",
+   "text": "1,1->1\n1,9->4\n4,1->9\n9,9->9\n9,4->1\n1,1->1\n1,4->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\nSTEPS: 1 1 4 9 9 1 1 9 4 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 6,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.69760513305664
+  },
+  {
+   "episode": 195,
+   "digits": "919919141914",
+   "text": "9,1->4\n4,9->1\n1,9->4\n4,1->9\n9,9->9\n9,1->4\n4,4->4\n4,1->9\n9,9->9\n9,1->4\n4,4->4\nSTEPS: 4 1 4 9 9 4 4 9 9 4 4\nANSWER: 4",
+   "answer": "4",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.993478775024414
+  },
+  {
+   "episode": 196,
+   "digits": "414491919491",
+   "text": "4,1->9\n9,4->1\n1,4->9\n9,4->1\n1,9->4\n4,1->9\n9,9->9\n9,1->4\n4,9->1\n1,4->9\n9,1->4\nSTEPS: 9 1 9 1 4 9 9 4 1 9 4\nANSWER: 4",
+   "answer": "4",
+   "correct": false,
+   "steps_correct": 5,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.822729349136353
+  },
+  {
+   "episode": 197,
+   "digits": "144441114941",
+   "text": "1,4->9  \n9,4->1  \n1,4->9  \n9,4->1  \n1,1->1  \n1,1->1  \n1,1->1  \n1,4->9  \n9,9->9  \n9,4->1  \n1,1->1  \nSTEPS: 9 1 9 1 1 1 1 9 9 1 1  \nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.823816537857056
+  },
+  {
+   "episode": 198,
+   "digits": "114491941114",
+   "text": "1,1->1\n1,4->9\n9,4->1\n1,9->4\n4,1->9\n9,9->9\n9,4->1\n1,1->1\n1,1->1\n1,1->1\n1,4->9\nSTEPS: 1 9 1 4 9 9 1 1 1 1 9\nANSWER: 9",
+   "answer": "9",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.667418718338013
+  },
+  {
+   "episode": 199,
+   "digits": "194919919491",
+   "text": "1,9->4\n4,4->4\n4,9->1\n1,1->1\n1,9->4\n4,9->1\n1,1->1\n1,9->4\n4,4->4\n4,9->1\n1,1->1\nSTEPS: 4 4 1 1 4 1 1 4 4 1 1\nANSWER: 1",
+   "answer": "1",
+   "correct": true,
+   "steps_correct": 11,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.674570322036743
+  },
+  {
+   "episode": 200,
+   "digits": "494444914141",
+   "text": "4,9->1\n1,4->9\n9,4->1\n1,4->9\n9,4->1\n1,4->9\n9,9->9\n9,1->4\n4,4->4\n4,1->9\n9,4->1\nSTEPS: 1 9 1 9 1 9 9 4 4 9 1\nANSWER: 1",
+   "answer": "1",
+   "correct": false,
+   "steps_correct": 7,
+   "tokens": 98,
+   "rounds": 1,
+   "seconds": 13.722901582717896
   }
  ]
 }
