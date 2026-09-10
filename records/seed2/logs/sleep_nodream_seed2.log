@@ -1,3 +1,19 @@
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
 Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   8%|▊         | 30/398 [00:00<00:01, 276.34it/s]Loading weights:  15%|█▍        | 59/398 [00:00<00:01, 270.56it/s]Loading weights:  24%|██▍       | 96/398 [00:00<00:00, 313.57it/s]Loading weights:  32%|███▏      | 128/398 [00:00<00:00, 290.53it/s]Loading weights:  40%|███▉      | 158/398 [00:00<00:00, 290.35it/s]Loading weights:  47%|████▋     | 188/398 [00:00<00:00, 281.12it/s]Loading weights:  55%|█████▍    | 217/398 [00:00<00:00, 262.68it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 471.17it/s]
 gpu=NVIDIA A16-16Q arm=sleep_nodream seed=2 tag=seed2 deterministic=True backend=hf:Qwen/Qwen3-4B batch=8
+[sleep_nodream seed=2] ep=0 probe=0.317 heldout=0.428 control=0.5833333333333334 1681s
+/opt/doze/.venv/lib/python3.11/site-packages/torch/autograd/graph.py:825: UserWarning: Flash Attention defaults to a non-deterministic algorithm. To explicitly enable determinism call torch.use_deterministic_algorithms(True, warn_only=False). (Triggered internally at ../aten/src/ATen/native/transformers/cuda/attention_backward.cu:102.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[sleep_nodream seed=2] ep=50 probe=0.333 heldout=0.552 control=0.66 tokens=4848 steps=50 | episode 13.6s night 60s checkpoint 1629s
+[sleep_nodream seed=2] ep=100 probe=0.183 heldout=0.612 control=0.6433333333333333 tokens=9710 steps=100 | episode 13.6s night 60s checkpoint 1693s
+[sleep_nodream seed=2] ep=150 probe=0.200 heldout=0.682 control=0.6166666666666667 tokens=14548 steps=150 | episode 13.6s night 60s checkpoint 1628s
+[sleep_nodream seed=2] ep=200 probe=0.233 heldout=0.622 control=0.5766666666666667 tokens=19350 steps=200 | episode 13.5s night 60s checkpoint 1699s
+[sleep_nodream seed=2] ep=250 probe=0.250 heldout=0.741 control=0.53 tokens=24266 steps=250 | episode 13.7s night 60s checkpoint 1761s
+[sleep_nodream seed=2] ep=300 probe=0.300 heldout=0.886 control=0.5466666666666666 tokens=29104 steps=300 | episode 13.6s night 60s checkpoint 1726s
+[sleep_nodream seed=2] ep=350 probe=0.317 heldout=0.831 control=0.5833333333333334 tokens=33968 steps=350 | episode 13.6s night 60s checkpoint 1665s
+[sleep_nodream seed=2] ep=400 probe=0.250 heldout=0.706 control=0.58 tokens=38816 steps=400 | episode 13.6s night 60s checkpoint 1762s
+[sleep_nodream seed=2] ep=450 probe=0.300 heldout=0.920 control=0.5566666666666666 tokens=43670 steps=450 | episode 13.6s night 60s checkpoint 1810s
+[sleep_nodream seed=2] ep=500 probe=0.283 heldout=0.945 control=0.5666666666666667 tokens=48406 steps=500 | episode 13.5s night 60s checkpoint 1719s
+[sleep_nodream seed=2] ep=550 probe=0.283 heldout=0.791 control=0.5666666666666667 tokens=53160 steps=550 | episode 13.4s night 60s checkpoint 1783s
+[sleep_nodream seed=2] ep=600 probe=0.317 heldout=0.861 control=0.6033333333333334 tokens=58038 steps=600 | episode 13.9s night 60s checkpoint 1718s
+timing {"gpu": "NVIDIA A16-16Q", "deterministic": true, "total_seconds": 31178.3, "episode_seconds_mean": 13.6, "checkpoint_seconds": [1681.4, 1628.7, 1693.2, 1628.3, 1698.6, 1761.3, 1726.0, 1664.8, 1762.0, 1810.3, 1719.5, 1783.1, 1717.5], "night_seconds": [60.38301062583923, 60.34294557571411, 60.33493638038635, 60.34224009513855, 60.43766498565674, 60.40733861923218, 60.37333106994629, 60.41676163673401, 60.45719766616821, 60.49961709976196, 60.35975480079651, 60.49026155471802], "resumed_from": null, "criterion_episode": null, "ledger": {"tokens_generated": 58038, "gradient_steps": 600, "training_tokens": 57864, "gpu_seconds": 8882.721}}
