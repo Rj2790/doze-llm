@@ -1,0 +1,4 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   5%|▌         | 21/398 [00:00<00:01, 193.43it/s]Loading weights:  11%|█▏        | 45/398 [00:00<00:01, 209.15it/s]Loading weights:  20%|█▉        | 78/398 [00:00<00:01, 257.48it/s]Loading weights:  29%|██▉       | 116/398 [00:00<00:00, 302.29it/s]Loading weights:  37%|███▋      | 147/398 [00:00<00:00, 303.91it/s]Loading weights:  45%|████▌     | 180/398 [00:00<00:00, 295.91it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 540.23it/s]
+gpu=NVIDIA A16-16Q arm=awake seed=2 tag=seed2 deterministic=True backend=hf:Qwen/Qwen3-4B batch=8 awake_budget=186
+[awake seed=2] ep=0 probe=0.333 heldout=0.408 control=0.59 4511s

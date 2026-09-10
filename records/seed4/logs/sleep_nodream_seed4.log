@@ -1,3 +1,10 @@
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
 Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   7%|▋         | 28/398 [00:00<00:01, 240.08it/s]Loading weights:  13%|█▎        | 53/398 [00:00<00:01, 231.16it/s]Loading weights:  21%|██        | 83/398 [00:00<00:01, 258.95it/s]Loading weights:  28%|██▊       | 110/398 [00:00<00:01, 207.96it/s]Loading weights:  36%|███▌      | 142/398 [00:00<00:01, 238.39it/s]Loading weights:  44%|████▍     | 176/398 [00:00<00:00, 261.84it/s]Loading weights:  51%|█████▏    | 204/398 [00:00<00:00, 243.81it/s]Loading weights:  93%|█████████▎| 370/398 [00:00<00:00, 634.39it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 420.51it/s]
 gpu=NVIDIA A16-16Q arm=sleep_nodream seed=4 tag=seed4 deterministic=True backend=hf:Qwen/Qwen3-4B batch=8
+[sleep_nodream seed=4] ep=0 probe=0.250 heldout=0.398 control=0.5833333333333334 1689s
+/opt/doze/.venv/lib/python3.11/site-packages/torch/autograd/graph.py:825: UserWarning: Flash Attention defaults to a non-deterministic algorithm. To explicitly enable determinism call torch.use_deterministic_algorithms(True, warn_only=False). (Triggered internally at ../aten/src/ATen/native/transformers/cuda/attention_backward.cu:102.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[sleep_nodream seed=4] ep=50 probe=0.333 heldout=0.677 control=0.7066666666666667 tokens=4842 steps=50 | episode 13.7s night 61s checkpoint 1691s
+[sleep_nodream seed=4] ep=100 probe=0.367 heldout=0.682 control=0.68 tokens=9662 steps=100 | episode 13.6s night 60s checkpoint 1643s
+[sleep_nodream seed=4] ep=150 probe=0.350 heldout=0.711 control=0.65 tokens=14542 steps=150 | episode 13.7s night 60s checkpoint 1632s
+[sleep_nodream seed=4] ep=200 probe=0.333 heldout=0.811 control=0.6333333333333333 tokens=19450 steps=200 | episode 13.9s night 60s checkpoint 1671s
