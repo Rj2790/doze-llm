@@ -11,3 +11,5 @@
 2026-09-10T11:29:15Z gpu1 start sleep_nodream seed4
 2026-09-10T19:54:47Z gpu1 done  sleep_nodream seed4 exit=0
 2026-09-10T19:54:47Z gpu1 start baseline seed2
+2026-09-11T01:07:01Z gpu1 done  baseline seed2 exit=0
+2026-09-11T01:07:01Z gpu1 start baseline seed3

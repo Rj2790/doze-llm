@@ -6,3 +6,7 @@ gpu=NVIDIA A16-16Q arm=awake seed=2 tag=seed2 deterministic=True backend=hf:Qwen
 [awake seed=2] ep=100 probe=0.333 heldout=0.408 control=0.59 tokens=18652 steps=0 | episode 12.4s night 0s checkpoint 4510s
 [awake seed=2] ep=150 probe=0.333 heldout=0.408 control=0.59 tokens=27944 steps=0 | episode 12.5s night 0s checkpoint 4512s
 [awake seed=2] ep=200 probe=0.333 heldout=0.408 control=0.59 tokens=37274 steps=0 | episode 12.6s night 0s checkpoint 4513s
+[awake seed=2] ep=250 probe=0.333 heldout=0.408 control=0.59 tokens=46550 steps=0 | episode 12.4s night 0s checkpoint 4512s
+[awake seed=2] ep=300 probe=0.333 heldout=0.408 control=0.59 tokens=55840 steps=0 | episode 12.4s night 0s checkpoint 4513s
+[awake seed=2] ep=350 probe=0.333 heldout=0.408 control=0.59 tokens=65164 steps=0 | episode 12.4s night 0s checkpoint 4511s
+[awake seed=2] ep=400 probe=0.333 heldout=0.408 control=0.59 tokens=74492 steps=0 | episode 12.3s night 0s checkpoint 4510s
