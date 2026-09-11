@@ -1,3 +1,17 @@
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
 Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   8%|▊         | 30/398 [00:00<00:01, 281.47it/s]Loading weights:  18%|█▊        | 70/398 [00:00<00:00, 336.46it/s]Loading weights:  26%|██▌       | 104/398 [00:00<00:00, 304.91it/s]Loading weights:  34%|███▍      | 135/398 [00:00<00:00, 287.78it/s]Loading weights:  41%|████      | 164/398 [00:00<00:00, 255.02it/s]Loading weights:  48%|████▊     | 190/398 [00:00<00:00, 249.35it/s]Loading weights:  98%|█████████▊| 390/398 [00:00<00:00, 754.61it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 493.42it/s]
 gpu=NVIDIA A16-16Q arm=baseline seed=3 tag=seed3 deterministic=True backend=hf:Qwen/Qwen3-4B batch=8
+[baseline seed=3] ep=0 probe=0.350 heldout=0.428 control=0.5833333333333334 1133s
+[baseline seed=3] ep=50 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=4866 steps=0 | episode 6.4s night 0s checkpoint 1134s
+[baseline seed=3] ep=100 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=9718 steps=0 | episode 6.4s night 0s checkpoint 1133s
+[baseline seed=3] ep=150 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=14526 steps=0 | episode 6.3s night 0s checkpoint 1133s
+[baseline seed=3] ep=200 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=19390 steps=0 | episode 6.4s night 0s checkpoint 1133s
+[baseline seed=3] ep=250 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=24220 steps=0 | episode 6.4s night 0s checkpoint 1133s
+[baseline seed=3] ep=300 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=29012 steps=0 | episode 6.3s night 0s checkpoint 1133s
+[baseline seed=3] ep=350 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=33872 steps=0 | episode 6.4s night 0s checkpoint 1133s
+[baseline seed=3] ep=400 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=38658 steps=0 | episode 6.3s night 0s checkpoint 1132s
+[baseline seed=3] ep=450 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=43484 steps=0 | episode 6.4s night 0s checkpoint 1132s
+[baseline seed=3] ep=500 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=48318 steps=0 | episode 6.3s night 0s checkpoint 1130s
+[baseline seed=3] ep=550 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=53176 steps=0 | episode 6.4s night 0s checkpoint 1132s
+[baseline seed=3] ep=600 probe=0.350 heldout=0.428 control=0.5833333333333334 tokens=57992 steps=0 | episode 6.3s night 0s checkpoint 1132s
+timing {"gpu": "NVIDIA A16-16Q", "deterministic": true, "total_seconds": 18720.5, "episode_seconds_mean": 6.35, "checkpoint_seconds": [1133.2, 1133.7, 1133.3, 1133.4, 1133.3, 1133.2, 1133.1, 1133.0, 1132.4, 1132.0, 1129.6, 1131.7, 1132.4], "night_seconds": [3.0994415283203125e-06, 5.0067901611328125e-06, 1.430511474609375e-06, 9.5367431640625e-07, 1.1920928955078125e-06, 1.1920928955078125e-06, 1.1920928955078125e-06, 1.1920928955078125e-06, 1.1920928955078125e-06, 1.6689300537109375e-06, 1.1920928955078125e-06, 9.5367431640625e-07], "resumed_from": null, "criterion_episode": null, "ledger": {"tokens_generated": 57992, "gradient_steps": 0, "training_tokens": 0, "gpu_seconds": 3810.165}}
