@@ -20,20 +20,7 @@
  },
  "criterion_episode": null,
  "eval_tokens": 664359,
- "matched": {
-  "seed": 2,
-  "arms": [
-   "awake",
-   "baseline",
-   "online",
-   "sleep",
-   "sleep_nodream"
-  ],
-  "backend": "hf:Qwen/Qwen3-4B",
-  "tol": 0.05,
-  "ok": true,
-  "message": "compute budgets matched"
- },
+ "matched": null,
  "partial": false,
  "resumed_from": null,
  "ledger": {
