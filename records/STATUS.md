@@ -97,8 +97,8 @@ verdict into the run files; requires the seed's `sleep` ledger.
 | 0 | ✓ pilot (Modal L4) | ✓ (Modal L4) | ✓ pilot | ✓ (Modal L4) | ✓ pilot | ✓ |
 | 1 | ✓ (Lightning L4) | ✓ (A16, 8.5 h) | ✓ (A16, 8.6 h) | ✓ (Lightning L4) | ✓ (A16, 17.4 h) | ✓ MATCHED |
 | 2 | ✓ (A16) | ✓ (A16, 8.7 h) | ✓ (A16, 8.4 h) | ✓ (A16, 5.2 h) | ✓ (A16, 18.4 h) | ✓ MATCHED |
-| 3 | ✓ (A16) | ✓ (A16, 8.3 h) | ✓ (A16, 8.7 h) | ✓ (A16, 5.2 h) | queued gpu1 | pending awake |
-| 4 | ✓ (A16) | ✓ (A16, 8.4 h) | ✓ (A16, 9.1 h) | running gpu1 | running gpu0 | pending |
+| 3 | ✓ (A16) | ✓ (A16, 8.3 h) | ✓ (A16, 8.7 h) | ✓ (A16, 5.2 h) | running gpu1 (from 11 Sep 17:01 IST) | pending awake |
+| 4 | ✓ (A16) | ✓ (A16, 8.4 h) | ✓ (A16, 9.1 h) | ✓ (A16, 5.2 h) | running gpu0 (from 11 Sep 12:28 IST) | pending awake |
 
 Seed 1 Sleep-NoDream (A16, 8.52 h): probe 0.33–0.47 (chance), held-out
 0.463 → 0.886 (peak 0.930 at ep 500), GSM8K 0.583 → 0.553; 600 steps,
@@ -116,4 +116,6 @@ Probe: all at chance, all censored. See `seed1/report.md`.
 
 Projected grid completion revised to 12 Sep ~12:30 IST (Baselines 5.2 h, not 7).
 
-Last updated: 2026-09-11 12:45 IST
+23/25 arms done. Remaining: Awake 4 (gpu0, ETA 12 Sep ~06:45 IST), Awake 3 (gpu1, ETA 12 Sep ~11:30 IST).
+
+Last updated: 2026-09-11 17:05 IST
