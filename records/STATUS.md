@@ -96,9 +96,9 @@ verdict into the run files; requires the seed's `sleep` ledger.
 |---|---|---|---|---|---|---|
 | 0 | ✓ pilot (Modal L4) | ✓ (Modal L4) | ✓ pilot | ✓ (Modal L4) | ✓ pilot | ✓ |
 | 1 | ✓ (Lightning L4) | ✓ (A16, 8.5 h) | ✓ (A16, 8.6 h) | ✓ (Lightning L4) | ✓ (A16, 17.4 h) | ✓ MATCHED |
-| 2 | ✓ (A16) | ✓ (A16, 8.7 h) | ✓ (A16, 8.4 h) | queued gpu1 | queued gpu0 | — |
-| 3 | ✓ (A16) | running gpu1 | ✓ (A16, 8.7 h) | queued gpu1 | queued gpu1 | — |
-| 4 | ✓ (A16) | queued gpu1 | running gpu0 | queued gpu1 | queued gpu0 | — |
+| 2 | ✓ (A16) | ✓ (A16, 8.7 h) | ✓ (A16, 8.4 h) | ✓ (A16, 5.2 h) | ✓ (A16, 18.4 h) | ✓ MATCHED |
+| 3 | ✓ (A16) | ✓ (A16, 8.3 h) | ✓ (A16, 8.7 h) | ✓ (A16, 5.2 h) | queued gpu1 | pending awake |
+| 4 | ✓ (A16) | ✓ (A16, 8.4 h) | ✓ (A16, 9.1 h) | running gpu1 | running gpu0 | pending |
 
 Seed 1 Sleep-NoDream (A16, 8.52 h): probe 0.33–0.47 (chance), held-out
 0.463 → 0.886 (peak 0.930 at ep 500), GSM8K 0.583 → 0.553; 600 steps,
@@ -114,4 +114,6 @@ Final held-out: Sleep 0.811, NoDream 0.886, Online 0.900, Awake 0.453,
 Baseline 0.478. GSM8K delta: Sleep −0.080, NoDream −0.030, Online +0.177.
 Probe: all at chance, all censored. See `seed1/report.md`.
 
-Last updated: 2026-09-10 09:15 IST
+Projected grid completion revised to 12 Sep ~12:30 IST (Baselines 5.2 h, not 7).
+
+Last updated: 2026-09-11 12:45 IST
