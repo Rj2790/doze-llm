@@ -1,0 +1,120 @@
+2026-09-12T11:24:30Z loaded Qwen/Qwen3-4B on NVIDIA L4; models=['base', 'online_seed1', 'online_seed2', 'online_seed3', 'online_seed4', 'sleep_nodream_seed0', 'sleep_nodream_seed1', 'sleep_nodream_seed2', 'sleep_nodream_seed3', 'sleep_nodream_seed4', 'sleep_seed1', 'sleep_seed2', 'sleep_seed3', 'sleep_seed4']
+2026-09-12T11:24:37Z B as_run/base/seed0: acc=0.367
+2026-09-12T11:24:41Z B rule_stated/base/seed0: acc=0.367
+2026-09-12T11:24:58Z B work_allowed/base/seed0: acc=0.367
+2026-09-12T11:25:15Z B rule_stated_work/base/seed0: acc=0.250
+2026-09-12T11:25:28Z B logprob/base/seed0: acc=0.350 margin=-2.754
+2026-09-12T11:25:32Z B as_run/base/seed1: acc=0.467
+2026-09-12T11:25:37Z B rule_stated/base/seed1: acc=0.350
+2026-09-12T11:25:54Z B work_allowed/base/seed1: acc=0.317
+2026-09-12T11:26:11Z B rule_stated_work/base/seed1: acc=0.317
+2026-09-12T11:26:24Z B logprob/base/seed1: acc=0.400 margin=-2.079
+2026-09-12T11:26:28Z B as_run/base/seed2: acc=0.250
+2026-09-12T11:26:32Z B rule_stated/base/seed2: acc=0.317
+2026-09-12T11:26:49Z B work_allowed/base/seed2: acc=0.467
+2026-09-12T11:27:07Z B rule_stated_work/base/seed2: acc=0.333
+2026-09-12T11:27:20Z B logprob/base/seed2: acc=0.267 margin=-3.275
+2026-09-12T11:27:24Z B as_run/base/seed3: acc=0.350
+2026-09-12T11:27:28Z B rule_stated/base/seed3: acc=0.333
+2026-09-12T11:27:45Z B work_allowed/base/seed3: acc=0.450
+2026-09-12T11:28:03Z B rule_stated_work/base/seed3: acc=0.383
+2026-09-12T11:28:16Z B logprob/base/seed3: acc=0.350 margin=-3.112
+2026-09-12T11:28:20Z B as_run/base/seed4: acc=0.267
+2026-09-12T11:28:25Z B rule_stated/base/seed4: acc=0.367
+2026-09-12T11:28:42Z B work_allowed/base/seed4: acc=0.317
+2026-09-12T11:29:00Z B rule_stated_work/base/seed4: acc=0.417
+2026-09-12T11:29:13Z B logprob/base/seed4: acc=0.267 margin=-1.800
+2026-09-12T11:29:30Z B as_run/online_seed1/seed1: acc=0.367
+2026-09-12T11:29:47Z B rule_stated/online_seed1/seed1: acc=0.300
+2026-09-12T11:30:14Z B work_allowed/online_seed1/seed1: acc=0.900
+2026-09-12T11:30:43Z B rule_stated_work/online_seed1/seed1: acc=0.883
+2026-09-12T11:31:00Z B logprob/online_seed1/seed1: acc=0.317 margin=-0.379
+2026-09-12T11:31:10Z B as_run/online_seed2/seed2: acc=0.333
+2026-09-12T11:31:18Z B rule_stated/online_seed2/seed2: acc=0.283
+2026-09-12T11:31:49Z B work_allowed/online_seed2/seed2: acc=0.600
+2026-09-12T11:32:19Z B rule_stated_work/online_seed2/seed2: acc=0.833
+2026-09-12T11:32:37Z B logprob/online_seed2/seed2: acc=0.333 margin=-0.679
+2026-09-12T11:32:47Z B as_run/online_seed3/seed3: acc=0.333
+2026-09-12T11:33:03Z B rule_stated/online_seed3/seed3: acc=0.333
+2026-09-12T11:33:32Z B work_allowed/online_seed3/seed3: acc=0.733
+2026-09-12T11:34:02Z B rule_stated_work/online_seed3/seed3: acc=0.750
+2026-09-12T11:34:20Z B logprob/online_seed3/seed3: acc=0.333 margin=-0.300
+2026-09-12T11:34:36Z B as_run/online_seed4/seed4: acc=0.350
+2026-09-12T11:34:52Z B rule_stated/online_seed4/seed4: acc=0.250
+2026-09-12T11:35:21Z B work_allowed/online_seed4/seed4: acc=0.467
+2026-09-12T11:35:50Z B rule_stated_work/online_seed4/seed4: acc=0.667
+2026-09-12T11:36:07Z B logprob/online_seed4/seed4: acc=0.350 margin=-1.767
+2026-09-12T11:36:36Z B as_run/sleep_nodream_seed0/seed0: acc=0.267
+2026-09-12T11:37:01Z B rule_stated/sleep_nodream_seed0/seed0: acc=0.217
+2026-09-12T11:37:32Z B work_allowed/sleep_nodream_seed0/seed0: acc=0.733
+2026-09-12T11:38:03Z B rule_stated_work/sleep_nodream_seed0/seed0: acc=0.750
+2026-09-12T11:38:20Z B logprob/sleep_nodream_seed0/seed0: acc=0.350 margin=-0.494
+2026-09-12T11:38:38Z B as_run/sleep_nodream_seed1/seed1: acc=0.350
+2026-09-12T11:38:55Z B rule_stated/sleep_nodream_seed1/seed1: acc=0.400
+2026-09-12T11:39:26Z B work_allowed/sleep_nodream_seed1/seed1: acc=0.417
+2026-09-12T11:39:58Z B rule_stated_work/sleep_nodream_seed1/seed1: acc=0.483
+2026-09-12T11:40:16Z B logprob/sleep_nodream_seed1/seed1: acc=0.383 margin=-0.654
+2026-09-12T11:40:25Z B as_run/sleep_nodream_seed2/seed2: acc=0.300
+2026-09-12T11:40:33Z B rule_stated/sleep_nodream_seed2/seed2: acc=0.200
+2026-09-12T11:41:03Z B work_allowed/sleep_nodream_seed2/seed2: acc=0.483
+2026-09-12T11:41:34Z B rule_stated_work/sleep_nodream_seed2/seed2: acc=0.483
+2026-09-12T11:41:51Z B logprob/sleep_nodream_seed2/seed2: acc=0.267 margin=-0.306
+2026-09-12T11:42:00Z B as_run/sleep_nodream_seed3/seed3: acc=0.317
+2026-09-12T11:42:08Z B rule_stated/sleep_nodream_seed3/seed3: acc=0.333
+2026-09-12T11:42:38Z B work_allowed/sleep_nodream_seed3/seed3: acc=0.483
+2026-09-12T11:43:08Z B rule_stated_work/sleep_nodream_seed3/seed3: acc=0.600
+2026-09-12T11:43:25Z B logprob/sleep_nodream_seed3/seed3: acc=0.317 margin=-0.760
+2026-09-12T11:43:34Z B as_run/sleep_nodream_seed4/seed4: acc=0.350
+2026-09-12T11:43:43Z B rule_stated/sleep_nodream_seed4/seed4: acc=0.317
+2026-09-12T11:44:12Z B work_allowed/sleep_nodream_seed4/seed4: acc=0.633
+2026-09-12T11:44:42Z B rule_stated_work/sleep_nodream_seed4/seed4: acc=0.850
+2026-09-12T11:44:59Z B logprob/sleep_nodream_seed4/seed4: acc=0.350 margin=-0.458
+2026-09-12T11:45:17Z B as_run/sleep_seed1/seed1: acc=0.400
+2026-09-12T11:45:34Z B rule_stated/sleep_seed1/seed1: acc=0.317
+2026-09-12T11:46:04Z B work_allowed/sleep_seed1/seed1: acc=0.450
+2026-09-12T11:46:34Z B rule_stated_work/sleep_seed1/seed1: acc=0.550
+2026-09-12T11:46:52Z B logprob/sleep_seed1/seed1: acc=0.383 margin=-0.337
+2026-09-12T11:47:01Z B as_run/sleep_seed2/seed2: acc=0.300
+2026-09-12T11:47:09Z B rule_stated/sleep_seed2/seed2: acc=0.267
+2026-09-12T11:47:39Z B work_allowed/sleep_seed2/seed2: acc=0.450
+2026-09-12T11:48:09Z B rule_stated_work/sleep_seed2/seed2: acc=0.533
+2026-09-12T11:48:27Z B logprob/sleep_seed2/seed2: acc=0.283 margin=-0.954
+2026-09-12T11:48:36Z B as_run/sleep_seed3/seed3: acc=0.300
+2026-09-12T11:48:50Z B rule_stated/sleep_seed3/seed3: acc=0.450
+2026-09-12T11:49:21Z B work_allowed/sleep_seed3/seed3: acc=0.450
+2026-09-12T11:49:53Z B rule_stated_work/sleep_seed3/seed3: acc=0.467
+2026-09-12T11:50:11Z B logprob/sleep_seed3/seed3: acc=0.350 margin=-0.729
+2026-09-12T11:50:28Z B as_run/sleep_seed4/seed4: acc=0.467
+2026-09-12T11:50:44Z B rule_stated/sleep_seed4/seed4: acc=0.367
+2026-09-12T11:51:14Z B work_allowed/sleep_seed4/seed4: acc=0.433
+2026-09-12T11:51:45Z B rule_stated_work/sleep_seed4/seed4: acc=0.617
+2026-09-12T11:52:03Z B logprob/sleep_seed4/seed4: acc=0.317 margin=-0.892
+2026-09-12T11:54:12Z C base/seed0: structured=0.373 unstructured=0.367
+2026-09-12T11:56:21Z C base/seed1: structured=0.483 unstructured=0.367
+2026-09-12T11:58:30Z C base/seed2: structured=0.458 unstructured=0.367
+2026-09-12T12:00:38Z C base/seed3: structured=0.438 unstructured=0.358
+2026-09-12T12:02:48Z C base/seed4: structured=0.428 unstructured=0.400
+2026-09-12T12:06:21Z C online_seed1/seed1: structured=0.905 unstructured=0.750
+2026-09-12T12:09:58Z C online_seed2/seed2: structured=0.861 unstructured=0.700
+2026-09-12T12:13:29Z C online_seed3/seed3: structured=0.965 unstructured=0.967
+2026-09-12T12:17:01Z C online_seed4/seed4: structured=0.920 unstructured=0.958
+2026-09-12T12:20:36Z C sleep_nodream_seed0/seed0: structured=0.970 unstructured=0.925
+2026-09-12T12:24:07Z C sleep_nodream_seed1/seed1: structured=0.886 unstructured=0.867
+2026-09-12T12:27:37Z C sleep_nodream_seed2/seed2: structured=0.871 unstructured=0.825
+2026-09-12T12:31:02Z C sleep_nodream_seed3/seed3: structured=0.915 unstructured=0.850
+2026-09-12T12:34:27Z C sleep_nodream_seed4/seed4: structured=0.985 unstructured=0.967
+2026-09-12T12:37:53Z C sleep_seed1/seed1: structured=0.796 unstructured=0.717
+2026-09-12T12:41:22Z C sleep_seed2/seed2: structured=0.930 unstructured=0.933
+2026-09-12T12:44:50Z C sleep_seed3/seed3: structured=0.866 unstructured=0.792
+2026-09-12T12:48:19Z C sleep_seed4/seed4: structured=0.960 unstructured=0.917
+2026-09-12T12:49:37Z B poscontrol50/base/seed0: probe acc=0.333 (loss 0.238); visible short=0.350; work60=0.350
+2026-09-12T12:51:23Z B poscontrol200/base/seed0: probe acc=0.350 (loss 0.206); visible short=0.483; work60=0.350
+2026-09-12T12:52:31Z B poscontrol50/base/seed1: probe acc=0.333 (loss 0.240); visible short=0.333; work60=0.400
+2026-09-12T12:54:18Z B poscontrol200/base/seed1: probe acc=0.333 (loss 0.213); visible short=0.350; work60=0.400
+2026-09-12T12:55:25Z B poscontrol50/base/seed2: probe acc=0.333 (loss 0.246); visible short=0.350; work60=0.533
+2026-09-12T12:57:10Z B poscontrol200/base/seed2: probe acc=0.333 (loss 0.210); visible short=0.350; work60=0.417
+2026-09-12T12:58:16Z B poscontrol50/base/seed3: probe acc=0.350 (loss 0.259); visible short=0.300; work60=0.450
+2026-09-12T13:00:01Z B poscontrol200/base/seed3: probe acc=0.333 (loss 0.210); visible short=0.333; work60=0.383
+2026-09-12T13:01:09Z B poscontrol50/base/seed4: probe acc=0.283 (loss 0.225); visible short=0.333; work60=0.417
+2026-09-12T13:02:55Z B poscontrol200/base/seed4: probe acc=0.317 (loss 0.204); visible short=0.400; work60=0.317
+2026-09-12T13:02:55Z FOLLOWUP_DONE
