@@ -17,3 +17,5 @@
 2026-09-11T06:19:02Z gpu1 start baseline seed4
 2026-09-11T11:30:54Z gpu1 done  baseline seed4 exit=0
 2026-09-11T11:30:54Z gpu1 start awake seed3
+2026-09-12T05:05:58Z gpu1 done  awake seed3 exit=0
+2026-09-12T05:05:58Z gpu1 QUEUE_DONE

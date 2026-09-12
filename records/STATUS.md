@@ -51,23 +51,21 @@ verdict into the run files; requires the seed's `sleep` ledger.
 4. Relaunch the remaining items with `run_all.sh "<seed>:<arm> ..."`; Awake items
    need the seed's Sleep ledger present.
 
-## Teardown when both queues show QUEUE_DONE
+## Teardown when both queues show QUEUE_DONE (executed 2026-09-12, see TIMELINE)
 
     ./deploy/vultr/pull_results.sh
     curl -H "Authorization: Bearer $VULTR" -X DELETE https://api.vultr.com/v2/instances/8b8aa0a1-5679-46b8-8034-ef9a8d225867
 
 ## Pending decisions / blockers
 
-- A second instance would halve the remaining wall-clock at the same total
-  cost; blocked by the account's monthly fee cap (one $688/mo plan). Limit
-  increase requested by the user; if granted, split the not-yet-started items
-  across the new VM's GPUs.
-- After the grid: `python -m eval.analyze --final --results records --seeds 0,1,2,3,4`
-  writes `records/analysis_final.md` (+ .json): PREREG §7 log-rank tests
-  (censored at 600), paired exact sign-flip test for H4, per-arm summaries,
-  and an exploratory update-schedule comparison. `analysis_preliminary.md`
-  is the same report over the arms finished so far (labelled preliminary).
-  Then write the result section in CONTEXT.md and update the explainer artifact.
+- Grid done; VM destroyed. No compute running anywhere (check: Modal apps
+  list, Lightning Studio stopped, Vultr instances list empty).
+- Decision for the user (CONTEXT §8 item 16): stop and write up the null;
+  8B dense confirmation; or the larger-model extension. The 4B data say no
+  arm ever left chance on the probe, so the task difficulty, not the update
+  schedule, is the binding constraint.
+- Analysis command (re-runnable from this folder alone):
+  `python -m eval.analyze --final --results records --seeds 0,1,2,3,4`.
 
 ## Known caveats for the analysis (keep with the data)
 
@@ -97,7 +95,7 @@ verdict into the run files; requires the seed's `sleep` ledger.
 | 0 | ✓ pilot (Modal L4) | ✓ (Modal L4) | ✓ pilot | ✓ (Modal L4) | ✓ pilot | ✓ |
 | 1 | ✓ (Lightning L4) | ✓ (A16, 8.5 h) | ✓ (A16, 8.6 h) | ✓ (Lightning L4) | ✓ (A16, 17.4 h) | ✓ MATCHED |
 | 2 | ✓ (A16) | ✓ (A16, 8.7 h) | ✓ (A16, 8.4 h) | ✓ (A16, 5.2 h) | ✓ (A16, 18.4 h) | ✓ MATCHED |
-| 3 | ✓ (A16) | ✓ (A16, 8.3 h) | ✓ (A16, 8.7 h) | ✓ (A16, 5.2 h) | running gpu1 (from 11 Sep 17:01 IST) | pending awake |
+| 3 | ✓ (A16) | ✓ (A16, 8.3 h) | ✓ (A16, 8.7 h) | ✓ (A16, 5.2 h) | ✓ (A16, 17.6 h) | ✓ MATCHED |
 | 4 | ✓ (A16) | ✓ (A16, 8.4 h) | ✓ (A16, 9.1 h) | ✓ (A16, 5.2 h) | ✓ (A16, 17.7 h) | ✓ MATCHED |
 
 Seed 1 Sleep-NoDream (A16, 8.52 h): probe 0.33–0.47 (chance), held-out
@@ -116,6 +114,15 @@ Probe: all at chance, all censored. See `seed1/report.md`.
 
 Projected grid completion revised to 12 Sep ~12:30 IST (Baselines 5.2 h, not 7).
 
-24/25 arms done; gpu0 QUEUE_DONE. Remaining: Awake 3 (gpu1, ETA 12 Sep ~11:30 IST).
+**GRID COMPLETE 2026-09-12 10:35 IST.** 25/25 arms; both queues QUEUE_DONE;
+every seed MATCHED. Final analysis: `analysis_final.md` / `.json`
+(H1–H4 all not supported; see `../CONTEXT.md` §5k for the reading).
+Vultr GPU-hours on the grid: 181.8 (18 arms). Pending charges at teardown:
+$89.50 of the $300 credit. Trained-arm adapter states (Sleep / NoDream /
+Online, seeds 1–4; `<arm>_seedN.json.state/` with `backend.pt`, `buffer.json`,
+`sleep.json`) archived off-repo at
+`~/doze-archive/vultr-final/trained_arm_states_seeds1-4.tar` (~4.8 GB) before
+the VM was destroyed. Frozen-arm state dumps (8 GB full-model each) and the
+validation run were not kept.
 
-Last updated: 2026-09-12 06:20 IST
+Last updated: 2026-09-12 10:50 IST

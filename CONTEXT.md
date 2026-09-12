@@ -751,6 +751,97 @@ direction negative again). Secondary metrics at ep 600: mirror_bias Online
 (0.343); late/early error Online 0.020/0.062, Sleep 0.036/0.118, NoDream
 0.046/0.084; GSM8K unparsable 0% everywhere. Files: `records/seed1/`.
 
+### 5k. Grid complete — final preregistered analysis (2026-09-12 10:37 IST)
+
+All 25 arms (5 seeds × 5 arms) finished. Last arm: Awake seed 3 on Vultr
+gpu1 at 10:35 IST. `check_seed` MATCHED for every seed (largest drift in any
+seed: Online gradient steps −3.0% in seed 2; everything else within ±2.3%).
+Grid wall-clock on the Vultr 2×A16 VM: 08 Sep 13:29 IST → 12 Sep 10:35 IST
+(3 d 21 h, 181.8 GPU-hours across 18 arms; seed 1 Sleep/Baseline on
+Lightning L4; seed 0 on Modal L4). Vultr pending charges at teardown:
+$89.50 of the $300 credit. Files: `records/analysis_final.md` (+ `.json`),
+per-seed `records/seedN/report.md`, run/ledger/log/timing files per seed.
+Command: `python -m eval.analyze --final --results records --seeds 0,1,2,3,4`.
+
+**Verdicts (PREREG §7):**
+
+| hypothesis | result | verdict |
+|---|---|---|
+| H1 insight: Sleep first to criterion | criterion (probe ≥ 0.70 at two consecutive checkpoints) met by **0 of 25 arms**; all censored at 600; log-rank degenerate | not supported |
+| H2 phase structure: Sleep vs Online | all censored | not supported |
+| H3 dreaming: Sleep vs NoDream | all censored | not supported |
+| H4 retention: Sleep forgets less than Online (GSM8K Δ) | paired diffs Sleep−Online [−0.077, −0.257, −0.050, −0.257, +0.023], mean −0.123, exact sign-flip p = 0.125; direction **reversed** | not supported |
+
+The preregistered outcome is a clean null on the insight hypotheses and a
+reversed-direction null on retention. PREREG §10 says a null on H2 is
+publishable; this is that case, with the caveats below.
+
+**Per-arm summary (mean over 5 seeds; probe = 60 masked items, chance 1/3):**
+
+| arm | peak held-out | last-3 held-out | GSM8K Δ (0→600) | seeds Δ>0 | probe max (any ckpt) | volatility |
+|---|---|---|---|---|---|---|
+| Baseline | 0.421 | 0.421 | 0 | — | 0.340 | 0 |
+| Awake | 0.419 | 0.419 | 0 | — | 0.310 | 0 |
+| Online | 0.963 | 0.889 | **+0.155** | 5/5 | 0.377 | 0.176 |
+| Sleep | 0.937 | 0.894 | +0.031 | 3/5 | 0.417 | 0.168 |
+| Sleep-NoDream | 0.950 | 0.917 | +0.079 | 4/5 | 0.383 | 0.163 |
+
+Per-seed final held-out / GSM8K Δ (trained arms):
+
+| seed | Online | Sleep | Sleep-NoDream |
+|---|---|---|---|
+| 0 (pilot code for Sleep/Online) | 0.667 (peak 0.965) / +0.137 | 0.930 / +0.060 | 0.970 / +0.240 |
+| 1 (Sleep on L4) | 0.900 / +0.177 | 0.811 / −0.080 | 0.886 / −0.030 |
+| 2 | 0.856 (peak 0.965) / +0.097 | 0.930 (peak 0.995) / +0.047 | 0.861 / +0.020 |
+| 3 | 0.960 / +0.193 | 0.876 / −0.063 | 0.905 / +0.097 |
+| 4 | 0.925 (peak 1.000) / +0.170 | 0.965 / +0.193 | 0.985 / +0.067 |
+
+Other paired comparisons (exact sign-flip, n=5): held-out last-3 Sleep−Online
++0.005 (p=1.0); Sleep−NoDream −0.023 (p=0.5); GSM8K Δ Sleep−NoDream −0.047
+(p=0.375); NoDream−Online −0.076 (p=0.31). Nothing separates the three
+trained arms on the task; they differ only on the control benchmark, where
+Online gains in every seed.
+
+**What the data say, plainly.**
+1. Nobody found the shortcut. Probe accuracy stayed at chance in all 25 arms
+   at all 13 checkpoints (best single checkpoint 0.47, Sleep seed 1). Held-out
+   accuracy going to 0.9+ with the probe flat means the model learned to
+   execute the 11-step procedure reliably, not to skip it. Mirror-bias at
+   ep 600 sits at or below its chance level in every trained arm (e.g. Online
+   0.17 vs 0.33, Sleep 0.27 vs 0.34 in seed 1; Sleep 0.14 vs 0.39 in seed 4),
+   so there is no sign of the r11 = r6 regularity being used implicitly either.
+2. Self-training on verified own solutions works on the task regardless of
+   schedule: same gradient steps, same tokens, same filter → same held-out
+   endpoint (0.86–0.99) whether the steps are spread one per episode (Online)
+   or batched 50 per night (Sleep, NoDream).
+3. Schedule matters for the control benchmark. Online improved GSM8K in 5/5
+   seeds (+0.10 to +0.19); nightly batches of 50 steps produced a mix of
+   gains and regressions (Sleep −0.08 to +0.19). Exploratory, not
+   preregistered: mean per-checkpoint GSM8K change Online +0.013 vs Sleep
+   +0.003; worst single-checkpoint drop Online −0.207 vs Sleep −0.087.
+   A plausible reading is that 50 consecutive LoRA steps on a narrow buffer
+   with 5% decay perturbs general ability more than 50 steps interleaved with
+   nothing else — but the design cannot distinguish that from noise at n=5.
+4. Dreams did not help. Post-pilot two-step dreamer: yield 22–33% of
+   proposals verified (seeds 1–4), duplicates the dominant rejection
+   (300–442 of 640–820 proposals per seed), held-out-prefix rejections 0 in
+   every seed (watchlist item confirmed clean), structured-dream fraction
+   ~1%. Sleep vs NoDream: held-out −0.023, GSM8K −0.047, both n.s.; dreams
+   cost 42–53k extra generated tokens per seed for no measurable return.
+5. Inference-time reasoning at matched tokens did nothing. Awake (critique
+   rounds, 2× the generated tokens of Baseline) sits at 0.419 held-out vs
+   Baseline 0.421 and the same probe chance level.
+
+**Caveats (carry into any write-up).** Seed 0 Sleep/Online/Awake ran the
+pilot code (one-step dreamer, non-deterministic CUDA) — see §5d–5f and
+DEVIATIONS.md; seed 1 mixes L4 (Sleep, Baseline) and A16 (others) — see
+records/STATUS.md; n=5 seeds gives the sign-flip test a minimum attainable
+p of 0.0625, so only unanimous effects can reach conventional significance;
+the insight hypotheses are fully censored and the log-rank test is
+uninformative beyond "never met" — a 4B model in 600 episodes of this task
+does not discover the shortcut under any arm, so the experiment cannot
+speak to whether sleep would accelerate a discovery that never happens.
+
 ## 6. Repo state
 
 ```
@@ -803,20 +894,23 @@ Any change to a frozen item goes in `DEVIATIONS.md` with a reason.
 
 ## 8. Immediate next steps, in order
 
-Steps 1–10 of the original list are done (calibration, freeze, review
-amendments, path check, A4, seed-0 Sleep/Online/Awake; §5, §5a–5d).
+Steps 1–14 are done: calibration, freeze, review amendments, path check,
+seed 0 (§5d–5f), seeds 1–4 on Lightning/Vultr (§5h–5j), the five-seed
+preregistered analysis (§5k, `records/analysis_final.md`). The Vultr VM is
+destroyed (2026-09-12); trained-arm adapter states for seeds 1–4 are archived
+off-repo at `~/doze-archive/vultr-final/trained_arm_states_seeds1-4.tar`.
 
-11. **Decisions before more runs** (each is tunable wording, but recorded in
-    DEVIATIONS.md if changed after seed 0): reject verbatim-copy dreams
-    (`duplicate`); dream format drift (40% unparsable); whether the dream
-    instruction stays at digits 8–12 given ~0 structured dreams. Also:
-    `torch.use_deterministic_algorithms(True)` for the grid (§5c).
-12. ~~Seed 0: Sleep-NoDream and Baseline~~ done 2026-09-04 (§5f).
-13. Seeds 1–4, all five arms, one GPU type, preemption-safe launch.
-14. `eval/analyze.py`: log-rank test on episode-to-criterion (all censored
-    so far), forgetting paired test; figures.
-15. `tasks/string_grammar.py` as replication; write-up (PREREG §10: a null
-    on H2 is publishable).
+16. **Decision (user):** what follows the 4B null. Options on the table:
+    (a) stop and write up the null (PREREG §10); (b) an 8B dense
+    confirmation with the same design, mainly to test whether the shortcut
+    is discoverable at all; (c) the preregistered larger-model extension
+    (Qwen3.8-27B was the candidate, §4 decisions log) — only worth the cost
+    if (b) or a cheaper probe shows the shortcut is reachable. The 4B result
+    says the task, not the schedule, is the binding constraint: no arm ever
+    left chance on the probe.
+17. Write-up of the 4B result (task, arms, matching, verdicts, exploratory
+    schedule finding, caveats). `tasks/string_grammar.py` replication only
+    if the follow-up route calls for it.
 
 ## 9. Working conventions
 
