@@ -24,3 +24,4 @@ Seed-0 useful compute: $18.73; seed-0 waste from failures: ≈ $6.3. Remaining p
 | 09-07 | Vultr GPU access approved after Trust & Safety ticket | — | — | — |
 | 09-08 | Vultr `vcg-a16-12c-128g-32vram`: blr instance unbootable (host timeout, destroyed); sgp instance created; setup + validation pass (6.5 s/episode, 96 s small checkpoint) | 2×A16 | grid launched 07:59 UTC: seed 1 (online, nodream, awake) + seeds 2–4 all arms; ~5–6 days | ≈ $120–130 of $300 credit (projected) |
 - 2026-09-11 17:01 IST — Baseline seed 4 done (18,710 s, exit 0). gpu1 starts Awake seed 3 (final queued arm). 23/25 complete.
+- 2026-09-12 06:07 IST — Awake seed 4 done (63,575 s, exit 0); gpu0 QUEUE_DONE. Seed 4 five-arm check MATCHED. 24/25 complete.
