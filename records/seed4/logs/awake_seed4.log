@@ -4,3 +4,14 @@ gpu=NVIDIA A16-16Q arm=awake seed=4 tag=seed4 deterministic=True backend=hf:Qwen
 [awake seed=4] ep=0 probe=0.267 heldout=0.398 control=0.5866666666666667 4346s
 [awake seed=4] ep=50 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=8696 steps=0 | episode 11.5s night 0s checkpoint 4345s
 [awake seed=4] ep=100 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=17340 steps=0 | episode 11.4s night 0s checkpoint 4346s
+[awake seed=4] ep=150 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=25988 steps=0 | episode 11.4s night 0s checkpoint 4347s
+[awake seed=4] ep=200 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=34682 steps=0 | episode 11.5s night 0s checkpoint 4345s
+[awake seed=4] ep=250 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=43302 steps=0 | episode 11.4s night 0s checkpoint 4338s
+[awake seed=4] ep=300 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=51902 steps=0 | episode 11.3s night 0s checkpoint 4346s
+[awake seed=4] ep=350 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=60566 steps=0 | episode 11.6s night 0s checkpoint 4348s
+[awake seed=4] ep=400 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=69272 steps=0 | episode 11.7s night 0s checkpoint 4344s
+[awake seed=4] ep=450 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=77882 steps=0 | episode 11.5s night 0s checkpoint 4344s
+[awake seed=4] ep=500 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=86520 steps=0 | episode 11.6s night 0s checkpoint 4344s
+[awake seed=4] ep=550 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=95196 steps=0 | episode 11.7s night 0s checkpoint 4346s
+[awake seed=4] ep=600 probe=0.267 heldout=0.398 control=0.5866666666666667 tokens=103842 steps=0 | episode 11.7s night 0s checkpoint 4336s
+timing {"gpu": "NVIDIA A16-16Q", "deterministic": true, "total_seconds": 63575.4, "episode_seconds_mean": 11.53, "checkpoint_seconds": [4345.7, 4345.3, 4346.0, 4346.5, 4344.6, 4337.5, 4345.8, 4348.3, 4344.3, 4343.5, 4343.5, 4345.9, 4335.7], "night_seconds": [3.0994415283203125e-06, 9.5367431640625e-07, 1.1920928955078125e-06, 1.1920928955078125e-06, 1.1920928955078125e-06, 5.7220458984375e-06, 8.344650268554688e-06, 1.430511474609375e-06, 1.1920928955078125e-06, 1.1920928955078125e-06, 9.5367431640625e-07, 1.430511474609375e-06], "resumed_from": null, "criterion_episode": null, "ledger": {"tokens_generated": 103842, "gradient_steps": 0, "training_tokens": 0, "gpu_seconds": 6915.39}}

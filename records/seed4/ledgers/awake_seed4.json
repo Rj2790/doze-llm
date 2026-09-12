@@ -1,0 +1,101 @@
+{
+  "arm": "awake",
+  "backend": "hf:Qwen/Qwen3-4B",
+  "tokens_generated": 103842,
+  "gradient_steps": 0,
+  "training_tokens": 0,
+  "gpu_seconds": 6915.390457868576,
+  "checkpoints": [
+    {
+      "episode": 0,
+      "tokens_generated": 0,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 0.0
+    },
+    {
+      "episode": 50,
+      "tokens_generated": 8696,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 573.311
+    },
+    {
+      "episode": 100,
+      "tokens_generated": 17340,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 1143.399
+    },
+    {
+      "episode": 150,
+      "tokens_generated": 25988,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 1713.945
+    },
+    {
+      "episode": 200,
+      "tokens_generated": 34682,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 2288.624
+    },
+    {
+      "episode": 250,
+      "tokens_generated": 43302,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 2859.495
+    },
+    {
+      "episode": 300,
+      "tokens_generated": 51902,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 3426.726
+    },
+    {
+      "episode": 350,
+      "tokens_generated": 60566,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 4007.278
+    },
+    {
+      "episode": 400,
+      "tokens_generated": 69272,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 4590.899
+    },
+    {
+      "episode": 450,
+      "tokens_generated": 77882,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 5167.392
+    },
+    {
+      "episode": 500,
+      "tokens_generated": 86520,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 5745.403
+    },
+    {
+      "episode": 550,
+      "tokens_generated": 95196,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 6328.726
+    },
+    {
+      "episode": 600,
+      "tokens_generated": 103842,
+      "gradient_steps": 0,
+      "training_tokens": 0,
+      "gpu_seconds": 6915.39
+    }
+  ]
+}

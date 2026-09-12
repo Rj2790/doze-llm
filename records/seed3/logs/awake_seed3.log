@@ -1,3 +1,12 @@
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
 Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:  11%|█         | 43/398 [00:00<00:00, 397.97it/s]Loading weights:  21%|██▏       | 85/398 [00:00<00:00, 404.79it/s]Loading weights:  32%|███▏      | 126/398 [00:00<00:00, 336.44it/s]Loading weights:  41%|████      | 163/398 [00:00<00:00, 344.69it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 757.13it/s]
 gpu=NVIDIA A16-16Q arm=awake seed=3 tag=seed3 deterministic=True backend=hf:Qwen/Qwen3-4B batch=8 awake_budget=176
+[awake seed=3] ep=0 probe=0.300 heldout=0.433 control=0.5866666666666667 4311s
+[awake seed=3] ep=50 probe=0.300 heldout=0.433 control=0.5866666666666667 tokens=8850 steps=0 | episode 11.7s night 0s checkpoint 4309s
+[awake seed=3] ep=100 probe=0.300 heldout=0.433 control=0.5866666666666667 tokens=17688 steps=0 | episode 11.7s night 0s checkpoint 4310s
+[awake seed=3] ep=150 probe=0.300 heldout=0.433 control=0.5866666666666667 tokens=26462 steps=0 | episode 11.6s night 0s checkpoint 4314s
+[awake seed=3] ep=200 probe=0.300 heldout=0.433 control=0.5866666666666667 tokens=35210 steps=0 | episode 11.7s night 0s checkpoint 4316s
+[awake seed=3] ep=250 probe=0.300 heldout=0.433 control=0.5866666666666667 tokens=44028 steps=0 | episode 11.8s night 0s checkpoint 4317s
+[awake seed=3] ep=300 probe=0.300 heldout=0.433 control=0.5866666666666667 tokens=52842 steps=0 | episode 11.8s night 0s checkpoint 4315s
+[awake seed=3] ep=350 probe=0.300 heldout=0.433 control=0.5866666666666667 tokens=61600 steps=0 | episode 11.8s night 0s checkpoint 4318s
+[awake seed=3] ep=400 probe=0.300 heldout=0.433 control=0.5866666666666667 tokens=70424 steps=0 | episode 11.7s night 0s checkpoint 4313s
