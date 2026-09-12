@@ -41,11 +41,17 @@ def test_score_error_anatomy():
     inst = fv.Instance.from_digits("149741")          # responses 7 4 1 9 4
     good = fv._work_lines("149741") + "\nSTEPS: 7 4 1 9 4\nANSWER: 4"
     s = fv.score(inst, good)
-    assert s["correct"] and s["steps_correct"] == 5 and s["rule_errors"] == 0 and s["tracking_errors"] == 0
-    # step 1: right operands, OLD rule's result (1,4->9 instead of 7) -> rule error + old-rule hit
-    # steps 2, 3, 5: wrong operands -> tracking errors; step 4: right operands (1,4), wrong result 7 (even step -> 9)
+    assert s["correct"] and s["steps_correct"] == 5 and s["first_wrong_step"] is None and s["leading_correct"] == 5
+    # step 1 has the right operands but the OLD rule's result (1,4->9 instead of 7)
     bad = "1,4->9\n9,9->9\n9,7->1\n1,4->7\n7,1->4\nSTEPS: 9 9 1 7 4\nANSWER: 4"
     s = fv.score(inst, bad)
-    assert s["rule_errors"] == 2 and s["old_rule_hits"] == 1 and s["tracking_errors"] == 3
-    assert s["correct"] and s["steps_correct"] == 2
+    assert s["first_wrong_step"] == 1 and s["first_error_kind"] == "rule" and s["first_error_old_rule"] is True
+    assert s["leading_correct"] == 0 and s["correct"] and s["steps_correct"] == 2
+    # steps 1-2 right, step 3 uses the wrong operands
+    track = "1,4->7\n7,9->4\n7,7->7\n7,4->9\n9,1->4\nSTEPS: 7 4 7 9 4\nANSWER: 4"
+    s = fv.score(inst, track)
+    assert s["first_wrong_step"] == 3 and s["first_error_kind"] == "tracking" and s["leading_correct"] == 2
+    # fewer lines than steps, all correct so far -> "missing"
+    s = fv.score(inst, "1,4->7\n7,9->4\nANSWER: 4")
+    assert s["first_wrong_step"] == 3 and s["first_error_kind"] == "missing"
     assert fv.score(inst, "no tags here")["correct"] is False and fv.score(inst, "no tags")["steps_parsed"] is False

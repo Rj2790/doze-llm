@@ -169,26 +169,28 @@ def parse_work_lines(text: str) -> list[tuple[str, str, str]]:
 
 
 def score(inst: Instance, text: str) -> dict:
-    """Correctness plus error anatomy: rule errors (right operands, wrong
-    result), tracking errors (wrong operands), and how many wrong results
-    equal what the ORIGINAL puzzle's rule would give (negative transfer)."""
+    """Correctness plus error anatomy up to the first divergence:
+    first_wrong_step (1-based; None if all written steps are right), whether
+    that first error was a rule error (right operands, wrong result) or a
+    tracking error (wrong operands), whether the wrong result equals what the
+    ORIGINAL puzzle's rule gives (negative transfer), and the number of
+    consecutive correct leading steps."""
     ans = parse_answer(text)
     steps = parse_steps(text)
     steps_correct = sum(a == b for a, b in zip(steps, inst.responses)) if steps else 0
     lines = parse_work_lines(text)
-    rule_err = track_err = old_rule_hits = 0
-    prev = None
+    first_wrong = None; kind = None; old_hit = False; leading = 0
     for k, (a, b, c) in enumerate(lines[: inst.length - 1], start=1):
         exp_a = inst.digits[0] if k == 1 else inst.responses[k - 2]
         exp_b = inst.digits[k]
         if (a, b) != (exp_a, exp_b):
-            track_err += 1
-            continue
+            first_wrong, kind = k, "tracking"; break
         if c != inst.responses[k - 1]:
-            rule_err += 1
-            if old_rule_value(a, b) == c:
-                old_rule_hits += 1
+            first_wrong, kind = k, "rule"; old_hit = old_rule_value(a, b) == c; break
+        leading += 1
+    if first_wrong is None and len(lines) < inst.length - 1:
+        first_wrong, kind = len(lines) + 1, "missing"
     return {"answer": ans, "correct": ans == inst.answer, "steps_correct": steps_correct,
-            "steps_total": len(inst.responses), "steps_parsed": steps is not None,
-            "n_lines": len(lines), "rule_errors": rule_err, "tracking_errors": track_err,
-            "old_rule_hits": old_rule_hits}
+            "steps_total": len(inst.responses), "steps_parsed": steps is not None, "n_lines": len(lines),
+            "leading_correct": leading, "first_wrong_step": first_wrong, "first_error_kind": kind,
+            "first_error_old_rule": old_hit}

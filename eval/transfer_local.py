@@ -41,13 +41,16 @@ def main() -> None:
             sc = fv.score(x, r.text)
             rows.append({"digits": x.digits, "answer": x.answer, **sc, "tokens": r.completion_tokens, "text": r.text})
         acc = sum(r["correct"] for r in rows) / len(rows)
+        kinds = [r["first_error_kind"] for r in rows if r["first_error_kind"]]
         summ = {"accuracy": acc, "steps_correct_mean": statistics.fmean(r["steps_correct"] for r in rows),
-                "rule_errors": sum(r["rule_errors"] for r in rows), "tracking_errors": sum(r["tracking_errors"] for r in rows),
-                "old_rule_hits": sum(r["old_rule_hits"] for r in rows), "tokens_mean": statistics.fmean(r["tokens"] for r in rows),
-                "seconds": time.time() - t0}
+                "leading_correct_mean": statistics.fmean(r["leading_correct"] for r in rows),
+                "first_error_rule": kinds.count("rule"), "first_error_tracking": kinds.count("tracking"), "first_error_missing": kinds.count("missing"),
+                "first_error_old_rule": sum(r["first_error_old_rule"] for r in rows), "all_steps_right": sum(r["first_error_kind"] is None for r in rows),
+                "tokens_mean": statistics.fmean(r["tokens"] for r in rows), "seconds": time.time() - t0}
         out["models"][name] = {"summary": summ, "rows": rows}
-        print(f"{name:22s} acc={acc:.2f} steps_ok={summ['steps_correct_mean']:.1f}/11 rule_err={summ['rule_errors']} track_err={summ['tracking_errors']} "
-              f"old_rule_hits={summ['old_rule_hits']} tok={summ['tokens_mean']:.0f} ({summ['seconds']:.0f}s)", flush=True)
+        print(f"{name:22s} acc={acc:.3f} leading_ok={summ['leading_correct_mean']:.1f}/11 first_err rule={summ['first_error_rule']} "
+              f"tracking={summ['first_error_tracking']} missing={summ['first_error_missing']} old_rule={summ['first_error_old_rule']} "
+              f"perfect={summ['all_steps_right']} tok={summ['tokens_mean']:.0f} ({summ['seconds']:.0f}s)", flush=True)
         Path(a.out).parent.mkdir(parents=True, exist_ok=True)
         Path(a.out).write_text(json.dumps(out, indent=1))
     print("TRANSFER_LOCAL_DONE")
