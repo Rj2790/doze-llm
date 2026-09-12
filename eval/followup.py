@@ -67,6 +67,7 @@ def positive_control_examples(split: nr.Split, n: int, seed: int) -> list[tuple[
     answer-stratified. Never touches held-out or probe prefixes."""
     import random
     rng = random.Random(f"poscontrol-{seed}")
+    n = 3 * math.ceil(n / 3)                       # stratified sampler needs a multiple of the alphabet size
     items = sd.stratified_probe_items(split.train, n=n, seed=seed + 101)
     assert all(x.prefix in split.train_prefixes for x in items)
     rng.shuffle(items)
@@ -120,9 +121,14 @@ def length_accuracy_slope(summaries: Sequence[dict]) -> dict:
 
 # ---- GPU driver ---------------------------------------------------------------------
 
+def _device() -> str:
+    import os
+    return os.environ.get("DOZE_DEVICE", "cuda")
+
+
 def _load_backend(model_id: str, system: str, deterministic: bool):
     from backends.hf_backend import HFBackend
-    return HFBackend(model_id, system=system, lora=False, deterministic=deterministic)
+    return HFBackend(model_id, system=system, lora=False, deterministic=deterministic, device=_device())
 
 
 class _AdapterOff:
@@ -193,11 +199,14 @@ def _score_candidates(be, prompt: str, candidates: Sequence[str]) -> dict[str, f
 
 def run_all(out_dir: str, adapters: dict[str, str], model_id: str, gpu_tag: str, seeds: Sequence[int],
             n_unstructured: int = 120, poscontrol_steps: Sequence[int] = (50, 200), deterministic: bool = True,
-            only: Sequence[str] = ("A", "B", "C")) -> None:
+            only: Sequence[str] = ("A", "B", "C"), n_control: int | None = None, n_probe: int = 60,
+            n_heldout: int | None = None) -> None:
     out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)
     (out / "gsm8k_outputs").mkdir(exist_ok=True)
     models = {"base": None, **adapters}
     control = cb.load_frozen()
+    if n_control:
+        control = control[:n_control]
     splits = {s: nr.make_split(seed=s, length=12) for s in seeds}
     log = (out / "followup.log").open("a")
 
@@ -234,7 +243,7 @@ def run_all(out_dir: str, adapters: dict[str, str], model_id: str, gpu_tag: str,
         for name, adir in models.items():
             seeds_for = seeds if name == "base" else [int(name.rsplit("seed", 1)[1])]
             for s in seeds_for:
-                items = sd.stratified_probe_items(splits[s].probe, n=60, seed=s)
+                items = sd.stratified_probe_items(splits[s].probe, n=n_probe, seed=s)
                 for variant, mt in PROBE_VARIANTS.items():
                     key = f"{variant}/{name}/seed{s}"
                     if key in pb:
@@ -270,7 +279,7 @@ def run_all(out_dir: str, adapters: dict[str, str], model_id: str, gpu_tag: str,
                 if key in cs:
                     continue
                 _attach_adapter(be, adir, name); be.system = nr.SYSTEM_PROMPT
-                struct = splits[s].heldout
+                struct = splits[s].heldout[:n_heldout] if n_heldout else splits[s].heldout
                 unstruct = nr.unstructured_heldout(splits[s], n=n_unstructured, seed=s)
                 r1 = be.generate([nr.format_prompt(x, "work") for x in struct], max_tokens=400)
                 r2 = be.generate([nr.format_prompt(x, "work") for x in unstruct], max_tokens=400)
@@ -291,22 +300,23 @@ def run_all(out_dir: str, adapters: dict[str, str], model_id: str, gpu_tag: str,
             from backends.hf_backend import HFBackend
             del be
             gc.collect(); torch.cuda.empty_cache()
-            tb = HFBackend(model_id, system=nr.SYSTEM_PROMPT, lora=True, seed=seeds[0], deterministic=deterministic)
+            tb = HFBackend(model_id, system=nr.SYSTEM_PROMPT, lora=True, seed=seeds[0], deterministic=deterministic, device=_device())
             for s, steps in todo:
                 key = f"poscontrol{steps}/base/seed{s}"
                 tb.seed = s; tb.reset_adapter()
                 ex = positive_control_examples(splits[s], n=min(steps, 240), seed=s)
                 st = tb.train(ex, steps=steps, seed=s)
-                items = sd.stratified_probe_items(splits[s].probe, n=60, seed=s)
+                items = sd.stratified_probe_items(splits[s].probe, n=n_probe, seed=s)
                 res = tb.generate([probe_prompt(x, "as_run") for x in items], max_tokens=64)
                 pb[key] = {**summarize_probe(items, [r.text for r in res]), "variant": f"poscontrol{steps}", "model": "base", "seed": s,
                            "train_loss": st.loss, "train_examples": len(ex), "texts": [r.text for r in res][:10]}
-                vis = sd.stratified_probe_items(splits[s].heldout, n=60, seed=s + 7)
+                vis = sd.stratified_probe_items(splits[s].heldout, n=n_probe, seed=s + 7)
                 res2 = tb.generate([nr.format_prompt(x, "short") for x in vis], max_tokens=16)
                 pb[key]["visible_short_accuracy"] = sum(nr.parse_answer(r.text) == x.answer for x, r in zip(vis, res2)) / len(vis)
                 # and: does it still solve full chains? (sanity that training did not break the model)
-                res3 = tb.generate([nr.format_prompt(x, "work") for x in splits[s].heldout[:60]], max_tokens=400)
-                pb[key]["heldout_work_accuracy_60"] = sum(nr.score(x, r.text)["correct"] for x, r in zip(splits[s].heldout[:60], res3)) / 60
+                hw = splits[s].heldout[:n_probe]
+                res3 = tb.generate([nr.format_prompt(x, "work") for x in hw], max_tokens=400)
+                pb[key]["heldout_work_accuracy_60"] = sum(nr.score(x, r.text)["correct"] for x, r in zip(hw, res3)) / len(hw)
                 pb_path.write_text(json.dumps(pb, indent=1))
                 note(f"B {key}: probe acc={pb[key]['accuracy']:.3f} (loss {st.loss:.3f}); visible short={pb[key]['visible_short_accuracy']:.3f}; work60={pb[key]['heldout_work_accuracy_60']:.3f}")
     note("FOLLOWUP_DONE")
@@ -321,6 +331,11 @@ def main() -> None:
     ap.add_argument("--only", default="A,B,C")
     ap.add_argument("--models", default="", help="comma list of adapter names to include (default all found)")
     ap.add_argument("--gpu-tag", default="")
+    ap.add_argument("--n-control", type=int, default=0, help="smoke tests only: truncate the 300 GSM8K items")
+    ap.add_argument("--n-probe", type=int, default=60)
+    ap.add_argument("--n-unstructured", type=int, default=120)
+    ap.add_argument("--n-heldout", type=int, default=0)
+    ap.add_argument("--poscontrol-steps", default="50,200")
     a = ap.parse_args()
     root = Path(a.adapters_root)
     adapters = {p.name: str(p) for p in sorted(root.iterdir()) if (p / "adapter_config.json").exists()}
@@ -333,7 +348,9 @@ def main() -> None:
         gpu = a.gpu_tag or (torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu")
     except Exception:
         gpu = a.gpu_tag or "?"
-    run_all(a.out, adapters, a.model, gpu, seeds, only=tuple(a.only.split(",")))
+    run_all(a.out, adapters, a.model, gpu, seeds, only=tuple(a.only.split(",")), n_control=a.n_control or None,
+            n_probe=a.n_probe, n_unstructured=a.n_unstructured, n_heldout=a.n_heldout or None,
+            poscontrol_steps=tuple(int(x) for x in a.poscontrol_steps.split(",")))
 
 
 if __name__ == "__main__":

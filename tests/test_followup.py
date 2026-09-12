@@ -29,6 +29,7 @@ def test_positive_control_examples_use_training_prefixes_only():
     sp = nr.make_split(seed=2, length=12)
     ex = fu.positive_control_examples(sp, n=60, seed=2)
     assert len(ex) == 60
+    assert len(fu.positive_control_examples(sp, n=50, seed=2)) == 51      # rounds up to a multiple of 3
     forbidden = sp.heldout_prefixes
     answers = []
     for prompt, completion in ex:

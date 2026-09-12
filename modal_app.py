@@ -388,3 +388,56 @@ def grid(seeds: str = "0,1,2,3,4", n_episodes: int = 600, online_filter: bool = 
     call = grid_remote.spawn(seeds, n_episodes, online_filter, gpu, arms, tag)
     print(f"grid_remote spawned: call_id={call.object_id} seeds={seeds} arms={arms} gpu={gpu} run_tag={tag}", flush=True)
     print(f"Files: doze-results volume under /{tag}/ (runs/, ledgers/, grid_seed<seed>.json). Resume: --run-tag {tag}", flush=True)
+
+
+# --------------------------------------------------------------------------
+# Post-hoc follow-up (records/followup_prereg.md): GSM8K re-score with saved
+# outputs, probe instrument checks, unstructured accuracy. Adapters live in the
+# results volume under /results/adapters/<arm>_seedN (uploaded with
+# `modal volume put doze-results adapters /adapters`). Results: /results/followup.
+# --------------------------------------------------------------------------
+
+@app.function(gpu=GPU, timeout=12 * 3600, volumes={RESULTS: results_vol, HF_CACHE: cache_vol},
+              secrets=[modal.Secret.from_name("huggingface")])
+def followup_remote(only: str = "A,B,C", seeds: str = "0,1,2,3,4", models: str = "", deterministic: bool = DETERMINISTIC) -> str:
+    import os
+    import subprocess
+    import sys
+    import threading
+    import time
+    sys.path.insert(0, "/root/doze"); os.chdir("/root/doze")
+    from eval import followup as fu
+    gpu_name = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+                              capture_output=True, text=True, timeout=10).stdout.strip() or GPU
+    root = Path(RESULTS) / "adapters"
+    adapters = {q.name: str(q) for q in sorted(root.iterdir()) if (q / "adapter_config.json").exists()}
+    if models:
+        keep = set(models.split(",")); adapters = {k: v for k, v in adapters.items() if k in keep}
+    print(f"gpu={gpu_name} only={only} adapters={list(adapters)}", flush=True)
+    stop = threading.Event()
+
+    def committer():
+        while not stop.wait(300):
+            try:
+                results_vol.commit()
+            except Exception as e:      # pragma: no cover
+                print("commit failed:", e, flush=True)
+    threading.Thread(target=committer, daemon=True).start()
+    try:
+        fu.run_all(str(Path(RESULTS) / "followup"), adapters, MODEL_ID, gpu_name,
+                   [int(x) for x in seeds.split(",")], only=tuple(only.split(",")), deterministic=deterministic)
+    finally:
+        stop.set(); results_vol.commit()
+    return f"done only={only} gpu={gpu_name}"
+
+
+@app.local_entrypoint()
+def followup(only: str = "A,B,C", seeds: str = "0,1,2,3,4", models: str = "", gpu: str = GPU, split: bool = True):
+    """Launch with --detach. split=True runs A on one container and B,C on another."""
+    fn = _gpu(followup_remote, gpu)
+    parts = ["A", "B,C"] if split and only == "A,B,C" else [only]
+    calls = [fn.spawn(only=part, seeds=seeds, models=models) for part in parts]
+    for part, c in zip(parts, calls):
+        print(f"followup spawned: only={part} call_id={c.object_id} gpu={gpu}", flush=True)
+    for c in calls:
+        print(c.get(), flush=True)
