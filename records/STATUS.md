@@ -61,6 +61,11 @@ verdict into the run files; requires the seed's `sleep` ledger.
 - Grid done; VM destroyed 2026-09-12 11:02 IST. Modal: no running apps; Vultr:
   instance list empty; Lightning Studio was stopped after seed 1 (not
   re-verified via API today).
+- **Fresh-eyes review (CONTEXT §5m, `analysis_outsider.md`)**: GSM8K tracks
+  response length (r=0.91); the probe could not detect the shortcut (answer-only
+  accuracy on visible items ≈ 1/3 everywhere). Two cheap checks recommended
+  before any scale decision: GSM8K re-score with saved outputs; probe positive
+  control.
 - Decision for the user (CONTEXT §8 item 16): stop and write up the null;
   8B dense confirmation; or the larger-model extension. The 4B data say no
   arm ever left chance on the probe, so the task difficulty, not the update

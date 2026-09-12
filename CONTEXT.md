@@ -753,6 +753,10 @@ direction negative again). Secondary metrics at ep 600: mirror_bias Online
 
 ### 5k. Grid complete — final preregistered analysis (2026-09-12 10:37 IST)
 
+> **Read with §5m.** Two conclusions below are over-claimed: the probe could
+> not have detected the shortcut, and the GSM8K movements track response
+> length (r = 0.91). Verdicts stand; interpretations are revised in §5m.
+
 All 25 arms (5 seeds × 5 arms) finished. Last arm: Awake seed 3 on Vultr
 gpu1 at 10:35 IST. `check_seed` MATCHED for every seed (largest drift in any
 seed: Online gradient steps −3.0% in seed 2; everything else within ±2.3%).
@@ -885,6 +889,57 @@ Sleep seed 3 adapter on the local base (MPS, bf16) solves 6/6 held-out puzzles
 vs 2/6 for the bare base. The seed 0 pilot Sleep/Online adapters were never saved
 by the pilot code and cannot be recovered. No remote compute is running.
 
+### 5m. Fresh-eyes review: two over-claims found (2026-09-12)
+
+`records/analysis_outsider.md`: a hypothesis-blind reading of the whole
+experiment, plus an independent reading by a fresh session with no access to
+this conversation (Appendix A) and a reconciliation with verifications
+(Appendix B). Both readings agree on the effect ranking. Three findings were
+checked against the run files and accepted:
+
+1. **GSM8K accuracy tracks response length.** `eval_tokens`/300 vs GSM8K
+   accuracy over 156 trained checkpoints: r = 0.908 (Sleep 0.96, NoDream
+   0.89, Online 0.71), slope +0.09 per +10 tokens/item. Base 0.58 under a
+   "think briefly" prompt with a 512-token cap is an under-reasoning
+   baseline. Control outputs were not saved, so "better arithmetic" vs
+   "writes more" cannot be separated. **H4 and the retention story are a
+   response-length story until re-scored.**
+2. **The masked probe could not have detected the shortcut.** Answer-only
+   accuracy on fully visible structured puzzles is 0.31–0.39 for every
+   regime at every checkpoint: no model here can do six steps silently, so a
+   model that knew r11 = r6 would still score ~1/3 on the probe. §5k's
+   "nobody found the shortcut" → "the instrument could not have shown it".
+   Mirror bias and output length (both flat) still support "no sign of
+   shortcut use in written chains".
+3. **First-night GSM8K dip is Sleep-only** (5/5 seeds down; NoDream 4/5 up;
+   Online 3/5 up) on a ~12-item train set differing by a few dreams; and
+   nights present exactly 50 examples, so from ~night 4 the 1:1 interleave
+   describes the pool, not the training batch.
+
+Also from the independent reading: the base model's errors are digit
+tracking, not rule errors (rule errors 5–13 of 500 early attempts vs
+330–413 tracking errors; 191/194 single-digit skips sit next to an equal
+digit); kept trajectories contain 1–2 wrong intermediate steps in 33–53% of
+block-1 keeps (C3 allows ≥9/11); Online's single-example steps swing
+held-out far beyond item noise.
+
+**What this changes.** PREREG verdicts unchanged (H1–H4 not supported). The
+*reasons* change: H1–H3 are unobservable with this probe and training
+format rather than observed-negative; H4's reversed direction should not be
+reported as forgetting. Robust, reportable: verified self-distillation
+repairs digit tracking in 200–400 steps regardless of schedule; critique
+without feedback inert; self-generated variants inert; narrow SFT shifts
+verbosity, and thereby scored accuracy, on an unrelated benchmark in a
+schedule-dependent way.
+
+**Cheapest decisive follow-ups (before any larger model):**
+(a) re-score GSM8K on base + 13 adapters with saved outputs, plus a second
+condition without "briefly" and with a 1024-token cap (local MPS or ~$3 on
+L4); (b) probe positive control: state the regularity in the prompt / 50-step
+LoRA on masked→answer pairs / teacher-forced log-prob of r6 vs alternatives,
+so the instrument's sensitivity is known; (c) unstructured full-chain
+accuracy for the adapters; (d) only then a broader benchmark panel.
+
 ## 6. Repo state
 
 ```
@@ -943,7 +998,10 @@ preregistered analysis (§5k, `records/analysis_final.md`). The Vultr VM is
 destroyed (2026-09-12); trained-arm adapter states for seeds 1–4 are archived
 off-repo at `~/doze-archive/vultr-final/trained_arm_states_seeds1-4.tar`.
 
-16. **Decision (user):** what follows the 4B null. Options on the table:
+16. **Decision (user):** what follows the 4B null — see §5m first: the two
+    cheap checks (GSM8K re-score with outputs; probe positive control) should
+    precede any model-scale decision, because they determine whether the
+    4B study measured what it meant to. Options on the table:
     (a) stop and write up the null (PREREG §10); (b) an 8B dense
     confirmation with the same design, mainly to test whether the shortcut
     is discoverable at all; (c) the preregistered larger-model extension
