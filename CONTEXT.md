@@ -982,12 +982,18 @@ redesign must (i) let the probe be answered in writing with a shortcut that
 is checkable against a no-structure control set, and (ii) run the control
 benchmark under its own prompt with outputs saved.
 
-**Transfer (variant 2: four symbols, alternating rules; local MPS).** n=10
-smoke: base 5/10, Online 2, Sleep 3, NoDream 2 (all ~chance for four
-symbols; every model derails by step 3–4; no old-rule leakage). Full
-zero-shot run, 14 models × 201 items, launched locally 19:39 IST
-(`records/transfer/variant2_zero_shot_n201.*`). Design note:
-`records/transfer_prereg.md`; task `tasks/fold_variant2.py`.
+**Transfer (variant 2: four symbols, alternating rules; local MPS, 201 items
+× 14 models; `records/transfer/RESULTS.md`).** All models at chance
+(0.20–0.34; chance 0.25). Base gets step 1 right 90%, step 2 34%; nobody
+handles the odd/even switch. Adapters are *worse* at step 1 (Online 0.61,
+Sleep 0.79, NoDream 0.84) — a small negative transfer. Old-table leakage is
+low (6–19% of first rule errors); the dominant errors are applying the other
+step's table or copying an operand. Reading: training on one fixed rule
+entrenched "one rule every step"; no zero-shot benefit; a floor task cannot
+show positive transfer, so variant 1 (one new fixed table) and the
+learning-to-learn arm remain the open questions. Task
+`tasks/fold_variant2.py`; runner `eval/transfer_local.py`; analysis
+`eval/transfer_analysis.py`.
 
 ## 6. Repo state
 

@@ -34,3 +34,4 @@ Seed-0 useful compute: $18.73; seed-0 waste from failures: ≈ $6.3. Remaining p
 - 2026-09-12 16:55 IST — Follow-up launched on Modal L4 (two detached containers: A; B,C) after a second blr A16 instance failed to start (destroyed). Pre-analysis note `followup_prereg.md`; code `eval/followup.py` smoke-tested end to end on MPS.
 - 2026-09-12 19:52 IST — Follow-up part A complete. Base GSM8K 0.910 under a math prompt (0.587 in the grid regime); all 13 adapters within ±0.02 of base. H4 axis was a prompt-regime artefact. B/C complete 18:32 IST: probe unpassable at this scale; general execution learning confirmed. CONTEXT §5n.
 - 2026-09-12 19:39 IST — Variant-2 zero-shot transfer (14 models × 201) running locally on MPS.
+- 2026-09-12 22:05 IST — Variant-2 zero-shot transfer done locally: all 14 models at chance; adapters worse than base at step 1 (negative transfer of the one-rule habit, not the old table). `records/transfer/RESULTS.md`, CONTEXT §5n.
