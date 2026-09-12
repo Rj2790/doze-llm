@@ -1,0 +1,95 @@
+{
+ "task": "fold_variant2",
+ "n": 201,
+ "seed": 0,
+ "models": {
+  "base": {
+   "accuracy": 0.2537313432835821,
+   "ci95": [
+    0.19858094140868135,
+    0.31811845850445
+   ],
+   "n": 201,
+   "step1_correct": 0.8955223880597015,
+   "step2_correct": 0.3383084577114428,
+   "leading_correct_mean": 1.4776119402985075,
+   "first_error": {
+    "tracking": 13,
+    "rule": 188
+   },
+   "first_rule_error_n": 188,
+   "other_parity_frac": 0.46808510638297873,
+   "old_rule_frac": 0.1276595744680851,
+   "copy_operand_frac": 0.5319148936170213,
+   "first_rule_error_step_dist": {
+    "3": 33,
+    "2": 111,
+    "1": 21,
+    "4": 16,
+    "5": 3,
+    "7": 1,
+    "6": 2,
+    "8": 1
+   },
+   "tokens_mean": 94.69651741293532
+  },
+  "online_seed1": {
+   "accuracy": 0.24378109452736318,
+   "ci95": [
+    0.1895919960352515,
+    0.3075801069046729
+   ],
+   "n": 201,
+   "step1_correct": 0.6666666666666666,
+   "step2_correct": 0.24875621890547264,
+   "leading_correct_mean": 1.1940298507462686,
+   "first_error": {
+    "tracking": 14,
+    "rule": 187
+   },
+   "first_rule_error_n": 187,
+   "other_parity_frac": 0.8663101604278075,
+   "old_rule_frac": 0.18716577540106952,
+   "copy_operand_frac": 0.13368983957219252,
+   "first_rule_error_step_dist": {
+    "4": 17,
+    "2": 84,
+    "1": 67,
+    "3": 14,
+    "6": 4,
+    "5": 1
+   },
+   "tokens_mean": 93.65174129353234
+  },
+  "online_seed2": {
+   "accuracy": 0.34328358208955223,
+   "ci95": [
+    0.28113500416395404,
+    0.4113100685080386
+   ],
+   "n": 201,
+   "step1_correct": 0.417910447761194,
+   "step2_correct": 0.1691542288557214,
+   "leading_correct_mean": 0.7810945273631841,
+   "first_error": {
+    "tracking": 5,
+    "rule": 196
+   },
+   "first_rule_error_n": 196,
+   "other_parity_frac": 0.7551020408163265,
+   "old_rule_frac": 0.11224489795918367,
+   "copy_operand_frac": 0.24489795918367346,
+   "first_rule_error_step_dist": {
+    "1": 117,
+    "2": 50,
+    "3": 12,
+    "7": 2,
+    "9": 1,
+    "4": 11,
+    "6": 2,
+    "8": 1
+   },
+   "tokens_mean": 102.0
+  }
+ }
+}

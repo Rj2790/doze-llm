@@ -55,3 +55,14 @@ def test_score_error_anatomy():
     s = fv.score(inst, "1,4->7\n7,9->4\nANSWER: 4")
     assert s["first_wrong_step"] == 3 and s["first_error_kind"] == "missing"
     assert fv.score(inst, "no tags here")["correct"] is False and fv.score(inst, "no tags")["steps_parsed"] is False
+
+
+def test_classify_first_rule_error():
+    from eval.transfer_analysis import classify_first_rule_error
+    # 149741: step1 (1,4) odd -> 7; other parity (even) would give 9; old rule gives 9; copy would be 1 or 4
+    c = classify_first_rule_error("149741", "1,4->9\n9,9->9\nSTEPS: 9 9\nANSWER: 9")
+    assert c["step"] == 1 and c["other_parity"] and c["old_rule"] and not c["copy_operand"]
+    c = classify_first_rule_error("149741", "1,4->1\nSTEPS: 1\nANSWER: 1")
+    assert c["copy_operand"] and not c["other_parity"]
+    assert classify_first_rule_error("149741", "1,4->7\n7,9->4\nSTEPS: 7 4\nANSWER: 4") is None      # no error in written steps
+    assert classify_first_rule_error("149741", "1,4->7\n9,9->9\nANSWER: 9") is None                 # first divergence is tracking
