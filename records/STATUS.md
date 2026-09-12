@@ -5,6 +5,20 @@ Read `README.md`, `TIMELINE.md` and `../CONTEXT.md` §5–§5i for the narrative
 
 ## Compute in use
 
+**Follow-up job (2026-09-12 16:55 IST, Modal L4, detached):** two containers of
+`modal_app.py::followup` — app `ap-uDGDJnYzWmJxEA4J34GpcM` runs part A (GSM8K
+re-score, 14 models × 2 regimes, outputs saved); app `ap-NZAdVL7aih8cfIFX0CIpSK`
+runs parts B (probe instrument checks + positive-control adapters) and C
+(structured vs unstructured chains). Results accumulate in the `doze-results`
+volume under `/followup/` (summaries JSON, `gsm8k_outputs/*.jsonl`,
+`followup.log`); each part appends `FOLLOWUP_DONE`. Expected: A ≈ 3–5 h, B+C ≈
+2 h. Check: `modal app logs <app>`; pull: `modal volume get --force doze-results followup records/followup`.
+Vultr: the 32 GB A16 plan is currently offered only in blr, and a blr instance
+again failed to start (HTTP 500 on start after 10 min "locked"); destroyed
+(id ec6b0ca8, 2026-09-12 16:40 IST). Adapters uploaded to the Modal volume at
+`/adapters/`.
+
+
 - **Vultr instance** `doze-llm-a16-sgp`, id `8b8aa0a1-5679-46b8-8034-ef9a8d225867`,
   plan `vcg-a16-12c-128g-32vram` (2 × NVIDIA A16-16Q), region sgp, Ubuntu 22.04.5,
   **IP: 207.148.68.114**, root via SSH key `rac-macbook` (~/.ssh/id_ed25519).
