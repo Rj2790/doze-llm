@@ -880,7 +880,9 @@ Local archive (`~/doze-archive/`, see `records/README.md` for the layout):
 (`models/adapters/<arm>_seedN/`, via `deploy/export_adapter.py`), raw resume
 states, the Vultr tar, the Lightning seed-1 tar (fetched over SSH after
 starting the Studio on CPU; Studio stopped again), the full Modal volume,
-and the base model. The seed 0 pilot Sleep/Online adapters were never saved
+and the base model (7.5 GB). Export verified with `deploy/verify_adapter.py`:
+Sleep seed 3 adapter on the local base (MPS, bf16) solves 6/6 held-out puzzles
+vs 2/6 for the bare base. The seed 0 pilot Sleep/Online adapters were never saved
 by the pilot code and cannot be recovered. No remote compute is running.
 
 ## 6. Repo state

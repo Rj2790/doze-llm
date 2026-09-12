@@ -31,7 +31,7 @@ grid finished and all remote compute was torn down.
 
 | path | what |
 |---|---|
-| `models/adapters/<arm>_seedN/` | **13 trained LoRA adapters in standard PEFT format** (`adapter_model.safetensors` 126 MB fp32 + `adapter_config.json` + `export_info.json`): Sleep, Sleep-NoDream and Online for seeds 1–4, plus Sleep-NoDream seed 0. Load with `PeftModel.from_pretrained(AutoModelForCausalLM.from_pretrained("Qwen/Qwen3-4B"), path)`. Exported by `deploy/export_adapter.py`. |
+| `models/adapters/<arm>_seedN/` | **13 trained LoRA adapters in standard PEFT format** (`adapter_model.safetensors` 126 MB fp32 + `adapter_config.json` + `export_info.json`): Sleep, Sleep-NoDream and Online for seeds 1–4, plus Sleep-NoDream seed 0. Load with `PeftModel.from_pretrained(AutoModelForCausalLM.from_pretrained("Qwen/Qwen3-4B"), path)`. Exported by `deploy/export_adapter.py`; smoke-tested with `deploy/verify_adapter.py` (sleep_seed3: 6/6 held-out vs base 2/6). |
 | `models/seedN/<arm>_seedN/` | the raw harness resume states those were exported from (`backend.pt` = LoRA + Adam + RNG, `buffer.json`, `sleep.json` / `online.json`) |
 | `models/base/Qwen3-4B/` | the unmodified base model (HF safetensors). This *is* the Baseline and Awake "model": those arms never update weights. |
 | `vultr-final/trained_arm_states_seeds1-4.tar` | verbatim tar of the 12 Vultr state dirs (4.37 GB, checksum-verified against the VM before it was destroyed) |
