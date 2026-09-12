@@ -842,6 +842,47 @@ uninformative beyond "never met" — a 4B model in 600 episodes of this task
 does not discover the shortcut under any arm, so the experiment cannot
 speak to whether sleep would accelerate a discovery that never happens.
 
+### 5l. Deep exploratory analysis and local archive (2026-09-12)
+
+`python -m eval.deep_analysis --results records --seeds 0,1,2,3,4` writes
+`records/analysis_deep.md` (+ `.json`, `records/figures/fig1–4`); the human
+reading is `records/analysis_deep_notes.md`. Not preregistered. Headlines:
+
+- Probe pooled over 3,900 item-evaluations per trained arm: 0.32–0.34,
+  CI ±0.015; conservative final-checkpoint pooling (n=300/arm) 0.33–0.34.
+  Upper bound on shortcut use: a few percent. Working length never shrank
+  (97 → 97 tokens/attempt).
+- Trained arms learned execution from the left: correct leading steps per
+  day attempt 6.6 → ~10/11; first-error position moved from mid-chain
+  (mode 5–6) to late (7–8). Only 3/978 held-out item-evaluations unsolved by
+  every trained arm at ep 600.
+- Sleep lags Online mid-run (block-6 day accuracy 0.70 vs 0.84) and catches
+  up by the end. Batched schedule is smoother on the task (held-out max
+  drawdown 0.11 vs Online 0.18) but worse on GSM8K, and the damage is early:
+  Sleep's GSM8K change −0.013/night over nights 1–4 (train sets ~36 items,
+  ≈1.4 passes, ~40% dreams) vs +0.010 over nights 5–12; NoDream shows no
+  early dip. Night GSM8K change correlates −0.27 with night loss, +0.21 with
+  train-set size (n=60 nights). Hypothesis: data-poor early nights, not
+  consolidation per se, drive the H4 reversal.
+- Dreams: yield 0.14 → 0.32 across nights, duplicates ~40% of proposals
+  throughout, 0 held-out/probe touches in ~3,660 proposals; ~40% of night-12
+  new items were dreams; no measurable return for +80% generated tokens.
+- Awake: 2 critique rounds on 77% of attempts; accuracy by rounds
+  0.40/0.41/0.42; inert.
+- Buffers: 336–454 distinct puzzles, 42–57% of train, balanced answers,
+  zero leakage — watchlist confirmed from artefacts.
+- Held-out accuracy recomputed from saved per-item rows matches the
+  reported number for all 22 runs with rows.
+- Power: H4 needs ~9 seeds at the observed effect.
+
+Local archive (`~/doze-archive/`, see `records/README.md` for the layout):
+13 trained adapters exported to standard PEFT folders
+(`models/adapters/<arm>_seedN/`, via `deploy/export_adapter.py`), raw resume
+states, the Vultr tar, the Lightning seed-1 tar (fetched over SSH after
+starting the Studio on CPU; Studio stopped again), the full Modal volume,
+and the base model. The seed 0 pilot Sleep/Online adapters were never saved
+by the pilot code and cannot be recovered. No remote compute is running.
+
 ## 6. Repo state
 
 ```

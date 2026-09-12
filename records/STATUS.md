@@ -128,4 +128,12 @@ validation run were not kept.
 
 Vultr instance 8b8aa0a1 destroyed 2026-09-12 11:02 IST (API DELETE 204; instance list empty).
 
-Last updated: 2026-09-12 11:05 IST
+Local archive complete (2026-09-12 12:30 IST): 13 trained adapters exported
+to PEFT format under `~/doze-archive/models/adapters/`; raw states, the
+Modal volume and the Lightning seed-1 tar alongside; base model downloading
+into `models/base/`. Seed 0 pilot Sleep/Online adapters never existed on disk
+(pilot code saved no state). Lightning Studio started on CPU for the fetch
+and stopped again (status verified Stopped). Layout: `README.md` in this folder.
+Deep exploratory analysis: `analysis_deep.md` + `analysis_deep_notes.md`.
+
+Last updated: 2026-09-12 12:30 IST

@@ -1,0 +1,6 @@
+2026-09-05T04:38:14Z gpu0 start sleep seed1
+2026-09-05T09:03:36Z gpu0 done  sleep seed1 exit=0
+2026-09-05T09:03:36Z gpu0 QUEUE_DONE
+2026-09-05T09:03:50Z gpu0 start baseline seed1
+2026-09-05T11:38:13Z gpu0 done  baseline seed1 exit=0
+2026-09-05T11:38:13Z gpu0 QUEUE_DONE

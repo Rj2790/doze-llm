@@ -1,0 +1,17 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 6858.53it/s]
+gpu=NVIDIA L4 arm=baseline seed=1 tag=seed1 deterministic=True backend=hf:Qwen/Qwen3-4B batch=16
+[baseline seed=1] ep=0 probe=0.417 heldout=0.478 control=0.5766666666666667 463s
+[baseline seed=1] ep=50 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=4810 steps=0 | episode 4.9s night 0s checkpoint 465s
+[baseline seed=1] ep=100 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=9628 steps=0 | episode 4.9s night 0s checkpoint 465s
+[baseline seed=1] ep=150 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=14450 steps=0 | episode 4.9s night 0s checkpoint 464s
+[baseline seed=1] ep=200 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=19286 steps=0 | episode 4.9s night 0s checkpoint 463s
+[baseline seed=1] ep=250 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=24142 steps=0 | episode 4.9s night 0s checkpoint 464s
+[baseline seed=1] ep=300 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=28954 steps=0 | episode 4.9s night 0s checkpoint 463s
+[baseline seed=1] ep=350 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=33800 steps=0 | episode 5.0s night 0s checkpoint 463s
+[baseline seed=1] ep=400 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=38600 steps=0 | episode 4.9s night 0s checkpoint 464s
+[baseline seed=1] ep=450 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=43466 steps=0 | episode 4.9s night 0s checkpoint 464s
+[baseline seed=1] ep=500 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=48344 steps=0 | episode 5.0s night 0s checkpoint 465s
+[baseline seed=1] ep=550 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=53140 steps=0 | episode 4.8s night 0s checkpoint 464s
+[baseline seed=1] ep=600 probe=0.417 heldout=0.478 control=0.5766666666666667 tokens=57978 steps=0 | episode 4.9s night 0s checkpoint 464s
+timing {"gpu": "NVIDIA L4", "deterministic": true, "total_seconds": 9260.6, "episode_seconds_mean": 4.91, "checkpoint_seconds": [462.8, 464.9, 464.5, 464.2, 463.4, 463.7, 462.8, 463.1, 464.4, 463.6, 464.7, 464.2, 463.9], "night_seconds": [2.1457672119140625e-06, 2.1457672119140625e-06, 1.1920928955078125e-06, 1.430511474609375e-06, 1.430511474609375e-06, 1.1920928955078125e-06, 1.430511474609375e-06, 9.5367431640625e-07, 9.5367431640625e-07, 1.1920928955078125e-06, 1.1920928955078125e-06, 1.1920928955078125e-06], "resumed_from": null, "criterion_episode": null, "ledger": {"tokens_generated": 57978, "gradient_steps": 0, "training_tokens": 0, "gpu_seconds": 2947.255}}
