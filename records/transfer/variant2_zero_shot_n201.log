@@ -1,1 +1,4 @@
 Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 7545.59it/s]
+base                   acc=0.254 leading_ok=1.5/11 first_err rule=188 tracking=13 missing=0 old_rule=24 perfect=0 tok=95 (596s)
+online_seed1           acc=0.244 leading_ok=1.2/11 first_err rule=187 tracking=14 missing=0 old_rule=35 perfect=0 tok=94 (711s)
+online_seed2           acc=0.343 leading_ok=0.8/11 first_err rule=196 tracking=5 missing=0 old_rule=22 perfect=0 tok=102 (733s)

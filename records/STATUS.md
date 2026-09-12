@@ -5,7 +5,7 @@ Read `README.md`, `TIMELINE.md` and `../CONTEXT.md` §5–§5i for the narrative
 
 ## Compute in use
 
-**Follow-up job (2026-09-12 16:55 IST, Modal L4, detached):** two containers of
+**Follow-up job — COMPLETE (A done 19:52 IST, B+C done 18:32 IST; both Modal containers exited; results in `followup/`, ≈$7).** Details of the launch kept for the record: two containers of
 `modal_app.py::followup` — app `ap-uDGDJnYzWmJxEA4J34GpcM` runs part A (GSM8K
 re-score, 14 models × 2 regimes, outputs saved); app `ap-NZAdVL7aih8cfIFX0CIpSK`
 runs parts B (probe instrument checks + positive-control adapters) and C
@@ -13,6 +13,7 @@ runs parts B (probe instrument checks + positive-control adapters) and C
 volume under `/followup/` (summaries JSON, `gsm8k_outputs/*.jsonl`,
 `followup.log`); each part appends `FOLLOWUP_DONE`. Expected: A ≈ 3–5 h, B+C ≈
 2 h. Check: `modal app logs <app>`; pull: `modal volume get --force doze-results followup records/followup`.
+Local (this Mac, MPS, `caffeinate`): variant-2 zero-shot, 14 models × 201 items, started 19:39 IST, ~2 h; `records/transfer/variant2_zero_shot_n201.log`.
 Vultr: the 32 GB A16 plan is currently offered only in blr, and a blr instance
 again failed to start (HTTP 500 on start after 10 min "locked"); destroyed
 (id ec6b0ca8, 2026-09-12 16:40 IST). Adapters uploaded to the Modal volume at

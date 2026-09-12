@@ -947,6 +947,48 @@ LoRA on masked→answer pairs / teacher-forced log-prob of r6 vs alternatives,
 so the instrument's sensitivity is known; (c) unstructured full-chain
 accuracy for the adapters; (d) only then a broader benchmark panel.
 
+### 5n. Follow-up results (2026-09-12, Modal L4; `records/followup/RESULTS.md`)
+
+Decision rules were fixed in `records/followup_prereg.md` before running.
+
+- **A — GSM8K.** The grid's regime reproduces to ±0.02 on all 14 models.
+  Under a normal math prompt with 1024 tokens: base **0.910** (grid regime
+  0.587); every adapter 0.897–0.933, i.e. within ±0.02 of base (Online
+  −0.001, NoDream +0.011, Sleep +0.015 mean). Accuracy–length r = 0.925 in
+  the grid regime, 0.22 in the math regime. **The H4 axis measured
+  verbosity under a no-explanation prompt; no arm forgot or gained.**
+- **B — probe.** Answer-only probe stays at chance for every model even
+  with the rule stated in the prompt (0.29–0.35); 200 steps of direct
+  training on masked→r6 pairs also stays at chance (loss floor ≈ 0.21) and
+  costs chain accuracy; teacher-forced log-prob argmax is at chance with
+  negative margins everywhere. With working allowed and the rule stated,
+  Online reaches 0.78 (0.67–0.88 per seed) — but there the last written
+  visible result *is* r6, so that variant measures computation, not
+  shortcut knowledge. **H1–H3 were unobservable by construction and
+  unreachable at this scale.**
+- **C — generalisation.** Unstructured strings (no mirror structure):
+  base 0.372, Online 0.844, Sleep 0.840, NoDream 0.887 (structured
+  0.436 / 0.913 / 0.888 / 0.925; base's own gap 0.06). **General execution
+  learning, not specialisation to the practice structure.**
+
+**Standing conclusions of the 4B study after the follow-up.** Verified
+self-distillation on the model's own correct chains repairs digit tracking
+and teaches general execution of the stated rule within a few hundred
+steps, under any of the three schedules, with self-generated variants and
+inference-time critique adding nothing. The study cannot speak to insight
+(probe unpassable) and its retention result was an artefact of the control
+prompt. Both instrument problems are now documented with evidence, and any
+redesign must (i) let the probe be answered in writing with a shortcut that
+is checkable against a no-structure control set, and (ii) run the control
+benchmark under its own prompt with outputs saved.
+
+**Transfer (variant 2: four symbols, alternating rules; local MPS).** n=10
+smoke: base 5/10, Online 2, Sleep 3, NoDream 2 (all ~chance for four
+symbols; every model derails by step 3–4; no old-rule leakage). Full
+zero-shot run, 14 models × 201 items, launched locally 19:39 IST
+(`records/transfer/variant2_zero_shot_n201.*`). Design note:
+`records/transfer_prereg.md`; task `tasks/fold_variant2.py`.
+
 ## 6. Repo state
 
 ```
