@@ -932,6 +932,13 @@ without feedback inert; self-generated variants inert; narrow SFT shifts
 verbosity, and thereby scored accuracy, on an unrelated benchmark in a
 schedule-dependent way.
 
+**Addendum (same day):** the control benchmark ran under the *task* system
+prompt ("no explanation"), not `control_bench.SYSTEM_PROMPT`; the harness
+backend has one system prompt per run. Recorded in DEVIATIONS.md. This makes
+the length coupling in (1) expected rather than surprising: the recorded
+GSM8K is a suppressed-reasoning score. Follow-up plan with decision rules
+written before running: `records/followup_prereg.md`; code `eval/followup.py`.
+
 **Cheapest decisive follow-ups (before any larger model):**
 (a) re-score GSM8K on base + 13 adapters with saved outputs, plus a second
 condition without "briefly" and with a 1024-token cap (local MPS or ~$3 on

@@ -73,3 +73,16 @@ state saved at run end for retro-analysis. Pilot retro-computation: only
 (d) and a day-trajectory proxy for (c) are possible for Sleep/Online (no
 adapters or eval texts were saved); (a)–(c) and GSM8K parse rate are
 computed for the frozen arms from the base model (CONTEXT.md §5e).
+
+## 2026-09-12 — Documentation: control benchmark system prompt (discovered post hoc)
+
+PREREG §4.3 specifies the GSM8K sample and exact-match scoring but not the
+system prompt. In the implementation the harness backend carries one system
+prompt per run (`nr.SYSTEM_PROMPT`, "…no explanation…"), and the control
+items were generated under it; `eval/control_bench.SYSTEM_PROMPT` was never
+used. All arms, seeds and checkpoints share this regime, so within-grid
+comparisons are unaffected, but absolute GSM8K levels are a
+"no-explanation" score (base ≈ 0.58) and changes may reflect how much the
+model writes (see CONTEXT §5m, `records/analysis_outsider.md`). No design
+change; the follow-up in `records/followup_prereg.md` re-scores under both
+regimes with outputs saved.
