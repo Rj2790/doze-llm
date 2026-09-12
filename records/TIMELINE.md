@@ -27,3 +27,4 @@ Seed-0 useful compute: $18.73; seed-0 waste from failures: ≈ $6.3. Remaining p
 - 2026-09-12 06:07 IST — Awake seed 4 done (63,575 s, exit 0); gpu0 QUEUE_DONE. Seed 4 five-arm check MATCHED. 24/25 complete.
 - 2026-09-12 10:35 IST — Awake seed 3 done (63,288 s, exit 0); gpu1 QUEUE_DONE. Seed 3 five-arm check MATCHED. **25/25 complete.** Grid wall-clock 3 d 21 h on 2×A16.
 - 2026-09-12 10:37 IST — Final analysis run (`analysis_final.md`): H1–H3 all censored (0/25 arms met criterion), H4 reversed (Sleep−Online GSM8K Δ −0.123, p=0.125). Trained-arm adapter states archived to `~/doze-archive/vultr-final/`.
+- 2026-09-12 11:02 IST — Vultr instance 8b8aa0a1 (sgp, 2×A16) destroyed after archive verified (tar 4.37 GB, 40 entries, byte count matches VM). Pending charges at teardown $89.50. No compute running anywhere.

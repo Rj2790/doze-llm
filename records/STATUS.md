@@ -58,8 +58,9 @@ verdict into the run files; requires the seed's `sleep` ledger.
 
 ## Pending decisions / blockers
 
-- Grid done; VM destroyed. No compute running anywhere (check: Modal apps
-  list, Lightning Studio stopped, Vultr instances list empty).
+- Grid done; VM destroyed 2026-09-12 11:02 IST. Modal: no running apps; Vultr:
+  instance list empty; Lightning Studio was stopped after seed 1 (not
+  re-verified via API today).
 - Decision for the user (CONTEXT §8 item 16): stop and write up the null;
   8B dense confirmation; or the larger-model extension. The 4B data say no
   arm ever left chance on the probe, so the task difficulty, not the update
@@ -125,4 +126,6 @@ Online, seeds 1–4; `<arm>_seedN.json.state/` with `backend.pt`, `buffer.json`,
 the VM was destroyed. Frozen-arm state dumps (8 GB full-model each) and the
 validation run were not kept.
 
-Last updated: 2026-09-12 10:50 IST
+Vultr instance 8b8aa0a1 destroyed 2026-09-12 11:02 IST (API DELETE 204; instance list empty).
+
+Last updated: 2026-09-12 11:05 IST
