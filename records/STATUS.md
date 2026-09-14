@@ -74,9 +74,9 @@ verdict into the run files; requires the seed's `sleep` ledger.
 ## Pending decisions / blockers
 
 - **Publication (2026-09-14):** experiments stopped by user decision; repo
-  prepared for open-sourcing (CONTEXT §8). Before flipping public the user
-  force-pushes the purged history, rotates credentials, flips GitHub and HF
-  visibility, and tags v1.0.0.
+  open-sourced (CONTEXT §8): history purged and force-pushed, credentials
+  rotated, GitHub PUBLIC with release v1.0.0, HF adapters PUBLIC. No compute
+  running anywhere. Nothing pending on the engineering side.
 
 - Grid done; VM destroyed 2026-09-12 11:02 IST. Modal: no running apps; Vultr:
   instance list empty; Lightning Studio was stopped after seed 1 (not

@@ -1052,9 +1052,11 @@ that day: the secrets file was found tracked in git since the Vultr deploy
 commits and purged from history (bundle backup kept off-repo); personal
 identifiers scrubbed from docs; MIT LICENSE, CITATION.cff, .env.example;
 README rewritten for a public reader; REPORT.md (the write-up); adapters
-uploaded to Hugging Face `rushiljain/doze-llm-adapters` (private until the
-repo goes public). Left to the user: force-push the rewritten history, rotate
-all credentials, flip GitHub and HF visibility, tag v1.0.0.
+uploaded to Hugging Face `rushiljain/doze-llm-adapters`. Later the same day:
+rewritten history force-pushed and verified clean on the remote; all
+credentials rotated by the user; GitHub repo PUBLIC with topics, description,
+social preview and release v1.0.0; HF adapter repo PUBLIC (13 complete
+adapters + model card, verified anonymously). Launch playbook kept off-repo.
 
 Steps 1–14 are done: calibration, freeze, review amendments, path check,
 seed 0 (§5d–5f), seeds 1–4 on Lightning/Vultr (§5h–5j), the five-seed
