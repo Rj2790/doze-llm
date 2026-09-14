@@ -1,7 +1,15 @@
+**Read the report:** [REPORT.md](REPORT.md) · **Adapters:** [rushiljain/doze-llm-adapters](https://huggingface.co/rushiljain/doze-llm-adapters) · **Preregistration:** [PREREG.md](PREREG.md) ([gist](https://gist.github.com/Rj2790/5bfb6765d5491802c3e139d65afe3dc8))
+
 # doze-llm
 
 **A preregistered test of a "sleep cycle" for a small language model, and what it
 taught us about measuring insight and forgetting.**
+
+![Held-out accuracy, insight probe and GSM8K control by episode for the five regimes, mean over five seeds](records/figures/fig1_curves.png)
+
+*Mean over 5 seeds. Every trained regime learns the puzzle (left); nothing ever
+moves the insight probe (middle); the GSM8K "forgetting" curves on the right
+turned out to be a prompt artefact.*
 
 We asked whether giving Qwen3-4B a sleep-like training schedule (days of frozen
 practice, nights of replay plus verified self-generated "dreams" and a burst of
