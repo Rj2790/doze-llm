@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this code or these results, please cite the repository."
+title: "doze-llm: a preregistered test of a sleep cycle for a small language model, and what it taught about measuring insight and forgetting"
+authors:
+  - family-names: Jain
+    given-names: Rushil
+date-released: 2026-09-14
+version: 1.0.0
+repository-code: https://github.com/Rj2790/doze-llm
+license: MIT
+keywords: [self-training, continual learning, LoRA, preregistration, insight, Number Reduction Task, Qwen3-4B]

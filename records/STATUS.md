@@ -16,13 +16,13 @@ volume under `/followup/` (summaries JSON, `gsm8k_outputs/*.jsonl`,
 Local variant-2 zero-shot run COMPLETE (19:39–22:05 IST; `records/transfer/RESULTS.md`). **Nothing is running anywhere** (Modal idle, Vultr 0 instances, no local jobs).
 Vultr: the 32 GB A16 plan is currently offered only in blr, and a blr instance
 again failed to start (HTTP 500 on start after 10 min "locked"); destroyed
-(id ec6b0ca8, 2026-09-12 16:40 IST). Adapters uploaded to the Modal volume at
+(2026-09-12 16:40 IST). Adapters uploaded to the Modal volume at
 `/adapters/`.
 
 
-- **Vultr instance** `doze-llm-a16-sgp`, id `8b8aa0a1-5679-46b8-8034-ef9a8d225867`,
+- **Vultr instance** `doze-llm-a16-sgp`, instance id redacted,
   plan `vcg-a16-12c-128g-32vram` (2 × NVIDIA A16-16Q), region sgp, Ubuntu 22.04.5,
-  **IP: 207.148.68.114**, root via SSH key `rac-macbook` (~/.ssh/id_ed25519).
+  IP redacted (instance destroyed 2026-09-12), root via SSH key.
   $0.942/h, billed while it exists (stopped instances still bill). Created
   2026-09-08 07:39 UTC; grid launched 07:59 UTC.
 - Repo on the VM: `/opt/doze` (venv `.venv`, torch 2.5.1+cu121). Results:
@@ -44,7 +44,7 @@ Measured pace on A16 (deterministic): LoRA arms ~8.5–9 h (13.5 s/episode,
 
 ## How to check progress (from any machine with the SSH key)
 
-    ssh root@207.148.68.114 'cat /data/results/logs/runner_gpu*.log; for f in /data/results/seed*/logs/*_seed*.log; do grep -h "\] ep=" $f | tail -1; done; nvidia-smi'
+    ssh root@<vm-ip> 'cat /data/results/logs/runner_gpu*.log; for f in /data/results/seed*/logs/*_seed*.log; do grep -h "\] ep=" $f | tail -1; done; nvidia-smi'
 
 ## How to pull results into records/
 
@@ -69,9 +69,14 @@ verdict into the run files; requires the seed's `sleep` ledger.
 ## Teardown when both queues show QUEUE_DONE (executed 2026-09-12, see TIMELINE)
 
     ./deploy/vultr/pull_results.sh
-    curl -H "Authorization: Bearer $VULTR" -X DELETE https://api.vultr.com/v2/instances/8b8aa0a1-5679-46b8-8034-ef9a8d225867
+    curl -H "Authorization: Bearer $VULTR" -X DELETE https://api.vultr.com/v2/instances/<instance-id>
 
 ## Pending decisions / blockers
+
+- **Publication (2026-09-14):** experiments stopped by user decision; repo
+  prepared for open-sourcing (CONTEXT §8). Before flipping public the user
+  force-pushes the purged history, rotates credentials, flips GitHub and HF
+  visibility, and tags v1.0.0.
 
 - Grid done; VM destroyed 2026-09-12 11:02 IST. Modal: no running apps; Vultr:
   instance list empty; Lightning Studio was stopped after seed 1 (not
@@ -146,7 +151,7 @@ Online, seeds 1–4; `<arm>_seedN.json.state/` with `backend.pt`, `buffer.json`,
 the VM was destroyed. Frozen-arm state dumps (8 GB full-model each) and the
 validation run were not kept.
 
-Vultr instance 8b8aa0a1 destroyed 2026-09-12 11:02 IST (API DELETE 204; instance list empty).
+Vultr instance destroyed 2026-09-12 11:02 IST (API DELETE 204; instance list empty).
 
 Local archive complete (2026-09-12 12:30 IST): 13 trained adapters exported
 to PEFT format under `~/doze-archive/models/adapters/`; raw states, the

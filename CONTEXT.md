@@ -654,7 +654,7 @@ plus A16 timing.
 ### 5h. Lightning AI Studios (2026-09-05) — seed 1 Sleep; idle-credit incident
 
 Vultr GPU plans require a support approval (ticket pending). Lightning AI
-(user rushiljain2001, teamspace general, 30 org credits) used instead:
+(teamspace general, 30 org credits) used instead:
 Studio `doze-llm`, L4, torch 2.8 cu128, Python 3.12; repo uploaded as a
 tarball (zero-byte files break single-file upload; `deploy/vultr/queue.py`
 shadowed stdlib `queue` and broke torch import → renamed `gpu_queue.py`).
@@ -694,8 +694,8 @@ approved, or new credits).
 ### 5i. Vultr grid launch (2026-09-08)
 
 Vultr GPU access approved 09-07 (Trust & Safety). Instance
-`doze-llm-a16-sgp` (id 8b8aa0a1…, `vcg-a16-12c-128g-32vram`, 2 × NVIDIA
-A16-16Q, Ubuntu 22.04.5, driver preinstalled, IP 207.148.68.114, Singapore;
+`doze-llm-a16-sgp` (`vcg-a16-12c-128g-32vram`, 2 × NVIDIA
+A16-16Q, Ubuntu 22.04.5, driver preinstalled, public IP redacted, Singapore;
 a Bangalore instance could not be powered on — host-side "Unable to start
 server" for 40 min — and was destroyed; the Singapore create needed three
 tries because the deleted instance still counted toward the monthly fee
@@ -1046,6 +1046,15 @@ implementation details, Modal configuration.
 Any change to a frozen item goes in `DEVIATIONS.md` with a reason.
 
 ## 8. Immediate next steps, in order
+
+**Decision 2026-09-14 (user): stop experiments, write up, open-source.** Done
+that day: the secrets file was found tracked in git since the Vultr deploy
+commits and purged from history (bundle backup kept off-repo); personal
+identifiers scrubbed from docs; MIT LICENSE, CITATION.cff, .env.example;
+README rewritten for a public reader; REPORT.md (the write-up); adapters
+uploaded to Hugging Face `rushiljain/doze-llm-adapters` (private until the
+repo goes public). Left to the user: force-push the rewritten history, rotate
+all credentials, flip GitHub and HF visibility, tag v1.0.0.
 
 Steps 1–14 are done: calibration, freeze, review amendments, path check,
 seed 0 (§5d–5f), seeds 1–4 on Lightning/Vultr (§5h–5j), the five-seed
